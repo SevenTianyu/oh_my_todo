@@ -30,6 +30,13 @@ const GROUP_ORDER: Record<GroupingMode, string[]> = {
   priority: ["high", "medium", "low"]
 };
 
+const STAGE_PRIORITY: Record<Stage, number> = {
+  closed: 0,
+  screening: 1,
+  interviewing: 2,
+  offer: 3
+};
+
 function endOfWindow(now: Date) {
   const end = new Date(now);
   end.setDate(end.getDate() + 7);
@@ -38,7 +45,15 @@ function endOfWindow(now: Date) {
 }
 
 function getPrimaryStage(company: CompanyRecord): Stage {
-  return company.processes.find((process) => process.status === "active")?.stage ?? "closed";
+  const activeStages = company.processes
+    .filter((process) => process.status === "active")
+    .map((process) => process.stage);
+
+  return activeStages.reduce<Stage>(
+    (bestStage, currentStage) =>
+      STAGE_PRIORITY[currentStage] > STAGE_PRIORITY[bestStage] ? currentStage : bestStage,
+    "closed"
+  );
 }
 
 export function getActiveCompanies(companies: CompanyRecord[]) {
