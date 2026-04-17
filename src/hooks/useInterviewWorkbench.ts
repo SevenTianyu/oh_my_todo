@@ -9,8 +9,6 @@ import { sampleCompanies } from "../lib/sampleData";
 import { getArchivedCompanies, getGroupedCompanies, getUpcomingInterviews } from "../lib/selectors";
 import type { CompanyRecord, GroupingMode, RoundRecord } from "../types/interview";
 
-const NOW = new Date("2026-04-17T09:00:00-07:00");
-
 type CompanySummaryPatch = Partial<
   Pick<CompanyRecord, "overallImpression" | "highlights" | "risks" | "priority">
 >;
@@ -25,7 +23,7 @@ export function useInterviewWorkbench(initialCompanies: CompanyRecord[] = sample
     companies,
     groupedCompanies: useMemo(() => getGroupedCompanies(companies, grouping), [companies, grouping]),
     archivedCompanies: useMemo(() => getArchivedCompanies(companies), [companies]),
-    upcomingInterviews: useMemo(() => getUpcomingInterviews(companies, NOW), [companies]),
+    upcomingInterviews: getUpcomingInterviews(companies, new Date()),
     updateCompanySummary: (companyId: string, patch: CompanySummaryPatch) =>
       setCompanies((current) => updateCompanySummary(current, companyId, patch)),
     addRoundToProcess: (companyId: string, processId: string) =>

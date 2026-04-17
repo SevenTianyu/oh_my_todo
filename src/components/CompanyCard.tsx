@@ -25,6 +25,20 @@ function toDateTimeLocalValue(value: string | null) {
   return match ? match[1] : value;
 }
 
+function getScheduledAtPatch(round: RoundRecord, value: string): Partial<RoundRecord> {
+  if (value === "") {
+    return {
+      scheduledAt: null,
+      status: round.status === "scheduled" ? "pending" : round.status
+    };
+  }
+
+  return {
+    scheduledAt: value,
+    status: "scheduled"
+  };
+}
+
 function ActiveProcess({
   process,
   company,
@@ -56,7 +70,12 @@ function ActiveProcess({
             type="datetime-local"
             value={toDateTimeLocalValue(round.scheduledAt)}
             onChange={(event) =>
-              onUpdateRound(company.id, process.id, round.id, { scheduledAt: event.target.value })
+              onUpdateRound(
+                company.id,
+                process.id,
+                round.id,
+                getScheduledAtPatch(round, event.target.value)
+              )
             }
           />
           <textarea
