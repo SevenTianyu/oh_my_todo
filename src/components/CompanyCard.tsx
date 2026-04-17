@@ -18,6 +18,13 @@ interface CompanyCardProps {
   ) => void;
 }
 
+function toDateTimeLocalValue(value: string | null) {
+  if (!value) return "";
+
+  const match = value.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/);
+  return match ? match[1] : value;
+}
+
 function ActiveProcess({
   process,
   company,
@@ -47,7 +54,7 @@ function ActiveProcess({
           <input
             aria-label={`${company.name}-${round.name}-时间`}
             type="datetime-local"
-            value={round.scheduledAt ?? ""}
+            value={toDateTimeLocalValue(round.scheduledAt)}
             onChange={(event) =>
               onUpdateRound(company.id, process.id, round.id, { scheduledAt: event.target.value })
             }

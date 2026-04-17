@@ -35,4 +35,22 @@ describe("CompanyCard", () => {
 
     expect(screen.getByLabelText("公司整体印象")).toHaveValue("新的整体判断");
   });
+
+  it("renders an editable datetime-local value for existing scheduled rounds", async () => {
+    const user = userEvent.setup();
+    const company = sampleCompanies[0];
+    render(
+      <CompanyCard
+        company={company}
+        onSaveSummary={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: `展开 ${company.name}` }));
+
+    expect(screen.getByLabelText(`${company.name}-一面-时间`)).toHaveValue("2026-04-17T14:00");
+  });
 });
