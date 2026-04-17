@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CompanyRecord, InterviewProcess, RoundRecord } from "../types/interview";
 
 type CompanySummaryPatch = Partial<
@@ -68,6 +68,10 @@ function ActiveProcess({
 export function CompanyCard(props: CompanyCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [impressionDraft, setImpressionDraft] = useState(props.company.overallImpression);
+
+  useEffect(() => {
+    setImpressionDraft(props.company.overallImpression);
+  }, [props.company.id, props.company.overallImpression]);
 
   return (
     <article className="company-card">
