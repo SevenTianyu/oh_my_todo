@@ -79,4 +79,28 @@ describe("CompanyCard", () => {
       status: "pending"
     });
   });
+
+  it("renders aligned editor rows inside dedicated layout containers", async () => {
+    const user = userEvent.setup();
+    const company = sampleCompanies[0];
+    render(
+      <CompanyCard
+        company={company}
+        onSaveSummary={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: `展开 ${company.name}` }));
+
+    const summaryField = screen.getByLabelText("公司整体印象");
+    const dateField = screen.getByLabelText(`${company.name}-一面-时间`);
+    const notesField = screen.getByLabelText(`${company.name}-一面-备注`);
+
+    expect(summaryField.closest(".company-card__summary-row")).not.toBeNull();
+    expect(dateField.closest(".company-card__round-row")).not.toBeNull();
+    expect(notesField.closest(".company-card__round-row")).toBe(dateField.closest(".company-card__round-row"));
+  });
 });

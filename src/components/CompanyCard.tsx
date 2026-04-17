@@ -53,19 +53,22 @@ function ActiveProcess({
   onUpdateRound: CompanyCardProps["onUpdateRound"];
 }) {
   return (
-    <section style={{ marginTop: 16 }}>
-      <h4>{process.roleName}</h4>
-      <button type="button" onClick={() => onAddRound(company.id, process.id)}>
-        新增轮次
-      </button>
-      <button type="button" onClick={() => onArchiveProcess(company.id, process.id)}>
-        归档流程
-      </button>
+    <section className="company-card__process">
+      <h4 className="company-card__process-title">{process.roleName}</h4>
+      <div className="company-card__process-actions">
+        <button type="button" onClick={() => onAddRound(company.id, process.id)}>
+          新增轮次
+        </button>
+        <button type="button" onClick={() => onArchiveProcess(company.id, process.id)}>
+          归档流程
+        </button>
+      </div>
 
       {process.rounds.map((round) => (
-        <div key={round.id} style={{ marginTop: 12 }}>
-          <strong>{round.name}</strong>
+        <div className="company-card__round-row" key={round.id}>
+          <strong className="company-card__round-label">{round.name}</strong>
           <input
+            className="company-card__datetime"
             aria-label={`${company.name}-${round.name}-时间`}
             type="datetime-local"
             value={toDateTimeLocalValue(round.scheduledAt)}
@@ -79,6 +82,7 @@ function ActiveProcess({
             }
           />
           <textarea
+            className="company-card__notes"
             aria-label={`${company.name}-${round.name}-备注`}
             value={round.notes}
             onChange={(event) =>
@@ -101,14 +105,15 @@ export function CompanyCard(props: CompanyCardProps) {
 
   return (
     <article className="company-card">
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <div>
-          <strong>{props.company.name}</strong>
+      <div className="company-card__header">
+        <div className="company-card__summary">
+          <strong className="company-card__name">{props.company.name}</strong>
           <div>{props.company.highlights}</div>
           <div>{props.company.risks}</div>
         </div>
 
         <button
+          className="company-card__toggle"
           type="button"
           aria-label={`${expanded ? "收起" : "展开"} ${props.company.name}`}
           onClick={() => setExpanded((value) => !value)}
@@ -118,17 +123,21 @@ export function CompanyCard(props: CompanyCardProps) {
       </div>
 
       {expanded ? (
-        <div style={{ marginTop: 16 }}>
-          <label>
-            公司整体印象
+        <div className="company-card__details">
+          <div className="company-card__summary-row">
+            <label className="company-card__field-label" htmlFor={`company-impression-${props.company.id}`}>
+              公司整体印象
+            </label>
             <textarea
+              className="company-card__notes"
+              id={`company-impression-${props.company.id}`}
               aria-label="公司整体印象"
               value={impressionDraft}
               onChange={(event) => setImpressionDraft(event.target.value)}
             />
-          </label>
 
           <button
+            className="company-card__summary-action"
             type="button"
             onClick={() =>
               props.onSaveSummary(props.company.id, {
@@ -138,6 +147,7 @@ export function CompanyCard(props: CompanyCardProps) {
           >
             保存公司判断
           </button>
+          </div>
 
           {props.company.processes
             .filter((process) => process.status === "active")

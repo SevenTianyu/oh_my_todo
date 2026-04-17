@@ -53,3 +53,97 @@ body {
   border-radius: 16px;
   padding: 16px;
 }
+
+.company-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.company-card__summary {
+  display: grid;
+  gap: 6px;
+}
+
+.company-card__name,
+.company-card__process-title {
+  font-size: 1.2rem;
+}
+
+.company-card__toggle {
+  flex-shrink: 0;
+}
+
+.company-card__details {
+  margin-top: 16px;
+  display: grid;
+  gap: 20px;
+}
+
+.company-card__summary-row,
+.company-card__round-row {
+  display: grid;
+  grid-template-columns: max-content minmax(240px, 360px) minmax(260px, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+
+.company-card__field-label,
+.company-card__round-label {
+  padding-top: 10px;
+  font-weight: 600;
+}
+
+.company-card__process {
+  display: grid;
+  gap: 12px;
+}
+
+.company-card__process-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.company-card__datetime,
+.company-card__notes {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  color: inherit;
+  border: 1px solid rgba(98, 77, 44, 0.35);
+  border-radius: 12px;
+  background: white;
+}
+
+.company-card__datetime {
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+.company-card__notes {
+  min-height: 72px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.company-card__summary-action {
+  justify-self: start;
+}
+
+@media (max-width: 960px) {
+  .board-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .company-card__summary-row,
+  .company-card__round-row {
+    grid-template-columns: 1fr;
+  }
+
+  .company-card__field-label,
+  .company-card__round-label {
+    padding-top: 0;
+  }
+}
