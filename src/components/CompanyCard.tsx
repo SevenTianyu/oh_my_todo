@@ -1,6 +1,32 @@
 import { useEffect, useState } from "react";
 import type { CompanyRecord, InterviewProcess, RoundRecord } from "../types/interview";
 
+const COMPANY_TYPE_LABELS = {
+  startup: "创业公司",
+  "big-tech": "大厂"
+} as const;
+
+const PRIORITY_LABELS = {
+  high: "高优先级",
+  medium: "中优先级",
+  low: "低优先级"
+} as const;
+
+const STAGE_LABELS = {
+  screening: "流程筛选",
+  interviewing: "面试推进",
+  offer: "Offer 阶段",
+  closed: "流程结束"
+} as const;
+
+const ROUND_STATUS_LABELS = {
+  pending: "待安排",
+  scheduled: "已排期",
+  completed: "已完成",
+  "waiting-result": "等结果",
+  closed: "已结束"
+} as const;
+
 type CompanySummaryPatch = Partial<
   Pick<CompanyRecord, "overallImpression" | "highlights" | "risks" | "priority">
 >;
@@ -54,21 +80,43 @@ function ActiveProcess({
 }) {
   return (
     <section className="company-card__process">
-      <h4 className="company-card__process-title">{process.roleName}</h4>
-      <div className="company-card__process-actions">
-        <button type="button" onClick={() => onAddRound(company.id, process.id)}>
-          新增轮次
-        </button>
-        <button type="button" onClick={() => onArchiveProcess(company.id, process.id)}>
-          归档流程
-        </button>
+      <div className="company-card__process-header">
+        <div className="company-card__process-copy">
+          <h4 className="company-card__process-title">{process.roleName}</h4>
+          <div className="company-card__process-meta">
+            <span className="badge badge--stage">{STAGE_LABELS[process.stage]}</span>
+            <span className="company-card__process-next">下一步：{process.nextStep}</span>
+          </div>
+        </div>
+
+        <div className="company-card__process-actions">
+          <button
+            className="button button--secondary"
+            type="button"
+            onClick={() => onAddRound(company.id, process.id)}
+          >
+            新增轮次
+          </button>
+          <button
+            className="button button--ghost"
+            type="button"
+            onClick={() => onArchiveProcess(company.id, process.id)}
+          >
+            归档流程
+          </button>
+        </div>
       </div>
 
       {process.rounds.map((round) => (
         <div className="company-card__round-row" key={round.id}>
-          <strong className="company-card__round-label">{round.name}</strong>
+          <div className="company-card__round-heading">
+            <strong className="company-card__round-label">{round.name}</strong>
+            <span className={`badge badge--round badge--round-${round.status}`}>
+              {ROUND_STATUS_LABELS[round.status]}
+            </span>
+          </div>
           <input
-            className="company-card__datetime"
+            className="field field--input company-card__datetime"
             aria-label={`${company.name}-${round.name}-时间`}
             type="datetime-local"
             value={toDateTimeLocalValue(round.scheduledAt)}
@@ -82,7 +130,7 @@ function ActiveProcess({
             }
           />
           <textarea
-            className="company-card__notes"
+            className="field field--textarea company-card__notes"
             aria-label={`${company.name}-${round.name}-备注`}
             value={round.notes}
             onChange={(event) =>
@@ -107,13 +155,30 @@ export function CompanyCard(props: CompanyCardProps) {
     <article className="company-card">
       <div className="company-card__header">
         <div className="company-card__summary">
+          <div className="company-card__badges">
+            <span className={`badge badge--company-type badge--company-type-${props.company.companyType}`}>
+              {COMPANY_TYPE_LABELS[props.company.companyType]}
+            </span>
+            <span className={`badge badge--priority badge--priority-${props.company.priority}`}>
+              {PRIORITY_LABELS[props.company.priority]}
+            </span>
+          </div>
+
           <strong className="company-card__name">{props.company.name}</strong>
-          <div>{props.company.highlights}</div>
-          <div>{props.company.risks}</div>
+          <div className="company-card__summary-lines">
+            <div className="company-card__summary-item">
+              <span>亮点</span>
+              <p>{props.company.highlights}</p>
+            </div>
+            <div className="company-card__summary-item">
+              <span>风险</span>
+              <p>{props.company.risks}</p>
+            </div>
+          </div>
         </div>
 
         <button
-          className="company-card__toggle"
+          className="button button--ghost company-card__toggle"
           type="button"
           aria-label={`${expanded ? "收起" : "展开"} ${props.company.name}`}
           onClick={() => setExpanded((value) => !value)}
@@ -129,24 +194,24 @@ export function CompanyCard(props: CompanyCardProps) {
               公司整体印象
             </label>
             <textarea
-              className="company-card__notes"
+              className="field field--textarea company-card__notes"
               id={`company-impression-${props.company.id}`}
               aria-label="公司整体印象"
               value={impressionDraft}
               onChange={(event) => setImpressionDraft(event.target.value)}
             />
 
-          <button
-            className="company-card__summary-action"
-            type="button"
-            onClick={() =>
-              props.onSaveSummary(props.company.id, {
-                overallImpression: impressionDraft
-              })
-            }
-          >
-            保存公司判断
-          </button>
+            <button
+              className="button button--primary company-card__summary-action"
+              type="button"
+              onClick={() =>
+                props.onSaveSummary(props.company.id, {
+                  overallImpression: impressionDraft
+                })
+              }
+            >
+              保存公司判断
+            </button>
           </div>
 
           {props.company.processes

@@ -8,7 +8,7 @@ test("user can switch grouping, edit a company note, and keep the change after r
   await expect(page.getByRole("heading", { name: "未来 7 天面试" })).toBeVisible();
 
   await page.getByRole("button", { name: "按个人优先级分组" }).click();
-  await expect(page.getByText("高优先级")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "高优先级" })).toBeVisible();
 
   await page.getByRole("button", { name: "展开 ACME" }).click();
   await page.getByLabel("公司整体印象").fill("团队很强，但需要继续确认稳定性。");

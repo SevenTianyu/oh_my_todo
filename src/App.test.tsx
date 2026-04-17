@@ -13,8 +13,8 @@ describe("App", () => {
 
     expect(screen.getByRole("heading", { name: "面试工作台" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "未来 7 天面试" })).toBeInTheDocument();
-    expect(screen.getByText("创业公司")).toBeInTheDocument();
-    expect(screen.getByText("大厂")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "创业公司" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "大厂" })).toBeInTheDocument();
     expect(screen.getByText("归档流程（1）")).toBeInTheDocument();
     expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
     expect(screen.getByLabelText("分组切换")).toBeInTheDocument();
@@ -26,8 +26,8 @@ describe("App", () => {
 
     await user.click(screen.getByRole("button", { name: "按个人优先级分组" }));
 
-    expect(screen.getByText("高优先级")).toBeInTheDocument();
-    expect(screen.getByText("中优先级")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "高优先级" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "中优先级" })).toBeInTheDocument();
   });
 
   it("adds a pending round to the upcoming timeline when the user schedules it", () => {
@@ -59,5 +59,15 @@ describe("App", () => {
 
     expect(within(timeline!).queryByText("ACME")).not.toBeInTheDocument();
     expect(within(timeline!).queryByText("字节跳动")).not.toBeInTheDocument();
+  });
+
+  it("renders the redesigned workbench landmarks for the hero, timeline, and archive areas", () => {
+    render(<App />);
+
+    expect(screen.getByText("Interview Workbench")).toBeInTheDocument();
+    expect(screen.getByLabelText("工作台概览")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "活跃流程工作区" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "历史判断区" })).toBeInTheDocument();
+    expect(screen.getByText("切换工作台视角")).toBeInTheDocument();
   });
 });

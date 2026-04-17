@@ -28,19 +28,27 @@ export function CompanyBoard({
   return (
     <section className="board-grid">
       {groups.map((group) => (
-        <div className="panel" key={group.key}>
-          <h3>{group.label}</h3>
-          {group.companies.map((company) => (
-            <CompanyCard
-              key={company.id}
-              company={company}
-              onSaveSummary={onSaveSummary}
-              onAddRound={onAddRound}
-              onArchiveProcess={onArchiveProcess}
-              onUpdateRound={onUpdateRound}
-            />
-          ))}
-        </div>
+        <section className="panel panel--group" key={group.key}>
+          <div className="group-panel__header">
+            <div>
+              <p className="group-panel__eyebrow">Active Lane</p>
+              <h3>{group.label}</h3>
+            </div>
+            <span className="group-panel__count">{group.companies.length}</span>
+          </div>
+          <div className="group-panel__stack">
+            {group.companies.map((company) => (
+              <CompanyCard
+                key={company.id}
+                company={company}
+                onSaveSummary={onSaveSummary}
+                onAddRound={onAddRound}
+                onArchiveProcess={onArchiveProcess}
+                onUpdateRound={onUpdateRound}
+              />
+            ))}
+          </div>
+        </section>
       ))}
     </section>
   );
