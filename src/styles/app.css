@@ -13,6 +13,10 @@ body {
   padding: 40px;
 }
 
+.stack-section {
+  margin-top: 24px;
+}
+
 .panel {
   background: rgba(255, 255, 255, 0.78);
   border: 1px solid rgba(98, 77, 44, 0.12);

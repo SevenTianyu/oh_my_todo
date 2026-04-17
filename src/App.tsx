@@ -22,12 +22,12 @@ export default function App() {
         interviews={getUpcomingInterviews(sampleCompanies, new Date("2026-04-17T09:00:00-07:00"))}
       />
 
-      <section style={{ marginTop: 24 }}>
+      <section className="stack-section">
         <GroupingTabs value={grouping} onChange={setGrouping} />
         <CompanyBoard groups={getGroupedCompanies(sampleCompanies, grouping)} />
       </section>
 
-      <section style={{ marginTop: 24 }}>
+      <section className="stack-section">
         <ArchiveSection companies={getArchivedCompanies(sampleCompanies)} />
       </section>
     </main>

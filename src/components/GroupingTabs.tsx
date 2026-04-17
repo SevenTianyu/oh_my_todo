@@ -14,7 +14,7 @@ export function GroupingTabs({
   onChange: (value: GroupingMode) => void;
 }) {
   return (
-    <div className="group-tabs" role="tablist" aria-label="分组切换">
+    <div className="group-tabs" aria-label="分组切换">
       {OPTIONS.map((option) => (
         <button
           key={option.value}

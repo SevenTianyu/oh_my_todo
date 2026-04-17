@@ -4,14 +4,16 @@ import { describe, expect, it } from "vitest";
 import App from "./App";
 
 describe("App", () => {
-  it("renders the upcoming timeline and the default company-type groups", () => {
+  it("renders the workbench shell and the default company-type groups", () => {
     render(<App />);
 
+    expect(screen.getByRole("heading", { name: "面试工作台" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "未来 7 天面试" })).toBeInTheDocument();
     expect(screen.getByText("创业公司")).toBeInTheDocument();
     expect(screen.getByText("大厂")).toBeInTheDocument();
-    expect(screen.getAllByText("ACME")).toHaveLength(2);
-    expect(screen.getAllByText("字节跳动")).toHaveLength(2);
+    expect(screen.getByText("归档流程（1）")).toBeInTheDocument();
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("分组切换")).toBeInTheDocument();
   });
 
   it("switches grouping tabs without reloading the page", async () => {
