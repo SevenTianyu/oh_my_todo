@@ -1,15 +1,12 @@
-import { useState } from "react";
 import "./styles/app.css";
 import { ArchiveSection } from "./components/ArchiveSection";
 import { CompanyBoard } from "./components/CompanyBoard";
 import { GroupingTabs } from "./components/GroupingTabs";
 import { UpcomingTimeline } from "./components/UpcomingTimeline";
-import { sampleCompanies } from "./lib/sampleData";
-import { getArchivedCompanies, getGroupedCompanies, getUpcomingInterviews } from "./lib/selectors";
-import type { GroupingMode } from "./types/interview";
+import { useInterviewWorkbench } from "./hooks/useInterviewWorkbench";
 
 export default function App() {
-  const [grouping, setGrouping] = useState<GroupingMode>("companyType");
+  const workbench = useInterviewWorkbench();
 
   return (
     <main className="page">
@@ -18,17 +15,21 @@ export default function App() {
         <p>先看最近已定面试，再管理仍在推进的公司流程。</p>
       </header>
 
-      <UpcomingTimeline
-        interviews={getUpcomingInterviews(sampleCompanies, new Date("2026-04-17T09:00:00-07:00"))}
-      />
+      <UpcomingTimeline interviews={workbench.upcomingInterviews} />
 
       <section className="stack-section">
-        <GroupingTabs value={grouping} onChange={setGrouping} />
-        <CompanyBoard groups={getGroupedCompanies(sampleCompanies, grouping)} />
+        <GroupingTabs value={workbench.grouping} onChange={workbench.setGrouping} />
+        <CompanyBoard
+          groups={workbench.groupedCompanies}
+          onSaveSummary={workbench.updateCompanySummary}
+          onAddRound={workbench.addRoundToProcess}
+          onArchiveProcess={workbench.archiveProcessById}
+          onUpdateRound={workbench.updateRoundRecord}
+        />
       </section>
 
       <section className="stack-section">
-        <ArchiveSection companies={getArchivedCompanies(sampleCompanies)} />
+        <ArchiveSection companies={workbench.archivedCompanies} />
       </section>
     </main>
   );
