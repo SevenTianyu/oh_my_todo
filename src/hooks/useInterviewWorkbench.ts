@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   addRoundToProcess,
   archiveProcessById,
@@ -7,6 +7,7 @@ import {
 } from "../lib/mutations";
 import { sampleCompanies } from "../lib/sampleData";
 import { getArchivedCompanies, getGroupedCompanies, getUpcomingInterviews } from "../lib/selectors";
+import { loadWorkbenchSnapshot, saveWorkbenchSnapshot } from "../lib/storage";
 import type { CompanyRecord, GroupingMode, RoundRecord } from "../types/interview";
 
 type CompanySummaryPatch = Partial<
@@ -14,8 +15,13 @@ type CompanySummaryPatch = Partial<
 >;
 
 export function useInterviewWorkbench(initialCompanies: CompanyRecord[] = sampleCompanies) {
-  const [grouping, setGrouping] = useState<GroupingMode>("companyType");
-  const [companies, setCompanies] = useState<CompanyRecord[]>(initialCompanies);
+  const [snapshot] = useState(() => loadWorkbenchSnapshot());
+  const [grouping, setGrouping] = useState<GroupingMode>(snapshot?.grouping ?? "companyType");
+  const [companies, setCompanies] = useState<CompanyRecord[]>(snapshot?.companies ?? initialCompanies);
+
+  useEffect(() => {
+    saveWorkbenchSnapshot({ grouping, companies });
+  }, [grouping, companies]);
 
   return {
     grouping,
