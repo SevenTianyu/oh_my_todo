@@ -6,9 +6,6 @@ export const sampleCompanies: CompanyRecord[] = [
     name: "ACME",
     companyType: "startup",
     overallImpression: "团队强，方向贴合，但节奏偏快。",
-    highlights: "业务和过往经历贴近",
-    risks: "组织稳定性需要继续确认",
-    priority: "high",
     processes: [
       {
         id: "acme-pm",
@@ -40,9 +37,6 @@ export const sampleCompanies: CompanyRecord[] = [
     name: "Nova AI",
     companyType: "startup",
     overallImpression: "赛道感兴趣，但需要继续判断现金流情况。",
-    highlights: "产品方向喜欢",
-    risks: "团队规模较小",
-    priority: "medium",
     processes: [
       {
         id: "nova-product",
@@ -67,9 +61,6 @@ export const sampleCompanies: CompanyRecord[] = [
     name: "字节跳动",
     companyType: "big-tech",
     overallImpression: "流程规范，但岗位细节还不够清晰。",
-    highlights: "平台大，流程明确",
-    risks: "岗位真实职责待确认",
-    priority: "high",
     processes: [
       {
         id: "byte-growth",
@@ -94,9 +85,6 @@ export const sampleCompanies: CompanyRecord[] = [
     name: "Google",
     companyType: "big-tech",
     overallImpression: "品牌吸引力强，但业务匹配度一般。",
-    highlights: "平台资源足",
-    risks: "项目方向一般",
-    priority: "low",
     processes: [
       {
         id: "google-ads",

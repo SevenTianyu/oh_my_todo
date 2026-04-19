@@ -16,18 +16,12 @@ const GROUP_LABELS: Record<GroupingMode, Record<string, string>> = {
     interviewing: "面试中",
     offer: "Offer 阶段",
     closed: "已结束"
-  },
-  priority: {
-    high: "高优先级",
-    medium: "中优先级",
-    low: "低优先级"
   }
 };
 
 const GROUP_ORDER: Record<GroupingMode, string[]> = {
   companyType: ["startup", "big-tech"],
-  stage: ["screening", "interviewing", "offer", "closed"],
-  priority: ["high", "medium", "low"]
+  stage: ["screening", "interviewing", "offer", "closed"]
 };
 
 const STAGE_PRIORITY: Record<Stage, number> = {
@@ -114,9 +108,7 @@ export function getGroupedCompanies(
     const key =
       grouping === "companyType"
         ? company.companyType
-        : grouping === "priority"
-          ? company.priority
-          : getPrimaryStage(company);
+        : getPrimaryStage(company);
 
     const bucket = buckets.get(key) ?? [];
     bucket.push(company);

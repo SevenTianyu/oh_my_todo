@@ -1,15 +1,18 @@
 import { CompanyCard } from "./CompanyCard";
-import type { CompanyGroup, CompanyRecord, RoundRecord } from "../types/interview";
+import type { CompanyGroup, CompanyRecord, InterviewProcess, RoundRecord } from "../types/interview";
 
-type CompanySummaryPatch = Partial<
-  Pick<CompanyRecord, "overallImpression" | "highlights" | "risks" | "priority">
->;
+type CompanySummaryPatch = Partial<Pick<CompanyRecord, "name" | "companyType" | "overallImpression">>;
 
 interface CompanyBoardProps {
   groups: CompanyGroup[];
   onSaveSummary: (companyId: string, patch: CompanySummaryPatch) => void;
   onAddRound: (companyId: string, processId: string) => void;
   onArchiveProcess: (companyId: string, processId: string) => void;
+  onUpdateProcess: (
+    companyId: string,
+    processId: string,
+    patch: Partial<Pick<InterviewProcess, "roleName">>
+  ) => void;
   onUpdateRound: (
     companyId: string,
     processId: string,
@@ -23,6 +26,7 @@ export function CompanyBoard({
   onSaveSummary,
   onAddRound,
   onArchiveProcess,
+  onUpdateProcess,
   onUpdateRound
 }: CompanyBoardProps) {
   return (
@@ -44,6 +48,7 @@ export function CompanyBoard({
                 onSaveSummary={onSaveSummary}
                 onAddRound={onAddRound}
                 onArchiveProcess={onArchiveProcess}
+                onUpdateProcess={onUpdateProcess}
                 onUpdateRound={onUpdateRound}
               />
             ))}

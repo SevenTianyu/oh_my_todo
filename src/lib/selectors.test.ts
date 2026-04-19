@@ -14,9 +14,6 @@ const multiProcessCompany: CompanyRecord = {
   name: "Epsilon",
   companyType: "startup",
   overallImpression: "测试用公司",
-  highlights: "测试用高优先级流程",
-  risks: "测试用风险",
-  priority: "high",
   processes: [
     {
       id: "epsilon-screening",
@@ -36,26 +33,6 @@ const multiProcessCompany: CompanyRecord = {
     }
   ]
 };
-const lowPriorityCompany: CompanyRecord = {
-  id: "omega",
-  name: "Omega",
-  companyType: "big-tech",
-  overallImpression: "测试用公司",
-  highlights: "测试用低优先级流程",
-  risks: "测试用风险",
-  priority: "low",
-  processes: [
-    {
-      id: "omega-screening",
-      roleName: "PM",
-      stage: "screening",
-      nextStep: "筛选",
-      status: "active",
-      rounds: []
-    }
-  ]
-};
-
 describe("selectors", () => {
   it("returns only scheduled interviews within the next 7 days in ascending order", () => {
     const upcoming = getUpcomingInterviews(sampleCompanies, NOW);
@@ -72,15 +49,6 @@ describe("selectors", () => {
     expect(groups.map((group) => group.label)).toEqual(["创业公司", "大厂"]);
     expect(groups[0].companies.map((company) => company.name)).toEqual(["ACME", "Nova AI"]);
     expect(groups[1].companies.map((company) => company.name)).toEqual(["字节跳动"]);
-  });
-
-  it("groups active companies by priority in a stable order", () => {
-    const groups = getGroupedCompanies([...sampleCompanies, lowPriorityCompany], "priority");
-
-    expect(groups.map((group) => group.label)).toEqual(["高优先级", "中优先级", "低优先级"]);
-    expect(groups[0].companies.map((company) => company.name)).toEqual(["ACME", "字节跳动"]);
-    expect(groups[1].companies.map((company) => company.name)).toEqual(["Nova AI"]);
-    expect(groups[2].companies.map((company) => company.name)).toEqual(["Omega"]);
   });
 
   it("uses the most advanced active stage when a company has multiple active processes", () => {

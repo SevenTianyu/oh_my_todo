@@ -2,45 +2,95 @@ import { useEffect, useMemo, useState } from "react";
 import {
   addRoundToProcess,
   archiveProcessById,
+  createCompanyWithProcess,
   updateCompanySummary,
+  updateProcessRecord,
   updateRoundRecord
 } from "../lib/mutations";
-import { sampleCompanies } from "../lib/sampleData";
 import { getArchivedCompanies, getGroupedCompanies, getUpcomingInterviews } from "../lib/selectors";
-import { loadWorkbenchSnapshot, saveWorkbenchSnapshot } from "../lib/storage";
-import type { CompanyRecord, GroupingMode, RoundRecord } from "../types/interview";
+import {
+  createEmptyWorkbenchSnapshot,
+  loadWorkbenchSnapshot,
+  parseWorkbenchSnapshotImport,
+  saveWorkbenchSnapshot
+} from "../lib/storage";
+import type {
+  CompanyRecord,
+  GroupingMode,
+  InterviewProcess,
+  NewCompanyDraft,
+  RoundRecord
+} from "../types/interview";
 
-type CompanySummaryPatch = Partial<
-  Pick<CompanyRecord, "overallImpression" | "highlights" | "risks" | "priority">
->;
+type CompanySummaryPatch = Partial<Pick<CompanyRecord, "name" | "companyType" | "overallImpression">>;
 
-export function useInterviewWorkbench(initialCompanies: CompanyRecord[] = sampleCompanies) {
-  const [snapshot] = useState(() => loadWorkbenchSnapshot());
-  const [grouping, setGrouping] = useState<GroupingMode>(snapshot?.grouping ?? "companyType");
-  const [companies, setCompanies] = useState<CompanyRecord[]>(snapshot?.companies ?? initialCompanies);
+export function useInterviewWorkbench() {
+  const [snapshot, setSnapshot] = useState(() => loadWorkbenchSnapshot() ?? createEmptyWorkbenchSnapshot());
 
   useEffect(() => {
-    saveWorkbenchSnapshot({ grouping, companies });
-  }, [grouping, companies]);
+    saveWorkbenchSnapshot(snapshot);
+  }, [snapshot]);
+
+  const grouping = snapshot.grouping;
+  const companies = snapshot.companies;
 
   return {
     grouping,
-    setGrouping,
     companies,
+    snapshot,
+    setGrouping: (nextGrouping: GroupingMode) =>
+      setSnapshot((current) => ({ ...current, grouping: nextGrouping })),
     groupedCompanies: useMemo(() => getGroupedCompanies(companies, grouping), [companies, grouping]),
     archivedCompanies: useMemo(() => getArchivedCompanies(companies), [companies]),
-    upcomingInterviews: getUpcomingInterviews(companies, new Date()),
+    upcomingInterviews: useMemo(() => getUpcomingInterviews(companies, new Date()), [companies]),
     updateCompanySummary: (companyId: string, patch: CompanySummaryPatch) =>
-      setCompanies((current) => updateCompanySummary(current, companyId, patch)),
+      setSnapshot((current) => ({
+        ...current,
+        companies: updateCompanySummary(current.companies, companyId, patch)
+      })),
     addRoundToProcess: (companyId: string, processId: string) =>
-      setCompanies((current) => addRoundToProcess(current, companyId, processId)),
+      setSnapshot((current) => ({
+        ...current,
+        companies: addRoundToProcess(current.companies, companyId, processId)
+      })),
     archiveProcessById: (companyId: string, processId: string) =>
-      setCompanies((current) => archiveProcessById(current, companyId, processId)),
+      setSnapshot((current) => ({
+        ...current,
+        companies: archiveProcessById(current.companies, companyId, processId)
+      })),
+    updateProcessRecord: (
+      companyId: string,
+      processId: string,
+      patch: Partial<Pick<InterviewProcess, "roleName">>
+    ) =>
+      setSnapshot((current) => ({
+        ...current,
+        companies: updateProcessRecord(current.companies, companyId, processId, patch)
+      })),
     updateRoundRecord: (
       companyId: string,
       processId: string,
       roundId: string,
       patch: Partial<RoundRecord>
-    ) => setCompanies((current) => updateRoundRecord(current, companyId, processId, roundId, patch))
+    ) =>
+      setSnapshot((current) => ({
+        ...current,
+        companies: updateRoundRecord(current.companies, companyId, processId, roundId, patch)
+      })),
+    createCompanyWithProcess: (draft: NewCompanyDraft) =>
+      setSnapshot((current) => ({
+        ...current,
+        companies: createCompanyWithProcess(current.companies, draft)
+      })),
+    resetWorkbench: () => setSnapshot(createEmptyWorkbenchSnapshot()),
+    importWorkbenchSnapshot: (raw: string) => {
+      const result = parseWorkbenchSnapshotImport(raw);
+
+      if (result.ok) {
+        setSnapshot(result.snapshot);
+      }
+
+      return result;
+    }
   };
 }

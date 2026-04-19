@@ -2,8 +2,7 @@ import type { GroupingMode } from "../types/interview";
 
 const OPTIONS: Array<{ value: GroupingMode; label: string; ariaLabel: string }> = [
   { value: "companyType", label: "公司类型", ariaLabel: "按公司类型分组" },
-  { value: "stage", label: "流程阶段", ariaLabel: "按流程阶段分组" },
-  { value: "priority", label: "个人优先级", ariaLabel: "按个人优先级分组" }
+  { value: "stage", label: "流程阶段", ariaLabel: "按流程阶段分组" }
 ];
 
 export function GroupingTabs({

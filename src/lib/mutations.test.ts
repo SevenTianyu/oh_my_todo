@@ -3,6 +3,8 @@ import { sampleCompanies } from "./sampleData";
 import {
   addRoundToProcess,
   archiveProcessById,
+  createCompanyWithProcess,
+  updateProcessRecord,
   updateCompanySummary,
   updateRoundRecord
 } from "./mutations";
@@ -21,16 +23,67 @@ describe("mutations", () => {
     );
   });
 
-  it("adds a new round to the selected process", () => {
+  it("adds a new round to the selected process with the next default interview label", () => {
     const next = addRoundToProcess(sampleCompanies, "acme", "acme-pm");
 
     expect(next.find((company) => company.id === "acme")?.processes[0].rounds).toHaveLength(3);
+    expect(next.find((company) => company.id === "acme")?.processes[0].rounds[2]?.name).toBe(
+      "二面"
+    );
+  });
+
+  it("creates a new company with its first active process and pending round", () => {
+    const next = createCompanyWithProcess(sampleCompanies, {
+      companyName: "Cursor",
+      companyType: "startup",
+      roleName: "Product Lead",
+      stage: "screening",
+      nextStep: "初筛沟通"
+    });
+
+    expect(next[0]).toMatchObject({
+      name: "Cursor",
+      companyType: "startup",
+      overallImpression: "",
+      processes: [
+        {
+          roleName: "Product Lead",
+          stage: "screening",
+          nextStep: "初筛沟通",
+          status: "active",
+          rounds: [
+            {
+              name: "初筛沟通",
+              scheduledAt: null,
+              status: "pending",
+              notes: ""
+            }
+          ]
+        }
+      ]
+    });
+    expect(next[0].id).toBeTruthy();
+    expect(next[0].processes[0].id).toBeTruthy();
+    expect(next[0].processes[0].rounds[0].id).toBeTruthy();
   });
 
   it("archives only the targeted process", () => {
     const next = archiveProcessById(sampleCompanies, "acme", "acme-pm");
 
     expect(next.find((company) => company.id === "acme")?.processes[0].status).toBe("archived");
+  });
+
+  it("updates process-level fields immutably", () => {
+    const next = updateProcessRecord(sampleCompanies, "acme", "acme-pm", {
+      roleName: "Staff Product Manager"
+    });
+
+    expect(next.find((company) => company.id === "acme")?.processes[0].roleName).toBe(
+      "Staff Product Manager"
+    );
+    expect(sampleCompanies.find((company) => company.id === "acme")?.processes[0].roleName).toBe(
+      "Senior PM"
+    );
   });
 
   it("updates round notes and schedule", () => {
