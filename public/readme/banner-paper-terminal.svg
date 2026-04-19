@@ -1,0 +1,87 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="40" x2="1120" y2="680" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7F1E8"/>
+      <stop offset="0.45" stop-color="#E6D9C9"/>
+      <stop offset="1" stop-color="#D4DDEB"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="114" y1="182" x2="608" y2="520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0E1629"/>
+      <stop offset="1" stop-color="#1F2B47"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="650" y1="146" x2="1108" y2="562" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFDF8"/>
+      <stop offset="1" stop-color="#F5ECDF"/>
+    </linearGradient>
+    <filter id="shadow" x="58" y="76" width="1166" height="584" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="22"/>
+      <feGaussianBlur stdDeviation="26"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.106 0 0 0 0 0.145 0 0 0 0 0.22 0 0 0 0.18 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_2"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_2" result="shape"/>
+    </filter>
+    <filter id="soft" x="621" y="117" width="536" height="474" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feGaussianBlur in="BackgroundImageFix" stdDeviation="6"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="18"/>
+      <feGaussianBlur stdDeviation="18"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.177 0 0 0 0 0.161 0 0 0 0 0.137 0 0 0 0.16 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_2"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_2" result="shape"/>
+    </filter>
+    <style>
+      .mono { font-family: "SFMono-Regular", "Menlo", "Consolas", monospace; }
+      .sans { font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="720" rx="36" fill="url(#bg)"/>
+
+  <g opacity="0.2">
+    <path d="M92 130C194 96 360 86 508 140" stroke="#4B5C75" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="10 14"/>
+    <path d="M774 84C926 70 1094 118 1162 232" stroke="#8A745C" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="8 14"/>
+    <path d="M934 604C1034 602 1130 572 1194 496" stroke="#37506F" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="8 14"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="86" y="104" width="1108" height="500" rx="34" fill="#F8F3EA"/>
+  </g>
+
+  <rect x="114" y="180" width="496" height="344" rx="28" fill="url(#screen)"/>
+  <rect x="114" y="180" width="496" height="42" rx="28" fill="#162038"/>
+  <circle cx="154" cy="201" r="7" fill="#F07C6C"/>
+  <circle cx="178" cy="201" r="7" fill="#F2B66A"/>
+  <circle cx="202" cy="201" r="7" fill="#7BC68F"/>
+
+  <text x="152" y="270" class="mono" font-size="22" fill="#8FA1C8">$ open interview-workbench</text>
+  <text x="152" y="316" class="mono" font-size="20" fill="#F6F2E9">→ upcoming interviews: 08</text>
+  <text x="152" y="354" class="mono" font-size="20" fill="#F6F2E9">→ active companies: 10</text>
+  <text x="152" y="392" class="mono" font-size="20" fill="#F6F2E9">→ archived notes: 01</text>
+  <text x="152" y="452" class="mono" font-size="18" fill="#8FA1C8">not another todo list.</text>
+  <text x="152" y="482" class="mono" font-size="18" fill="#8FA1C8">timing, judgment, and momentum_</text>
+
+  <g filter="url(#soft)">
+    <rect x="650" y="145" width="478" height="410" rx="28" transform="rotate(-2 650 145)" fill="url(#paper)"/>
+    <rect x="686" y="170" width="116" height="34" rx="17" transform="rotate(-2 686 170)" fill="#1E3868" fill-opacity="0.1" stroke="#2B4E83" stroke-width="2"/>
+    <text x="710" y="193" class="sans" font-size="18" font-weight="700" fill="#1E3868" transform="rotate(-2 710 193)">local-first</text>
+
+    <text x="690" y="248" class="sans" font-size="56" font-weight="800" fill="#12213A" transform="rotate(-2 690 248)">oh_my_todo</text>
+    <text x="690" y="288" class="sans" font-size="24" font-weight="600" fill="#56657D" transform="rotate(-2 690 288)">Interview Workbench</text>
+
+    <line x1="690" y1="330" x2="1080" y2="330" stroke="#C8B89C" stroke-width="2" stroke-dasharray="5 10"/>
+
+    <text x="690" y="380" class="sans" font-size="21" font-weight="700" fill="#20304A" transform="rotate(-2 690 380)">• keep timing visible</text>
+    <text x="690" y="420" class="sans" font-size="21" font-weight="700" fill="#20304A" transform="rotate(-2 690 420)">• write judgment in context</text>
+    <text x="690" y="460" class="sans" font-size="21" font-weight="700" fill="#20304A" transform="rotate(-2 690 460)">• carry your data out anytime</text>
+    <text x="690" y="514" class="sans" font-size="18" font-weight="600" fill="#7B6C57" transform="rotate(-2 690 514)">paper notes × terminal clarity × local privacy</text>
+  </g>
+
+  <rect x="870" y="116" width="140" height="44" rx="14" transform="rotate(5 870 116)" fill="#F6B668"/>
+  <text x="892" y="145" class="mono" font-size="18" font-weight="700" fill="#50300F" transform="rotate(5 892 145)">not another todo</text>
+
+  <path d="M800 590C848 610 920 618 980 600" stroke="#B85C45" stroke-width="3" stroke-linecap="round"/>
+  <path d="M983 603L969 593L969 612" fill="#B85C45"/>
+</svg>
