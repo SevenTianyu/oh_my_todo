@@ -10,7 +10,6 @@ export const sampleCompanies: CompanyRecord[] = [
       {
         id: "acme-pm",
         roleName: "Senior PM",
-        stage: "interviewing",
         nextStep: "一面",
         status: "active",
         rounds: [
@@ -41,7 +40,6 @@ export const sampleCompanies: CompanyRecord[] = [
       {
         id: "nova-product",
         roleName: "Product Lead",
-        stage: "screening",
         nextStep: "待约面",
         status: "active",
         rounds: [
@@ -65,7 +63,6 @@ export const sampleCompanies: CompanyRecord[] = [
       {
         id: "byte-growth",
         roleName: "Growth PM",
-        stage: "interviewing",
         nextStep: "HR 面",
         status: "active",
         rounds: [
@@ -89,7 +86,6 @@ export const sampleCompanies: CompanyRecord[] = [
       {
         id: "google-ads",
         roleName: "PM",
-        stage: "closed",
         nextStep: "流程结束",
         status: "archived",
         rounds: [

@@ -13,7 +13,6 @@ const SEEDED_WORKBENCH = {
         {
           id: "anthropic-pm",
           roleName: "Product Manager",
-          stage: "interviewing",
           nextStep: "一面",
           status: "active",
           rounds: [

@@ -99,6 +99,74 @@ describe("storage", () => {
     });
   });
 
+  it("ignores legacy process stage fields when importing json", () => {
+    const result = parseWorkbenchSnapshotImport(
+      JSON.stringify({
+        version: 2,
+        grouping: "companyType",
+        companies: [
+          {
+            id: "cursor",
+            name: "Cursor",
+            companyType: "startup",
+            overallImpression: "",
+            processes: [
+              {
+                id: "cursor-product",
+                roleName: "Product Lead",
+                stage: "interviewing",
+                nextStep: "初筛",
+                status: "active",
+                rounds: [
+                  {
+                    id: "cursor-round-1",
+                    name: "初筛",
+                    scheduledAt: null,
+                    status: "pending",
+                    notes: ""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      snapshot: {
+        version: 2,
+        grouping: "companyType",
+        companies: [
+          {
+            id: "cursor",
+            name: "Cursor",
+            companyType: "startup",
+            overallImpression: "",
+            processes: [
+              {
+                id: "cursor-product",
+                roleName: "Product Lead",
+                nextStep: "初筛",
+                status: "active",
+                rounds: [
+                  {
+                    id: "cursor-round-1",
+                    name: "初筛",
+                    scheduledAt: null,
+                    status: "pending",
+                    notes: ""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    });
+  });
+
   it("reports invalid json during import parsing", () => {
     const result = parseWorkbenchSnapshotImport("{not-json");
 
@@ -158,6 +226,7 @@ describe("storage", () => {
       grouping: "stage",
       companies: sampleCompanies
     });
+    expect(JSON.parse(content).companies[0].processes[0]).not.toHaveProperty("stage");
   });
 
   it("builds timestamped export filenames", () => {

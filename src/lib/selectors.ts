@@ -2,7 +2,7 @@ import type {
   CompanyGroup,
   CompanyRecord,
   GroupingMode,
-  Stage,
+  RoundStatus,
   UpcomingInterview
 } from "../types/interview";
 
@@ -13,23 +13,23 @@ const GROUP_LABELS: Record<GroupingMode, Record<string, string>> = {
   },
   stage: {
     screening: "筛选中",
-    interviewing: "面试中",
-    offer: "Offer 阶段",
-    closed: "已结束"
+    interviewing: "面试中"
   }
 };
 
 const GROUP_ORDER: Record<GroupingMode, string[]> = {
   companyType: ["startup", "big-tech"],
-  stage: ["screening", "interviewing", "offer", "closed"]
+  stage: ["screening", "interviewing"]
 };
 
-const STAGE_PRIORITY: Record<Stage, number> = {
-  closed: 0,
-  screening: 1,
-  interviewing: 2,
-  offer: 3
-};
+const INTERVIEWING_ROUND_STATUSES = new Set<RoundStatus>([
+  "scheduled",
+  "completed",
+  "waiting-result",
+  "closed"
+]);
+
+type DerivedStage = "screening" | "interviewing";
 
 function endOfWindow(now: Date) {
   const end = new Date(now);
@@ -38,16 +38,20 @@ function endOfWindow(now: Date) {
   return end;
 }
 
-function getPrimaryStage(company: CompanyRecord): Stage {
-  const activeStages = company.processes
-    .filter((process) => process.status === "active")
-    .map((process) => process.stage);
+function getProcessStage(process: CompanyRecord["processes"][number]): DerivedStage {
+  return process.rounds.some(
+    (round) => round.scheduledAt !== null || INTERVIEWING_ROUND_STATUSES.has(round.status)
+  )
+    ? "interviewing"
+    : "screening";
+}
 
-  return activeStages.reduce<Stage>(
-    (bestStage, currentStage) =>
-      STAGE_PRIORITY[currentStage] > STAGE_PRIORITY[bestStage] ? currentStage : bestStage,
-    "closed"
-  );
+function getPrimaryStage(company: CompanyRecord): DerivedStage {
+  return company.processes
+    .filter((process) => process.status === "active")
+    .some((process) => getProcessStage(process) === "interviewing")
+    ? "interviewing"
+    : "screening";
 }
 
 export function getActiveCompanies(companies: CompanyRecord[]) {

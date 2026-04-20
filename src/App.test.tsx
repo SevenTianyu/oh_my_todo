@@ -108,12 +108,11 @@ describe("App", () => {
     await user.type(screen.getByLabelText("公司名称"), "Anthropic");
     await user.selectOptions(screen.getByLabelText("公司类型"), "startup");
     await user.type(screen.getByLabelText("岗位名称"), "Product Manager");
-    await user.selectOptions(screen.getByLabelText("流程阶段"), "interviewing");
     await user.click(screen.getByRole("button", { name: "保存到工作台" }));
 
     expect(screen.getByText("Anthropic")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "展开面试安排" }));
-    expect(screen.getByText("下一步：一面")).toBeInTheDocument();
+    expect(screen.getByText("下一步：初筛沟通")).toBeInTheDocument();
 
     view.unmount();
     render(<App />);
@@ -180,7 +179,6 @@ describe("App", () => {
                 {
                   id: "cursor-product",
                   roleName: "Product Lead",
-                  stage: "screening",
                   nextStep: "初筛",
                   status: "active",
                   rounds: [

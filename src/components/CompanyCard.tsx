@@ -7,13 +7,6 @@ const COMPANY_TYPE_LABELS = {
   "big-tech": "大厂"
 } as const;
 
-const STAGE_LABELS = {
-  screening: "流程筛选",
-  interviewing: "面试推进",
-  offer: "Offer 阶段",
-  closed: "流程结束"
-} as const;
-
 const ROUND_STATUS_LABELS = {
   pending: "待安排",
   scheduled: "已排期",
@@ -277,7 +270,6 @@ function ActiveProcess({
             </button>
           )}
           <div className="company-card__process-meta">
-            <span className="badge badge--stage">{STAGE_LABELS[process.stage]}</span>
             <span className="company-card__process-next">下一步：{process.nextStep}</span>
           </div>
         </div>

@@ -1,9 +1,7 @@
 export type GroupingMode = "companyType" | "stage";
 export type CompanyType = "startup" | "big-tech";
-export type Stage = "screening" | "interviewing" | "offer" | "closed";
 export type RoundStatus = "pending" | "scheduled" | "completed" | "waiting-result" | "closed";
 export type ProcessStatus = "active" | "archived";
-export type ActiveStage = Exclude<Stage, "closed">;
 
 export interface RoundRecord {
   id: string;
@@ -16,7 +14,6 @@ export interface RoundRecord {
 export interface InterviewProcess {
   id: string;
   roleName: string;
-  stage: Stage;
   nextStep: string;
   status: ProcessStatus;
   rounds: RoundRecord[];
@@ -50,5 +47,4 @@ export interface NewCompanyDraft {
   companyName: string;
   companyType: CompanyType;
   roleName: string;
-  stage: ActiveStage;
 }

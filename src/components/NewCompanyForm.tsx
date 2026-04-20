@@ -1,24 +1,17 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import type { ActiveStage, CompanyType, NewCompanyDraft } from "../types/interview";
+import type { CompanyType, NewCompanyDraft } from "../types/interview";
 
 const COMPANY_TYPE_OPTIONS: Array<{ value: CompanyType; label: string }> = [
   { value: "startup", label: "创业公司" },
   { value: "big-tech", label: "大厂" }
 ];
 
-const STAGE_OPTIONS: Array<{ value: ActiveStage; label: string }> = [
-  { value: "screening", label: "筛选中" },
-  { value: "interviewing", label: "面试中" },
-  { value: "offer", label: "Offer 阶段" }
-];
-
 function createInitialDraft(): NewCompanyDraft {
   return {
     companyName: "",
     companyType: "startup",
-    roleName: "",
-    stage: "screening"
+    roleName: ""
   };
 }
 
@@ -58,7 +51,7 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
           <p className="panel__eyebrow">Quick Capture</p>
           <h2>新建公司与首个流程</h2>
         </div>
-        <p className="panel__description">先录入最少字段，系统会按阶段自动补首轮，后续再补充判断、时间和备注。</p>
+        <p className="panel__description">先录入最少字段，系统会自动补上首轮初筛沟通，后续再补充判断、时间和备注。</p>
       </div>
 
       <form className="composer-form" onSubmit={handleSubmit}>
@@ -100,22 +93,6 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
             value={draft.roleName}
             onChange={(event) => updateDraft("roleName", event.target.value)}
           />
-        </label>
-
-        <label className="composer-field">
-          <span>流程阶段</span>
-          <select
-            aria-label="流程阶段"
-            className="field composer-field__control"
-            value={draft.stage}
-            onChange={(event) => updateDraft("stage", event.target.value as ActiveStage)}
-          >
-            {STAGE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
         </label>
 
         <div className="composer-form__actions">

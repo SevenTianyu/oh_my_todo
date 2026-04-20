@@ -5,14 +5,12 @@ import type {
   InterviewProcess,
   ProcessStatus,
   RoundRecord,
-  RoundStatus,
-  Stage
+  RoundStatus
 } from "../types/interview";
 
 const STORAGE_KEY = "interview-workbench:v1";
 const GROUPING_MODES = new Set<GroupingMode>(["companyType", "stage"]);
 const COMPANY_TYPES = new Set<CompanyType>(["startup", "big-tech"]);
-const STAGES = new Set<Stage>(["screening", "interviewing", "offer", "closed"]);
 const PROCESS_STATUSES = new Set<ProcessStatus>(["active", "archived"]);
 const ROUND_STATUSES = new Set<RoundStatus>([
   "pending",
@@ -169,7 +167,6 @@ function readProcess(value: unknown, path: string): InterviewProcess {
   return {
     id: readString(value, "id", path),
     roleName: readString(value, "roleName", path),
-    stage: readEnum(value, "stage", path, STAGES),
     nextStep: readString(value, "nextStep", path),
     status: readEnum(value, "status", path, PROCESS_STATUSES),
     rounds: readArray(value, "rounds", path).map((round, index) =>

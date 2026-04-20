@@ -1,6 +1,7 @@
 import type { CompanyRecord } from "../types/interview";
 import { describe, expect, it } from "vitest";
 import { sampleCompanies } from "./sampleData";
+import { createCompanyWithProcess, updateRoundRecord } from "./mutations";
 import {
   getActiveCompanies,
   getArchivedCompanies,
@@ -18,7 +19,6 @@ const multiProcessCompany: CompanyRecord = {
     {
       id: "epsilon-screening",
       roleName: "PM",
-      stage: "screening",
       nextStep: "初筛",
       status: "active",
       rounds: []
@@ -26,10 +26,17 @@ const multiProcessCompany: CompanyRecord = {
     {
       id: "epsilon-offer",
       roleName: "PM",
-      stage: "offer",
-      nextStep: "Offer",
+      nextStep: "复盘",
       status: "active",
-      rounds: []
+      rounds: [
+        {
+          id: "epsilon-offer-round",
+          name: "一面",
+          scheduledAt: null,
+          status: "completed",
+          notes: ""
+        }
+      ]
     }
   ]
 };
@@ -51,13 +58,33 @@ describe("selectors", () => {
     expect(groups[1].companies.map((company) => company.name)).toEqual(["字节跳动"]);
   });
 
-  it("uses the most advanced active stage when a company has multiple active processes", () => {
-    const groups = getGroupedCompanies([...sampleCompanies, multiProcessCompany], "stage");
+  it("groups stage using derived progress only", () => {
+    const created = createCompanyWithProcess([], {
+      companyName: "Cursor",
+      companyType: "startup",
+      roleName: "Product Lead"
+    })[0];
+    const scheduled = updateRoundRecord(
+      [created],
+      created.id,
+      created.processes[0].id,
+      created.processes[0].rounds[0].id,
+      {
+        scheduledAt: "2026-04-17T10:00:00-07:00",
+        status: "scheduled"
+      }
+    )[0];
 
-    expect(groups.map((group) => group.label)).toEqual(["筛选中", "面试中", "Offer 阶段"]);
+    const groups = getGroupedCompanies([...sampleCompanies, multiProcessCompany, scheduled], "stage");
+
+    expect(groups.map((group) => group.label)).toEqual(["筛选中", "面试中"]);
     expect(groups[0].companies.map((company) => company.name)).toEqual(["Nova AI"]);
-    expect(groups[1].companies.map((company) => company.name)).toEqual(["ACME", "字节跳动"]);
-    expect(groups[2].companies.map((company) => company.name)).toEqual(["Epsilon"]);
+    expect(groups[1].companies.map((company) => company.name)).toEqual([
+      "ACME",
+      "字节跳动",
+      "Epsilon",
+      "Cursor"
+    ]);
   });
 
   it("keeps fully archived companies out of the active board", () => {

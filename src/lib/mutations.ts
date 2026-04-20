@@ -26,11 +26,7 @@ const CHINESE_ROUND_ORDER: Record<string, number> = {
   十: 10
 };
 
-const DEFAULT_FIRST_ROUND_BY_STAGE: Record<NewCompanyDraft["stage"], string> = {
-  screening: "初筛沟通",
-  interviewing: "一面",
-  offer: "Offer 沟通"
-};
+const DEFAULT_FIRST_ROUND_NAME = "初筛沟通";
 
 function toSlug(value: string) {
   return value
@@ -112,7 +108,7 @@ export function createCompanyWithProcess(
 ): CompanyRecord[] {
   const companyId = createId("company", draft.companyName);
   const processId = createId("process", draft.roleName);
-  const firstRoundName = DEFAULT_FIRST_ROUND_BY_STAGE[draft.stage];
+  const firstRoundName = DEFAULT_FIRST_ROUND_NAME;
 
   return [
     {
@@ -124,7 +120,6 @@ export function createCompanyWithProcess(
         {
           id: processId,
           roleName: draft.roleName,
-          stage: draft.stage,
           nextStep: firstRoundName,
           status: "active",
           rounds: [
@@ -154,7 +149,7 @@ export function archiveProcessById(
     return {
       ...company,
       processes: company.processes.map((process) =>
-        process.id === processId ? { ...process, status: "archived", stage: "closed" } : process
+        process.id === processId ? { ...process, status: "archived" } : process
       )
     };
   });

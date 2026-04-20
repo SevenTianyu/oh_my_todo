@@ -32,46 +32,38 @@ describe("mutations", () => {
     );
   });
 
-  it.each([
-    { stage: "screening", expectedFirstRound: "初筛沟通" },
-    { stage: "interviewing", expectedFirstRound: "一面" },
-    { stage: "offer", expectedFirstRound: "Offer 沟通" }
-  ] as const)(
-    "creates a new company with the default first round for %s stage",
-    ({ stage, expectedFirstRound }) => {
-      const next = createCompanyWithProcess(sampleCompanies, {
-        companyName: "Cursor",
-        companyType: "startup",
-        roleName: "Product Lead",
-        stage
-      });
+  it("creates a new company with a pending initial round and no process stage", () => {
+    const next = createCompanyWithProcess(sampleCompanies, {
+      companyName: "Cursor",
+      companyType: "startup",
+      roleName: "Product Lead"
+    });
 
-      expect(next[0]).toMatchObject({
-        name: "Cursor",
-        companyType: "startup",
-        overallImpression: "",
-        processes: [
-          {
-            roleName: "Product Lead",
-            stage,
-            nextStep: expectedFirstRound,
-            status: "active",
-            rounds: [
-              {
-                name: expectedFirstRound,
-                scheduledAt: null,
-                status: "pending",
-                notes: ""
-              }
-            ]
-          }
-        ]
-      });
-      expect(next[0].id).toBeTruthy();
-      expect(next[0].processes[0].id).toBeTruthy();
-      expect(next[0].processes[0].rounds[0].id).toBeTruthy();
-    }
-  );
+    expect(next[0]).toMatchObject({
+      name: "Cursor",
+      companyType: "startup",
+      overallImpression: "",
+      processes: [
+        {
+          roleName: "Product Lead",
+          nextStep: "初筛沟通",
+          status: "active",
+          rounds: [
+            {
+              name: "初筛沟通",
+              scheduledAt: null,
+              status: "pending",
+              notes: ""
+            }
+          ]
+        }
+      ]
+    });
+    expect(next[0].processes[0]).not.toHaveProperty("stage");
+    expect(next[0].id).toBeTruthy();
+    expect(next[0].processes[0].id).toBeTruthy();
+    expect(next[0].processes[0].rounds[0].id).toBeTruthy();
+  });
 
   it("archives only the targeted process", () => {
     const next = archiveProcessById(sampleCompanies, "acme", "acme-pm");
