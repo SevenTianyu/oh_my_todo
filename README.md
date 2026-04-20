@@ -47,7 +47,7 @@ Typical todo apps are good at collecting tasks, but interviews are not just task
 When you are evaluating a company, you usually need to see three things together:
 
 - what is already scheduled
-- what stage each process is in
+- how round progress maps to the current screening/interviewing lens
 - what you actually think about the company after each round
 
 `oh_my_todo` is built around that reality. It is less about checking off chores and more about keeping timing, momentum, and judgment in the same workspace.
@@ -74,9 +74,10 @@ When you are evaluating a company, you usually need to see three things together
 ## What you can do
 
 - Create companies and their first interview process without logging in.
-- Track interview rounds and statuses in one place.
+- Track interview rounds, notes, and schedules in one place; the screening/interviewing lens is derived from round progress.
 - Keep an overall company impression that grows with round-by-round notes.
-- Group the board by company type or process stage.
+- Group the board by company type or the derived screening/interviewing lens.
+- Archive ended processes after you mark them archived.
 - Export your full workspace as JSON.
 - Import a previously exported JSON file to restore or move your data.
 
@@ -137,7 +138,7 @@ Clone https://github.com/SevenTianyu/oh_my_todo.git, install dependencies, and s
 ## How to use it
 
 1. Open the app and create your first company.
-2. Add the role, current stage, and next step.
+2. Add the company, type, and role; the app creates the first round for you.
 3. Expand `Company Judgment` when you want to edit your overall view.
 4. Expand `Interview Schedule` when you want to add or update rounds.
 5. Export JSON whenever you want a backup or want to move data between browsers or devices.
