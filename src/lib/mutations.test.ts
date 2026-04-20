@@ -4,6 +4,9 @@ import {
   addRoundToProcess,
   archiveProcessById,
   createCompanyWithProcess,
+  finishNegotiation,
+  saveNegotiationSnapshot,
+  startNegotiation,
   updateProcessRecord,
   updateCompanySummary,
   updateRoundRecord
@@ -96,5 +99,63 @@ describe("mutations", () => {
 
     expect(round?.scheduledAt).toBe("2026-04-18T12:00");
     expect(round?.notes).toBe("确认汇报对象");
+  });
+
+  it("activates negotiation and appends immutable snapshots", () => {
+    const started = startNegotiation(sampleCompanies, "acme", "acme-pm");
+    const updated = saveNegotiationSnapshot(started, "acme", {
+      title: "Senior PM",
+      level: "P5",
+      city: "San Francisco",
+      workMode: "Hybrid",
+      baseMonthlySalary: 50000,
+      salaryMonths: 15,
+      annualBonusCash: 120000,
+      signOnBonus: 50000,
+      relocationBonus: 0,
+      equityShares: 4000,
+      equityStrikePrice: 12,
+      equityReferencePrice: 30,
+      equityVestingYears: 4,
+      deadline: "2026-04-25",
+      hrSignal: "可继续谈",
+      notes: "首轮口头包"
+    });
+    const acme = updated.find((company) => company.id === "acme");
+
+    expect(acme?.negotiation).toMatchObject({
+      status: "active",
+      sourceProcessId: "acme-pm",
+      latestSnapshotId: expect.any(String)
+    });
+    expect(acme?.negotiation?.snapshots).toHaveLength(1);
+  });
+
+  it("finishes negotiation with a terminal status without deleting snapshot history", () => {
+    const started = startNegotiation(sampleCompanies, "acme", "acme-pm", "2026-04-25T09:00:00.000Z");
+    const updated = saveNegotiationSnapshot(started, "acme", {
+      title: "Senior PM",
+      level: "P5",
+      city: "San Francisco",
+      workMode: "Hybrid",
+      baseMonthlySalary: 50000,
+      salaryMonths: 15,
+      annualBonusCash: 120000,
+      signOnBonus: 50000,
+      relocationBonus: 0,
+      equityShares: 4000,
+      equityStrikePrice: 12,
+      equityReferencePrice: 30,
+      equityVestingYears: 4,
+      deadline: "2026-04-25",
+      hrSignal: "可继续谈",
+      notes: "首轮口头包"
+    });
+    const finished = finishNegotiation(updated, "acme", "declined", "2026-04-26T09:00:00.000Z");
+    const acme = finished.find((company) => company.id === "acme");
+
+    expect(acme?.negotiation?.status).toBe("declined");
+    expect(acme?.negotiation?.endedAt).toBe("2026-04-26T09:00:00.000Z");
+    expect(acme?.negotiation?.snapshots.length).toBeGreaterThan(0);
   });
 });

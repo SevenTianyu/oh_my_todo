@@ -9,6 +9,20 @@ import {
   serializeWorkbenchSnapshot
 } from "./storage";
 
+const defaultNegotiation = {
+  status: "inactive" as const,
+  sourceProcessId: null,
+  startedAt: null,
+  endedAt: null,
+  latestSnapshotId: null,
+  snapshots: []
+};
+
+const sampleCompaniesWithNegotiation = sampleCompanies.map((company) => ({
+  ...company,
+  negotiation: company.negotiation ?? defaultNegotiation
+}));
+
 describe("storage", () => {
   beforeEach(() => {
     window.localStorage.clear();
@@ -25,7 +39,7 @@ describe("storage", () => {
 
     expect(snapshot?.version).toBe(2);
     expect(snapshot?.grouping).toBe("companyType");
-    expect(snapshot?.companies[0].name).toBe("ACME");
+    expect(snapshot?.companies).toEqual(sampleCompaniesWithNegotiation);
   });
 
   it("returns null when there is no saved snapshot", () => {
@@ -46,7 +60,7 @@ describe("storage", () => {
     expect(snapshot).toEqual({
       version: 2,
       grouping: "companyType",
-      companies: sampleCompanies
+      companies: sampleCompaniesWithNegotiation
     });
   });
 
@@ -76,7 +90,8 @@ describe("storage", () => {
       name: "Legacy Co",
       companyType: "startup",
       overallImpression: "基础判断\n亮点：亮点信息\n风险：风险信息",
-      processes: []
+      processes: [],
+      negotiation: defaultNegotiation
     });
   });
 
@@ -94,7 +109,7 @@ describe("storage", () => {
       snapshot: {
         version: 2,
         grouping: "companyType",
-        companies: sampleCompanies
+        companies: sampleCompaniesWithNegotiation
       }
     });
   });
@@ -160,7 +175,8 @@ describe("storage", () => {
                   }
                 ]
               }
-            ]
+            ],
+            negotiation: defaultNegotiation
           }
         ]
       }
@@ -209,7 +225,7 @@ describe("storage", () => {
       snapshot: {
         version: 2,
         grouping: "companyType",
-        companies: sampleCompanies
+        companies: sampleCompaniesWithNegotiation
       }
     });
   });
@@ -241,5 +257,34 @@ describe("storage", () => {
       grouping: "companyType",
       companies: []
     });
+  });
+
+  it("fills in a default inactive negotiation object when importing legacy json", () => {
+    const result = parseWorkbenchSnapshotImport(
+      JSON.stringify({
+        version: 2,
+        grouping: "companyType",
+        companies: [
+          {
+            id: "cursor",
+            name: "Cursor",
+            companyType: "startup",
+            overallImpression: "",
+            processes: [
+              {
+                id: "cursor-product",
+                roleName: "Product Lead",
+                nextStep: "HR 面",
+                status: "active",
+                rounds: []
+              }
+            ]
+          }
+        ]
+      })
+    );
+
+    expect(result.ok && result.snapshot.companies[0]?.negotiation?.status).toBe("inactive");
+    expect(result.ok && result.snapshot.companies[0]?.negotiation?.snapshots).toEqual([]);
   });
 });

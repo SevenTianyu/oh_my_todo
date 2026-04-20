@@ -1,4 +1,12 @@
-import type { CompanyRecord, InterviewProcess, NewCompanyDraft, RoundRecord } from "../types/interview";
+import type {
+  CompanyRecord,
+  CompensationNegotiation,
+  InterviewProcess,
+  NegotiationSnapshot,
+  NegotiationStatus,
+  NewCompanyDraft,
+  RoundRecord
+} from "../types/interview";
 
 const NUMBERED_ROUND_LABELS = [
   "一面",
@@ -39,6 +47,21 @@ function toSlug(value: string) {
 function createId(prefix: string, value: string) {
   const base = toSlug(value) || prefix;
   return `${prefix}-${base}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function createEmptyNegotiation(): CompensationNegotiation {
+  return {
+    status: "inactive",
+    sourceProcessId: null,
+    startedAt: null,
+    endedAt: null,
+    latestSnapshotId: null,
+    snapshots: []
+  };
+}
+
+function getNegotiation(company: CompanyRecord) {
+  return company.negotiation ?? createEmptyNegotiation();
 }
 
 function getRoundOrder(name: string) {
@@ -151,6 +174,81 @@ export function archiveProcessById(
       processes: company.processes.map((process) =>
         process.id === processId ? { ...process, status: "archived" } : process
       )
+    };
+  });
+}
+
+export function startNegotiation(
+  companies: CompanyRecord[],
+  companyId: string,
+  processId: string,
+  now: string = new Date().toISOString()
+): CompanyRecord[] {
+  return companies.map((company) => {
+    if (company.id !== companyId) return company;
+
+    const negotiation = getNegotiation(company);
+
+    return {
+      ...company,
+      negotiation: {
+        ...negotiation,
+        status: "active",
+        sourceProcessId: processId,
+        startedAt: negotiation.startedAt ?? now,
+        endedAt: null
+      }
+    };
+  });
+}
+
+export function saveNegotiationSnapshot(
+  companies: CompanyRecord[],
+  companyId: string,
+  draft: Omit<NegotiationSnapshot, "id" | "version" | "createdAt">
+): CompanyRecord[] {
+  return companies.map((company) => {
+    if (company.id !== companyId) return company;
+
+    const negotiation = getNegotiation(company);
+    const version = negotiation.snapshots.length + 1;
+    const snapshot: NegotiationSnapshot = {
+      ...draft,
+      id: createId("negotiation", `${company.id}-${version}`),
+      version,
+      createdAt: new Date().toISOString()
+    };
+
+    return {
+      ...company,
+      negotiation: {
+        ...negotiation,
+        status: "active",
+        latestSnapshotId: snapshot.id,
+        snapshots: [...negotiation.snapshots, snapshot]
+      }
+    };
+  });
+}
+
+export function finishNegotiation(
+  companies: CompanyRecord[],
+  companyId: string,
+  status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">,
+  now: string = new Date().toISOString()
+): CompanyRecord[] {
+  return companies.map((company) => {
+    if (company.id !== companyId) return company;
+
+    const negotiation = getNegotiation(company);
+
+    return {
+      ...company,
+      negotiation: {
+        ...negotiation,
+        status,
+        endedAt: now
+      }
     };
   });
 }

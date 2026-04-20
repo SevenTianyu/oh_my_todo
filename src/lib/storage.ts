@@ -1,8 +1,11 @@
 import type {
   CompanyRecord,
+  CompensationNegotiation,
   CompanyType,
   GroupingMode,
   InterviewProcess,
+  NegotiationSnapshot,
+  NegotiationStatus,
   ProcessStatus,
   RoundRecord,
   RoundStatus
@@ -18,6 +21,13 @@ const ROUND_STATUSES = new Set<RoundStatus>([
   "completed",
   "waiting-result",
   "closed"
+]);
+const NEGOTIATION_STATUSES = new Set<NegotiationStatus>([
+  "inactive",
+  "active",
+  "accepted",
+  "declined",
+  "terminated"
 ]);
 
 type ImportErrorCode =
@@ -104,6 +114,17 @@ function readOptionalString(record: RawRecord, key: string): string | null {
   return typeof value === "string" ? value : null;
 }
 
+function createEmptyNegotiation(): CompensationNegotiation {
+  return {
+    status: "inactive",
+    sourceProcessId: null,
+    startedAt: null,
+    endedAt: null,
+    latestSnapshotId: null,
+    snapshots: []
+  };
+}
+
 function readArray(record: RawRecord, key: string, path: string): unknown[] {
   const value = getRequiredField(record, key, path);
 
@@ -137,6 +158,20 @@ function readEnum<T extends string>(
   return value as T;
 }
 
+function readNullableNumber(record: RawRecord, key: string, path: string): number | null {
+  const value = getRequiredField(record, key, path);
+
+  if (typeof value === "number" || value === null) {
+    return value;
+  }
+
+  throw {
+    code: "invalid_shape",
+    message: `Expected ${getPath(path, key)} to be a number or null`,
+    path: getPath(path, key)
+  } satisfies WorkbenchImportError;
+}
+
 function readRound(value: unknown, path: string): RoundRecord {
   if (!isRecord(value)) {
     throw {
@@ -152,6 +187,55 @@ function readRound(value: unknown, path: string): RoundRecord {
     scheduledAt: readNullableString(value, "scheduledAt", path),
     status: readEnum(value, "status", path, ROUND_STATUSES),
     notes: readString(value, "notes", path)
+  };
+}
+
+function readNegotiationSnapshot(value: unknown, path: string): NegotiationSnapshot {
+  if (!isRecord(value)) {
+    throw {
+      code: "invalid_shape",
+      message: `Expected ${path} to be an object`,
+      path
+    } satisfies WorkbenchImportError;
+  }
+
+  return {
+    id: readString(value, "id", path),
+    version: Number(getRequiredField(value, "version", path)),
+    createdAt: readString(value, "createdAt", path),
+    title: readString(value, "title", path),
+    level: readString(value, "level", path),
+    city: readString(value, "city", path),
+    workMode: readString(value, "workMode", path),
+    baseMonthlySalary: readNullableNumber(value, "baseMonthlySalary", path),
+    salaryMonths: readNullableNumber(value, "salaryMonths", path),
+    annualBonusCash: readNullableNumber(value, "annualBonusCash", path),
+    signOnBonus: readNullableNumber(value, "signOnBonus", path),
+    relocationBonus: readNullableNumber(value, "relocationBonus", path),
+    equityShares: readNullableNumber(value, "equityShares", path),
+    equityStrikePrice: readNullableNumber(value, "equityStrikePrice", path),
+    equityReferencePrice: readNullableNumber(value, "equityReferencePrice", path),
+    equityVestingYears: readNullableNumber(value, "equityVestingYears", path),
+    deadline: readNullableString(value, "deadline", path),
+    hrSignal: readString(value, "hrSignal", path),
+    notes: readString(value, "notes", path)
+  };
+}
+
+function readNegotiation(value: unknown, path: string): CompensationNegotiation {
+  if (!isRecord(value)) {
+    return createEmptyNegotiation();
+  }
+
+  return {
+    status: readEnum(value, "status", path, NEGOTIATION_STATUSES),
+    sourceProcessId: readNullableString(value, "sourceProcessId", path),
+    startedAt: readNullableString(value, "startedAt", path),
+    endedAt: readNullableString(value, "endedAt", path),
+    latestSnapshotId: readNullableString(value, "latestSnapshotId", path),
+    snapshots: readArray(value, "snapshots", path).map((snapshot, index) =>
+      readNegotiationSnapshot(snapshot, `${getPath(path, "snapshots")}[${index}]`)
+    )
   };
 }
 
@@ -211,7 +295,8 @@ function readCompany(value: unknown, path: string): CompanyRecord {
     ),
     processes: readArray(value, "processes", path).map((process, index) =>
       readProcess(process, `${getPath(path, "processes")}[${index}]`)
-    )
+    ),
+    negotiation: readNegotiation(value.negotiation, getPath(path, "negotiation"))
   };
 }
 
