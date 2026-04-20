@@ -26,6 +26,12 @@ const CHINESE_ROUND_ORDER: Record<string, number> = {
   十: 10
 };
 
+const DEFAULT_FIRST_ROUND_BY_STAGE: Record<NewCompanyDraft["stage"], string> = {
+  screening: "初筛沟通",
+  interviewing: "一面",
+  offer: "Offer 沟通"
+};
+
 function toSlug(value: string) {
   return value
     .trim()
@@ -106,6 +112,7 @@ export function createCompanyWithProcess(
 ): CompanyRecord[] {
   const companyId = createId("company", draft.companyName);
   const processId = createId("process", draft.roleName);
+  const firstRoundName = DEFAULT_FIRST_ROUND_BY_STAGE[draft.stage];
 
   return [
     {
@@ -118,12 +125,12 @@ export function createCompanyWithProcess(
           id: processId,
           roleName: draft.roleName,
           stage: draft.stage,
-          nextStep: draft.nextStep,
+          nextStep: firstRoundName,
           status: "active",
           rounds: [
             {
-              id: createId("round", draft.nextStep),
-              name: draft.nextStep,
+              id: createId("round", firstRoundName),
+              name: firstRoundName,
               scheduledAt: null,
               status: "pending",
               notes: ""

@@ -18,8 +18,7 @@ function createInitialDraft(): NewCompanyDraft {
     companyName: "",
     companyType: "startup",
     roleName: "",
-    stage: "screening",
-    nextStep: ""
+    stage: "screening"
   };
 }
 
@@ -41,11 +40,10 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
     const normalizedDraft: NewCompanyDraft = {
       ...draft,
       companyName: draft.companyName.trim(),
-      roleName: draft.roleName.trim(),
-      nextStep: draft.nextStep.trim()
+      roleName: draft.roleName.trim()
     };
 
-    if (!normalizedDraft.companyName || !normalizedDraft.roleName || !normalizedDraft.nextStep) {
+    if (!normalizedDraft.companyName || !normalizedDraft.roleName) {
       return;
     }
 
@@ -60,7 +58,7 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
           <p className="panel__eyebrow">Quick Capture</p>
           <h2>新建公司与首个流程</h2>
         </div>
-        <p className="panel__description">先录入最少字段，后续再补充判断、时间和备注。</p>
+        <p className="panel__description">先录入最少字段，系统会按阶段自动补首轮，后续再补充判断、时间和备注。</p>
       </div>
 
       <form className="composer-form" onSubmit={handleSubmit}>
@@ -118,18 +116,6 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
               </option>
             ))}
           </select>
-        </label>
-
-        <label className="composer-field">
-          <span>下一步</span>
-          <input
-            aria-label="下一步"
-            className="field composer-field__control"
-            required
-            type="text"
-            value={draft.nextStep}
-            onChange={(event) => updateDraft("nextStep", event.target.value)}
-          />
         </label>
 
         <div className="composer-form__actions">

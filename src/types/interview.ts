@@ -51,5 +51,4 @@ export interface NewCompanyDraft {
   companyType: CompanyType;
   roleName: string;
   stage: ActiveStage;
-  nextStep: string;
 }
