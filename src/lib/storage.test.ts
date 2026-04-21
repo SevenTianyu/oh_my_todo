@@ -22,6 +22,7 @@ const sampleCompaniesWithNegotiation = sampleCompanies.map((company) => ({
   ...company,
   negotiation: company.negotiation ?? defaultNegotiation
 }));
+const legacyCompanies = sampleCompanies.map(({ negotiation, ...company }) => company);
 
 describe("storage", () => {
   beforeEach(() => {
@@ -234,13 +235,13 @@ describe("storage", () => {
     const content = serializeWorkbenchSnapshot({
       version: 2,
       grouping: "stage",
-      companies: sampleCompanies
+      companies: legacyCompanies as never
     });
 
     expect(JSON.parse(content)).toEqual({
       version: 2,
       grouping: "stage",
-      companies: sampleCompanies
+      companies: sampleCompaniesWithNegotiation
     });
     expect(JSON.parse(content).companies[0].processes[0]).not.toHaveProperty("stage");
   });

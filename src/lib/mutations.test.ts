@@ -63,6 +63,14 @@ describe("mutations", () => {
       ]
     });
     expect(next[0].processes[0]).not.toHaveProperty("stage");
+    expect(next[0].negotiation).toMatchObject({
+      status: "inactive",
+      sourceProcessId: null,
+      startedAt: null,
+      endedAt: null,
+      latestSnapshotId: null,
+      snapshots: []
+    });
     expect(next[0].id).toBeTruthy();
     expect(next[0].processes[0].id).toBeTruthy();
     expect(next[0].processes[0].rounds[0].id).toBeTruthy();
@@ -129,6 +137,64 @@ describe("mutations", () => {
       latestSnapshotId: expect.any(String)
     });
     expect(acme?.negotiation?.snapshots).toHaveLength(1);
+    expect(sampleCompanies.find((company) => company.id === "acme")?.negotiation).toMatchObject({
+      status: "inactive",
+      snapshots: []
+    });
+  });
+
+  it("keeps negotiation snapshot history immutable across multiple saves", () => {
+    const started = startNegotiation(sampleCompanies, "acme", "acme-pm", "2026-04-25T09:00:00.000Z");
+    const firstSaved = saveNegotiationSnapshot(started, "acme", {
+      title: "Senior PM",
+      level: "P5",
+      city: "San Francisco",
+      workMode: "Hybrid",
+      baseMonthlySalary: 50000,
+      salaryMonths: 15,
+      annualBonusCash: 120000,
+      signOnBonus: 50000,
+      relocationBonus: 0,
+      equityShares: 4000,
+      equityStrikePrice: 12,
+      equityReferencePrice: 30,
+      equityVestingYears: 4,
+      deadline: "2026-04-25",
+      hrSignal: "可继续谈",
+      notes: "首轮口头包"
+    });
+    const secondSaved = saveNegotiationSnapshot(firstSaved, "acme", {
+      title: "Senior PM",
+      level: "P5",
+      city: "San Francisco",
+      workMode: "Hybrid",
+      baseMonthlySalary: 52000,
+      salaryMonths: 15,
+      annualBonusCash: 130000,
+      signOnBonus: 60000,
+      relocationBonus: 0,
+      equityShares: 4200,
+      equityStrikePrice: 12,
+      equityReferencePrice: 30,
+      equityVestingYears: 4,
+      deadline: "2026-04-27",
+      hrSignal: "可继续谈",
+      notes: "二轮口头包"
+    });
+
+    const originalAcme = sampleCompanies.find((company) => company.id === "acme");
+    const firstAcme = firstSaved.find((company) => company.id === "acme");
+    const secondAcme = secondSaved.find((company) => company.id === "acme");
+
+    expect(originalAcme?.negotiation.snapshots).toHaveLength(0);
+    expect(firstAcme?.negotiation.snapshots).toHaveLength(1);
+    expect(firstAcme?.negotiation.snapshots[0].version).toBe(1);
+    expect(secondAcme?.negotiation.snapshots).toHaveLength(2);
+    expect(secondAcme?.negotiation.snapshots[0].version).toBe(1);
+    expect(secondAcme?.negotiation.snapshots[1].version).toBe(2);
+    expect(secondAcme?.negotiation.latestSnapshotId).toBe(
+      secondAcme?.negotiation.snapshots[1].id
+    );
   });
 
   it("finishes negotiation with a terminal status without deleting snapshot history", () => {

@@ -139,6 +139,7 @@ export function createCompanyWithProcess(
       name: draft.companyName,
       companyType: draft.companyType,
       overallImpression: "",
+      negotiation: createEmptyNegotiation(),
       processes: [
         {
           id: processId,

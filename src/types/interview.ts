@@ -57,7 +57,7 @@ export interface CompanyRecord {
   companyType: CompanyType;
   overallImpression: string;
   processes: InterviewProcess[];
-  negotiation?: CompensationNegotiation;
+  negotiation: CompensationNegotiation;
 }
 
 export interface UpcomingInterview {

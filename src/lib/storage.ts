@@ -125,6 +125,28 @@ function createEmptyNegotiation(): CompensationNegotiation {
   };
 }
 
+function normalizeNegotiation(negotiation: unknown): CompensationNegotiation {
+  if (!isRecord(negotiation)) {
+    return createEmptyNegotiation();
+  }
+
+  return readNegotiation(negotiation, "negotiation");
+}
+
+function normalizeCompanyForExport(company: CompanyRecord): CompanyRecord {
+  return {
+    ...company,
+    negotiation: normalizeNegotiation(company.negotiation)
+  };
+}
+
+function normalizeSnapshotForExport(snapshot: WorkbenchSnapshot): WorkbenchSnapshot {
+  return {
+    ...snapshot,
+    companies: snapshot.companies.map(normalizeCompanyForExport)
+  };
+}
+
 function readArray(record: RawRecord, key: string, path: string): unknown[] {
   const value = getRequiredField(record, key, path);
 
@@ -392,7 +414,7 @@ export function saveWorkbenchSnapshot(snapshot: WorkbenchSnapshot) {
 }
 
 export function serializeWorkbenchSnapshot(snapshot: WorkbenchSnapshot) {
-  return JSON.stringify(snapshot, null, 2);
+  return JSON.stringify(normalizeSnapshotForExport(snapshot), null, 2);
 }
 
 export function getWorkbenchExportFilename(now: Date = new Date()) {

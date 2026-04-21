@@ -10,11 +10,20 @@ import {
 } from "./selectors";
 
 const NOW = new Date("2026-04-17T09:00:00-07:00");
+const defaultNegotiation = {
+  status: "inactive" as const,
+  sourceProcessId: null,
+  startedAt: null,
+  endedAt: null,
+  latestSnapshotId: null,
+  snapshots: []
+};
 const multiProcessCompany: CompanyRecord = {
   id: "epsilon",
   name: "Epsilon",
   companyType: "startup",
   overallImpression: "测试用公司",
+  negotiation: defaultNegotiation,
   processes: [
     {
       id: "epsilon-screening",
