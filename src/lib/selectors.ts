@@ -31,6 +31,17 @@ const INTERVIEWING_ROUND_STATUSES = new Set<RoundStatus>([
   "waiting-result",
   "closed"
 ]);
+const NEGOTIATION_PROGRESS_STATUSES = new Set<RoundStatus>(["completed", "waiting-result", "closed"]);
+const NEGOTIATION_SIGNAL_PATTERNS = [
+  /offer/i,
+  /package/i,
+  /谈薪/,
+  /薪资/,
+  /薪酬/,
+  /薪/,
+  /hr 面/i,
+  /hrbp/i
+];
 
 type DerivedStage = "screening" | "interviewing" | "negotiating";
 
@@ -69,6 +80,18 @@ function getPrimaryStage(company: CompanyRecord): DerivedStage {
     .some((process) => getProcessStage(process) === "interviewing")
     ? "interviewing"
     : "screening";
+}
+
+function hasMeaningfulNegotiationProgress(process: CompanyRecord["processes"][number]) {
+  return process.rounds.some((round) => NEGOTIATION_PROGRESS_STATUSES.has(round.status));
+}
+
+function hasNegotiationSignal(process: CompanyRecord["processes"][number]) {
+  const searchText = [process.nextStep, ...process.rounds.flatMap((round) => [round.name, round.notes])]
+    .join("\n")
+    .trim();
+
+  return NEGOTIATION_SIGNAL_PATTERNS.some((pattern) => pattern.test(searchText));
 }
 
 export function getActiveCompanies(companies: CompanyRecord[]) {
@@ -190,7 +213,12 @@ export function getNegotiationSuggestionProcessIds(companies: CompanyRecord[]) {
         return [];
       }
 
-      const activeProcess = company.processes.find((process) => process.status === "active");
+      const activeProcess = company.processes.find(
+        (process) =>
+          process.status === "active" &&
+          hasMeaningfulNegotiationProgress(process) &&
+          hasNegotiationSignal(process)
+      );
 
       return activeProcess ? [[company.id, activeProcess.id]] : [];
     })

@@ -3,6 +3,8 @@ import type { TextareaHTMLAttributes } from "react";
 import type {
   CompanyRecord,
   InterviewProcess,
+  NegotiationSnapshot,
+  NegotiationStatus,
   RoundRecord
 } from "../types/interview";
 import { NegotiationSection } from "./NegotiationSection";
@@ -42,6 +44,14 @@ interface CompanyCardProps {
   ) => void;
   negotiationSuggestionProcessId?: string | null;
   onStartNegotiation?: (companyId: string, processId: string) => void;
+  onSaveNegotiationSnapshot?: (
+    companyId: string,
+    draft: Omit<NegotiationSnapshot, "id" | "version" | "createdAt">
+  ) => void;
+  onFinishNegotiation?: (
+    companyId: string,
+    status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">
+  ) => void;
 }
 
 function toDateTimeLocalValue(value: string | null) {
@@ -488,6 +498,8 @@ export function CompanyCard(props: CompanyCardProps) {
           company={props.company}
           suggestionProcessId={props.negotiationSuggestionProcessId}
           onStartNegotiation={props.onStartNegotiation}
+          onSaveNegotiationSnapshot={props.onSaveNegotiationSnapshot}
+          onFinishNegotiation={props.onFinishNegotiation}
         />
       </div>
     </article>

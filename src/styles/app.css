@@ -496,6 +496,38 @@ body {
   gap: 12px;
 }
 
+.company-card__negotiation-form {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.company-card__negotiation-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.company-card__negotiation-field {
+  display: grid;
+  gap: 8px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.company-card__negotiation-field span {
+  font-size: 0.9rem;
+}
+
+.company-card__negotiation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .company-card__negotiation-item-header {
   display: flex;
   justify-content: space-between;

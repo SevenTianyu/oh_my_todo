@@ -263,11 +263,53 @@ describe("selectors", () => {
     expect(rows).toEqual([]);
   });
 
-  it("derives negotiation suggestion ids for inactive companies with active processes", () => {
-    expect(getNegotiationSuggestionProcessIds(sampleCompanies)).toEqual({
-      acme: "acme-pm",
-      nova: "nova-product",
-      bytedance: "byte-growth"
+  it("does not suggest negotiation for early-stage screening processes", () => {
+    expect(getNegotiationSuggestionProcessIds(sampleCompanies)).toEqual({});
+  });
+
+  it("suggests only late-stage active processes with negotiation signals instead of the first active process", () => {
+    const company: CompanyRecord = {
+      id: "zenith",
+      name: "Zenith",
+      companyType: "startup",
+      overallImpression: "测试候选公司",
+      negotiation: defaultNegotiation,
+      processes: [
+        {
+          id: "zenith-screening",
+          roleName: "PM",
+          nextStep: "初筛沟通",
+          status: "active",
+          rounds: [
+            {
+              id: "zenith-screening-round-1",
+              name: "初筛沟通",
+              scheduledAt: null,
+              status: "pending",
+              notes: "刚投递"
+            }
+          ]
+        },
+        {
+          id: "zenith-offer",
+          roleName: "Principal PM",
+          nextStep: "HR 面",
+          status: "active",
+          rounds: [
+            {
+              id: "zenith-offer-round-1",
+              name: "终面",
+              scheduledAt: "2026-04-20T10:00:00-07:00",
+              status: "completed",
+              notes: "面试通过，HR 将沟通 package"
+            }
+          ]
+        }
+      ]
+    };
+
+    expect(getNegotiationSuggestionProcessIds([company])).toEqual({
+      zenith: "zenith-offer"
     });
   });
 

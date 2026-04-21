@@ -75,7 +75,7 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
-  it("surfaces the start-negotiation CTA for suggested inactive companies", async () => {
+  it("does not surface the start-negotiation CTA for early-stage inactive companies", async () => {
     seedWorkbench();
     const user = userEvent.setup();
     render(<App />);
@@ -85,7 +85,45 @@ describe("App", () => {
 
     await user.click(within(novaCard!).getByRole("button", { name: "展开谈薪" }));
 
-    expect(within(novaCard!).getByRole("button", { name: "确认进入谈薪" })).toBeInTheDocument();
+    expect(within(novaCard!).queryByRole("button", { name: "确认进入谈薪" })).not.toBeInTheDocument();
+  });
+
+  it("saves additional negotiation snapshots from the shipped UI and grows the history", async () => {
+    seedWorkbench();
+    const user = userEvent.setup();
+    render(<App />);
+
+    const airtableCard = screen
+      .getAllByText("Airtable")
+      .find((element) => element.closest("article")?.classList.contains("company-card"))
+      ?.closest("article");
+    expect(airtableCard).not.toBeNull();
+
+    await user.click(within(airtableCard!).getByRole("button", { name: "展开谈薪" }));
+
+    const salaryField = within(airtableCard!).getByLabelText("月基本工资");
+    expect(salaryField).toHaveValue("52000");
+
+    await user.clear(salaryField);
+    await user.type(salaryField, "53000");
+    await user.click(within(airtableCard!).getByRole("button", { name: "保存谈薪快照" }));
+
+    expect(await within(airtableCard!).findByText("第 2 轮谈薪")).toBeInTheDocument();
+    const latestSummaryAfterSecondSave = within(airtableCard!)
+      .getByText("最新快照")
+      .closest(".company-card__negotiation-summary") as HTMLElement | null;
+    expect(within(latestSummaryAfterSecondSave!).getByText("53,000 × 15 薪")).toBeInTheDocument();
+    expect(within(airtableCard!).getByLabelText("月基本工资")).toHaveValue("53000");
+
+    await user.clear(within(airtableCard!).getByLabelText("月基本工资"));
+    await user.type(within(airtableCard!).getByLabelText("月基本工资"), "54000");
+    await user.click(within(airtableCard!).getByRole("button", { name: "保存谈薪快照" }));
+
+    expect(await within(airtableCard!).findByText("第 3 轮谈薪")).toBeInTheDocument();
+    const latestSummaryAfterThirdSave = within(airtableCard!)
+      .getByText("最新快照")
+      .closest(".company-card__negotiation-summary") as HTMLElement | null;
+    expect(within(latestSummaryAfterThirdSave!).getByText("54,000 × 15 薪")).toBeInTheDocument();
   });
 
   it("adds a pending round to the upcoming timeline when the user schedules it", () => {

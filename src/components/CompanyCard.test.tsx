@@ -447,4 +447,60 @@ describe("CompanyCard", () => {
     expect(versionOne).toBeInTheDocument();
     expect(versionTwo.compareDocumentPosition(versionOne)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
+
+  it("prefills the negotiation form from the latest snapshot and exposes save plus finish actions", async () => {
+    const user = userEvent.setup();
+    const onSaveNegotiationSnapshot = vi.fn();
+    const onFinishNegotiation = vi.fn();
+
+    render(
+      <CompanyCard
+        company={sampleCompanies[3]}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+        onStartNegotiation={() => {}}
+        onSaveNegotiationSnapshot={onSaveNegotiationSnapshot}
+        onFinishNegotiation={onFinishNegotiation}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "展开谈薪" }));
+
+    expect(screen.getByLabelText("谈薪标题")).toHaveValue("Staff PM");
+    expect(screen.getByLabelText("月基本工资")).toHaveValue("52000");
+
+    await user.clear(screen.getByLabelText("月基本工资"));
+    await user.type(screen.getByLabelText("月基本工资"), "53000");
+    await user.clear(screen.getByLabelText("备注"));
+    await user.type(screen.getByLabelText("备注"), "继续争取更高 base");
+    await user.click(screen.getByRole("button", { name: "保存谈薪快照" }));
+
+    expect(onSaveNegotiationSnapshot).toHaveBeenCalledWith("airtable", {
+      title: "Staff PM",
+      level: "P5",
+      city: "San Francisco",
+      workMode: "Hybrid",
+      baseMonthlySalary: 53000,
+      salaryMonths: 15,
+      annualBonusCash: 150000,
+      signOnBonus: 80000,
+      relocationBonus: 0,
+      equityShares: 3500,
+      equityStrikePrice: 25,
+      equityReferencePrice: 55,
+      equityVestingYears: 4,
+      deadline: "2026-04-25",
+      hrSignal: "首轮口头 offer",
+      notes: "继续争取更高 base"
+    });
+
+    await user.click(screen.getByRole("button", { name: "标记为接受" }));
+
+    expect(onFinishNegotiation).toHaveBeenCalledWith("airtable", "accepted");
+    expect(screen.getByRole("button", { name: "标记为拒绝" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "终止谈薪" })).toBeInTheDocument();
+  });
 });

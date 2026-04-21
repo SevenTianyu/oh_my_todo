@@ -3,6 +3,8 @@ import {
   addRoundToProcess,
   archiveProcessById,
   createCompanyWithProcess,
+  finishNegotiation,
+  saveNegotiationSnapshot,
   startNegotiation,
   updateCompanySummary,
   updateProcessRecord,
@@ -25,6 +27,8 @@ import type {
   CompanyRecord,
   GroupingMode,
   InterviewProcess,
+  NegotiationSnapshot,
+  NegotiationStatus,
   NewCompanyDraft,
   RoundRecord
 } from "../types/interview";
@@ -75,6 +79,22 @@ export function useInterviewWorkbench() {
       setSnapshot((current) => ({
         ...current,
         companies: startNegotiation(current.companies, companyId, processId)
+      })),
+    saveNegotiationSnapshot: (
+      companyId: string,
+      draft: Omit<NegotiationSnapshot, "id" | "version" | "createdAt">
+    ) =>
+      setSnapshot((current) => ({
+        ...current,
+        companies: saveNegotiationSnapshot(current.companies, companyId, draft)
+      })),
+    finishNegotiation: (
+      companyId: string,
+      status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">
+    ) =>
+      setSnapshot((current) => ({
+        ...current,
+        companies: finishNegotiation(current.companies, companyId, status)
       })),
     archiveProcessById: (companyId: string, processId: string) =>
       setSnapshot((current) => ({

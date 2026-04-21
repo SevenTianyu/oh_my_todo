@@ -241,6 +241,8 @@ export default function App() {
               onAddRound={workbench.addRoundToProcess}
               negotiationSuggestionProcessIds={workbench.negotiationSuggestionProcessIds}
               onStartNegotiation={workbench.startNegotiation}
+              onSaveNegotiationSnapshot={workbench.saveNegotiationSnapshot}
+              onFinishNegotiation={workbench.finishNegotiation}
               onArchiveProcess={workbench.archiveProcessById}
               onUpdateProcess={workbench.updateProcessRecord}
               onUpdateRound={workbench.updateRoundRecord}

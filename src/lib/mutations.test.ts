@@ -225,4 +225,74 @@ describe("mutations", () => {
     expect(acme?.negotiation?.endedAt).toBe("2026-04-26T09:00:00.000Z");
     expect(acme?.negotiation?.snapshots.length).toBeGreaterThan(0);
   });
+
+  it("resets negotiation history when restarting for a different process", () => {
+    const company = {
+      ...sampleCompanies[0],
+      processes: [
+        ...sampleCompanies[0].processes,
+        {
+          id: "acme-analytics",
+          roleName: "Analytics PM",
+          nextStep: "等待书面 offer",
+          status: "active" as const,
+          rounds: [
+            {
+              id: "acme-analytics-round-1",
+              name: "终面",
+              scheduledAt: "2026-04-23T15:00:00-07:00",
+              status: "completed" as const,
+              notes: "通过，HR 开始沟通 package"
+            }
+          ]
+        }
+      ],
+      negotiation: {
+        status: "declined" as const,
+        sourceProcessId: "acme-pm",
+        startedAt: "2026-04-20T09:00:00.000Z",
+        endedAt: "2026-04-22T09:00:00.000Z",
+        latestSnapshotId: "acme-negotiation-1",
+        snapshots: [
+          {
+            id: "acme-negotiation-1",
+            version: 1,
+            createdAt: "2026-04-21T09:00:00.000Z",
+            title: "Senior PM",
+            level: "P5",
+            city: "San Francisco",
+            workMode: "Hybrid",
+            baseMonthlySalary: 50000,
+            salaryMonths: 15,
+            annualBonusCash: 120000,
+            signOnBonus: 40000,
+            relocationBonus: 0,
+            equityShares: 2000,
+            equityStrikePrice: 12,
+            equityReferencePrice: 28,
+            equityVestingYears: 4,
+            deadline: "2026-04-25",
+            hrSignal: "原岗位已结束",
+            notes: "上一条岗位的谈薪历史"
+          }
+        ]
+      }
+    };
+
+    const restarted = startNegotiation(
+      [company],
+      "acme",
+      "acme-analytics",
+      "2026-04-27T09:00:00.000Z"
+    );
+
+    expect(restarted[0].negotiation).toMatchObject({
+      status: "active",
+      sourceProcessId: "acme-analytics",
+      startedAt: "2026-04-27T09:00:00.000Z",
+      endedAt: null,
+      latestSnapshotId: null,
+      snapshots: []
+    });
+  });
 });

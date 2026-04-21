@@ -189,14 +189,17 @@ export function startNegotiation(
     if (company.id !== companyId) return company;
 
     const negotiation = getNegotiation(company);
+    const shouldResetHistory =
+      negotiation.sourceProcessId !== null && negotiation.sourceProcessId !== processId;
+    const nextNegotiation = shouldResetHistory ? createEmptyNegotiation() : negotiation;
 
     return {
       ...company,
       negotiation: {
-        ...negotiation,
+        ...nextNegotiation,
         status: "active",
         sourceProcessId: processId,
-        startedAt: negotiation.startedAt ?? now,
+        startedAt: shouldResetHistory ? now : negotiation.startedAt ?? now,
         endedAt: null
       }
     };

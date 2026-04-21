@@ -13,7 +13,7 @@ vi.mock("./CompanyCard", () => ({
 }));
 
 describe("CompanyBoard", () => {
-  it("passes only the implemented negotiation wiring into CompanyCard", () => {
+  it("passes the negotiation callbacks into CompanyCard", () => {
     render(
       <CompanyBoard
         groups={[
@@ -30,6 +30,8 @@ describe("CompanyBoard", () => {
         onUpdateRound={() => {}}
         negotiationSuggestionProcessIds={{ nova: "nova-product" }}
         onStartNegotiation={() => {}}
+        onSaveNegotiationSnapshot={() => {}}
+        onFinishNegotiation={() => {}}
       />
     );
 
@@ -38,9 +40,9 @@ describe("CompanyBoard", () => {
     expect(passedProps).toMatchObject({
       company: sampleCompanies[1],
       negotiationSuggestionProcessId: "nova-product",
-      onStartNegotiation: expect.any(Function)
+      onStartNegotiation: expect.any(Function),
+      onSaveNegotiationSnapshot: expect.any(Function),
+      onFinishNegotiation: expect.any(Function)
     });
-    expect(passedProps.onSaveNegotiationSnapshot).toBeUndefined();
-    expect(passedProps.onFinishNegotiation).toBeUndefined();
   });
 });
