@@ -39,7 +39,7 @@ describe("OfferComparisonPanel", () => {
         }
       }
     ];
-    const { rerender } = render(
+    const { container, rerender } = render(
       <OfferComparisonPanel rows={[rows[0]]} scope="active" onScopeChange={onScopeChange} />
     );
 
@@ -47,6 +47,7 @@ describe("OfferComparisonPanel", () => {
     expect(screen.getByText("5.2 万 × 15 薪")).toBeInTheDocument();
     expect(screen.getByText("89.8 万")).toBeInTheDocument();
     expect(screen.queryByText("Google")).not.toBeInTheDocument();
+    expect(container.querySelectorAll("colgroup col")).toHaveLength(6);
 
     await user.click(screen.getByRole("button", { name: "全部有薪资记录的公司" }));
     expect(onScopeChange).toHaveBeenCalledWith("all");

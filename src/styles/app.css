@@ -978,6 +978,54 @@ body {
   min-width: 188px;
 }
 
+.offer-panel__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.offer-panel__table th,
+.offer-panel__table td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.offer-panel__table th {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.offer-panel__table td {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.offer-panel__col--company {
+  width: 13%;
+}
+
+.offer-panel__col--role {
+  width: 16%;
+}
+
+.offer-panel__col--salary {
+  width: 20%;
+}
+
+.offer-panel__col--first-year {
+  width: 18%;
+}
+
+.offer-panel__col--long-term {
+  width: 20%;
+}
+
+.offer-panel__col--deadline {
+  width: 13%;
+}
+
 .archive-panel {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(243, 246, 250, 0.84));
 }

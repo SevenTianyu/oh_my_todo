@@ -46,11 +46,10 @@ export function getNegotiationMetrics(snapshot: NegotiationSnapshot): Negotiatio
   return {
     firstYearCash,
     equityAnnualized,
-    firstYearTotal:
-      firstYearCash !== null && equityAnnualized !== null ? firstYearCash + equityAnnualized : null,
+    firstYearTotal: firstYearCash !== null ? firstYearCash + (equityAnnualized ?? 0) : null,
     longTermAnnualizedTotal:
-      annualCash !== null && snapshot.annualBonusCash !== null && equityAnnualized !== null
-        ? annualCash + snapshot.annualBonusCash + equityAnnualized
+      annualCash !== null && snapshot.annualBonusCash !== null
+        ? annualCash + snapshot.annualBonusCash + (equityAnnualized ?? 0)
         : null
   };
 }

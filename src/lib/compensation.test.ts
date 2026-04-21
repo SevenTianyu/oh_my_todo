@@ -74,8 +74,28 @@ describe("compensation", () => {
 
     expect(metrics.equityAnnualized).toBeNull();
     expect(metrics.firstYearCash).toBe(930000);
-    expect(metrics.firstYearTotal).toBeNull();
-    expect(metrics.longTermAnnualizedTotal).toBeNull();
+    expect(metrics.firstYearTotal).toBe(930000);
+    expect(metrics.longTermAnnualizedTotal).toBe(870000);
+  });
+
+  it("falls back to cash totals when equity inputs are incomplete", () => {
+    const metrics = getNegotiationMetrics(
+      createSnapshot({
+        baseMonthlySalary: 30000,
+        salaryMonths: 12,
+        annualBonusCash: 0,
+        signOnBonus: 0,
+        relocationBonus: 0,
+        equityShares: 10000,
+        equityPerShareValue: 0,
+        equityVestingYears: 0
+      })
+    );
+
+    expect(metrics.firstYearCash).toBe(360000);
+    expect(metrics.equityAnnualized).toBeNull();
+    expect(metrics.firstYearTotal).toBe(360000);
+    expect(metrics.longTermAnnualizedTotal).toBe(360000);
   });
 
   it("rejects non-positive vesting years for annualized equity math", () => {

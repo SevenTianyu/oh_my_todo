@@ -63,6 +63,14 @@ export function OfferComparisonPanel({
         </div>
       </div>
       <table className="offer-panel__table">
+        <colgroup>
+          <col className="offer-panel__col offer-panel__col--company" />
+          <col className="offer-panel__col offer-panel__col--role" />
+          <col className="offer-panel__col offer-panel__col--salary" />
+          <col className="offer-panel__col offer-panel__col--first-year" />
+          <col className="offer-panel__col offer-panel__col--long-term" />
+          <col className="offer-panel__col offer-panel__col--deadline" />
+        </colgroup>
         <thead>
           <tr>
             <th>公司</th>

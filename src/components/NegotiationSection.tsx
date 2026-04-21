@@ -61,6 +61,14 @@ function parseOptionalNumber(value: string) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function parseOptionalNumberOrZero(value: string) {
+  return parseOptionalNumber(value) ?? 0;
+}
+
+function parseCashInputToYuanOrZero(value: string) {
+  return parseCashInputToYuan(value) ?? 0;
+}
+
 function createNegotiationFormState(company: CompanyRecord): NegotiationFormState {
   const latestSnapshot = getLatestNegotiationSnapshot(company.negotiation);
   const sourceProcess = company.processes.find(
@@ -164,12 +172,12 @@ export function NegotiationSection({
       workMode: formState.workMode.trim(),
       baseMonthlySalary: parseCashInputToYuan(formState.baseMonthlySalary),
       salaryMonths: parseOptionalNumber(formState.salaryMonths),
-      annualBonusCash: parseCashInputToYuan(formState.annualBonusCash),
-      signOnBonus: parseCashInputToYuan(formState.signOnBonus),
-      relocationBonus: parseCashInputToYuan(formState.relocationBonus),
-      equityShares: parseOptionalNumber(formState.equityShares),
-      equityPerShareValue: parseOptionalNumber(formState.equityPerShareValue),
-      equityVestingYears: parseOptionalNumber(formState.equityVestingYears),
+      annualBonusCash: parseCashInputToYuanOrZero(formState.annualBonusCash),
+      signOnBonus: parseCashInputToYuanOrZero(formState.signOnBonus),
+      relocationBonus: parseCashInputToYuanOrZero(formState.relocationBonus),
+      equityShares: parseOptionalNumberOrZero(formState.equityShares),
+      equityPerShareValue: parseOptionalNumberOrZero(formState.equityPerShareValue),
+      equityVestingYears: parseOptionalNumberOrZero(formState.equityVestingYears),
       deadline: formState.deadline || null,
       hrSignal: formState.hrSignal.trim(),
       notes: formState.notes.trim()

@@ -539,6 +539,52 @@ describe("CompanyCard", () => {
     expect(screen.getByRole("button", { name: "终止谈薪" })).toBeInTheDocument();
   });
 
+  it("defaults blank non-core negotiation fields to zero when saving a partial package", async () => {
+    const user = userEvent.setup();
+    const onSaveNegotiationSnapshot = vi.fn();
+
+    render(
+      <CompanyCard
+        company={sampleCompanies[3]}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+        onStartNegotiation={() => {}}
+        onSaveNegotiationSnapshot={onSaveNegotiationSnapshot}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "展开谈薪" }));
+
+    await user.clear(screen.getByLabelText("年终现金奖金"));
+    await user.clear(screen.getByLabelText("签字费"));
+    await user.clear(screen.getByLabelText("搬家补贴"));
+    await user.clear(screen.getByLabelText("股票数量"));
+    await user.clear(screen.getByLabelText("每股估值"));
+    await user.clear(screen.getByLabelText("归属年限"));
+    await user.click(screen.getByRole("button", { name: "保存谈薪快照" }));
+
+    expect(onSaveNegotiationSnapshot).toHaveBeenCalledWith("airtable", {
+      title: "Staff PM",
+      level: "P5",
+      city: "San Francisco",
+      workMode: "Hybrid",
+      baseMonthlySalary: 52000,
+      salaryMonths: 15,
+      annualBonusCash: 0,
+      signOnBonus: 0,
+      relocationBonus: 0,
+      equityShares: 0,
+      equityPerShareValue: 0,
+      equityVestingYears: 0,
+      deadline: "2026-04-25",
+      hrSignal: "首轮口头 offer",
+      notes: "还可以继续谈 base"
+    });
+  });
+
   it("confirms before deleting a negotiation snapshot and dispatches the targeted id", async () => {
     const user = userEvent.setup();
     const onDeleteNegotiationSnapshot = vi.fn();
