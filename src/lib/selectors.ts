@@ -2,9 +2,11 @@ import type {
   CompanyGroup,
   CompanyRecord,
   GroupingMode,
+  NegotiationSnapshot,
   RoundStatus,
   UpcomingInterview
 } from "../types/interview";
+import { getLatestNegotiationSnapshot, getNegotiationMetrics, type NegotiationMetrics } from "./compensation";
 
 const GROUP_LABELS: Record<GroupingMode, Record<string, string>> = {
   companyType: {
@@ -31,6 +33,15 @@ const INTERVIEWING_ROUND_STATUSES = new Set<RoundStatus>([
 ]);
 
 type DerivedStage = "screening" | "interviewing" | "negotiating";
+
+export interface OfferComparisonRow {
+  companyId: string;
+  companyName: string;
+  sourceProcessId: string;
+  latestVersion: number;
+  latestSnapshot: NegotiationSnapshot;
+  metrics: NegotiationMetrics;
+}
 
 function endOfWindow(now: Date) {
   const end = new Date(now);
@@ -141,4 +152,28 @@ export function getOfferComparisonCompanies(companies: CompanyRecord[], scope: "
       ? company.negotiation.status === "active"
       : company.negotiation.snapshots.length > 0
   );
+}
+
+export function getOfferComparisonRows(
+  companies: CompanyRecord[],
+  scope: "active" | "all"
+): OfferComparisonRow[] {
+  return getOfferComparisonCompanies(companies, scope).flatMap((company) => {
+    const latestSnapshot = getLatestNegotiationSnapshot(company.negotiation);
+
+    if (!latestSnapshot || !company.negotiation.sourceProcessId) {
+      return [];
+    }
+
+    return [
+      {
+        companyId: company.id,
+        companyName: company.name,
+        sourceProcessId: company.negotiation.sourceProcessId,
+        latestVersion: latestSnapshot.version,
+        latestSnapshot,
+        metrics: getNegotiationMetrics(latestSnapshot)
+      }
+    ];
+  });
 }

@@ -55,6 +55,17 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "面试中" })).toBeInTheDocument();
   });
 
+  it("renders the offer comparison section and the negotiating lane", async () => {
+    seedWorkbench();
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "按流程阶段分组" }));
+
+    expect(screen.getByRole("heading", { name: "谈薪中" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Offer 对比" })).toBeInTheDocument();
+  });
+
   it("adds a pending round to the upcoming timeline when the user schedules it", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-17T09:00:00-07:00"));

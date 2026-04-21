@@ -3,11 +3,17 @@ import {
   addRoundToProcess,
   archiveProcessById,
   createCompanyWithProcess,
+  startNegotiation,
   updateCompanySummary,
   updateProcessRecord,
   updateRoundRecord
 } from "../lib/mutations";
-import { getArchivedCompanies, getGroupedCompanies, getUpcomingInterviews } from "../lib/selectors";
+import {
+  getArchivedCompanies,
+  getGroupedCompanies,
+  getOfferComparisonRows,
+  getUpcomingInterviews
+} from "../lib/selectors";
 import {
   createEmptyWorkbenchSnapshot,
   loadWorkbenchSnapshot,
@@ -26,6 +32,7 @@ type CompanySummaryPatch = Partial<Pick<CompanyRecord, "name" | "companyType" | 
 
 export function useInterviewWorkbench() {
   const [snapshot, setSnapshot] = useState(() => loadWorkbenchSnapshot() ?? createEmptyWorkbenchSnapshot());
+  const [comparisonScope, setComparisonScope] = useState<"active" | "all">("active");
 
   useEffect(() => {
     saveWorkbenchSnapshot(snapshot);
@@ -38,10 +45,16 @@ export function useInterviewWorkbench() {
     grouping,
     companies,
     snapshot,
+    comparisonScope,
+    setComparisonScope,
     setGrouping: (nextGrouping: GroupingMode) =>
       setSnapshot((current) => ({ ...current, grouping: nextGrouping })),
     groupedCompanies: useMemo(() => getGroupedCompanies(companies, grouping), [companies, grouping]),
     archivedCompanies: useMemo(() => getArchivedCompanies(companies), [companies]),
+    offerComparisonRows: useMemo(
+      () => getOfferComparisonRows(companies, comparisonScope),
+      [companies, comparisonScope]
+    ),
     upcomingInterviews: useMemo(() => getUpcomingInterviews(companies, new Date()), [companies]),
     updateCompanySummary: (companyId: string, patch: CompanySummaryPatch) =>
       setSnapshot((current) => ({
@@ -52,6 +65,11 @@ export function useInterviewWorkbench() {
       setSnapshot((current) => ({
         ...current,
         companies: addRoundToProcess(current.companies, companyId, processId)
+      })),
+    startNegotiation: (companyId: string, processId: string) =>
+      setSnapshot((current) => ({
+        ...current,
+        companies: startNegotiation(current.companies, companyId, processId)
       })),
     archiveProcessById: (companyId: string, processId: string) =>
       setSnapshot((current) => ({

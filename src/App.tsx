@@ -5,6 +5,7 @@ import { ArchiveSection } from "./components/ArchiveSection";
 import { CompanyBoard } from "./components/CompanyBoard";
 import { GroupingTabs } from "./components/GroupingTabs";
 import { NewCompanyForm } from "./components/NewCompanyForm";
+import { OfferComparisonPanel } from "./components/OfferComparisonPanel";
 import { UpcomingTimeline } from "./components/UpcomingTimeline";
 import { useInterviewWorkbench } from "./hooks/useInterviewWorkbench";
 import { getWorkbenchExportFilename, serializeWorkbenchSnapshot } from "./lib/storage";
@@ -238,9 +239,18 @@ export default function App() {
               groups={workbench.groupedCompanies}
               onSaveSummary={workbench.updateCompanySummary}
               onAddRound={workbench.addRoundToProcess}
+              onStartNegotiation={workbench.startNegotiation}
               onArchiveProcess={workbench.archiveProcessById}
               onUpdateProcess={workbench.updateProcessRecord}
               onUpdateRound={workbench.updateRoundRecord}
+            />
+          </section>
+
+          <section className="stack-section">
+            <OfferComparisonPanel
+              rows={workbench.offerComparisonRows}
+              scope={workbench.comparisonScope}
+              onScopeChange={workbench.setComparisonScope}
             />
           </section>
 
