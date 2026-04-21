@@ -246,6 +246,55 @@ describe("storage", () => {
     expect(JSON.parse(content).companies[0].processes[0]).not.toHaveProperty("stage");
   });
 
+  it("round-trips a populated negotiation payload through export and import", () => {
+    const richSnapshot = {
+      version: 2 as const,
+      grouping: "companyType" as const,
+      companies: [
+        {
+          ...sampleCompanies[0],
+          negotiation: {
+            status: "declined" as const,
+            sourceProcessId: "acme-pm",
+            startedAt: "2026-04-25T09:00:00.000Z",
+            endedAt: "2026-04-26T09:00:00.000Z",
+            latestSnapshotId: "negotiation-acme-1-abc123",
+            snapshots: [
+              {
+                id: "negotiation-acme-1-abc123",
+                version: 1,
+                createdAt: "2026-04-25T09:10:00.000Z",
+                title: "Senior PM",
+                level: "P5",
+                city: "San Francisco",
+                workMode: "Hybrid",
+                baseMonthlySalary: 50000,
+                salaryMonths: 15,
+                annualBonusCash: 120000,
+                signOnBonus: 50000,
+                relocationBonus: 0,
+                equityShares: 4000,
+                equityStrikePrice: 12,
+                equityReferencePrice: 30,
+                equityVestingYears: 4,
+                deadline: "2026-04-25",
+                hrSignal: "可继续谈",
+                notes: "首轮口头包"
+              }
+            ]
+          }
+        }
+      ]
+    };
+
+    const result = parseWorkbenchSnapshotImport(serializeWorkbenchSnapshot(richSnapshot));
+
+    expect(result).toEqual({
+      ok: true,
+      snapshot: richSnapshot
+    });
+  });
+
   it("builds timestamped export filenames", () => {
     expect(getWorkbenchExportFilename(new Date("2026-04-19T09:30:00-07:00"))).toBe(
       "oh-my-todo-2026-04-19.json"

@@ -221,9 +221,18 @@ function readNegotiationSnapshot(value: unknown, path: string): NegotiationSnaps
     } satisfies WorkbenchImportError;
   }
 
+  const version = getRequiredField(value, "version", path);
+  if (typeof version !== "number" || !Number.isFinite(version)) {
+    throw {
+      code: "invalid_shape",
+      message: `Expected ${getPath(path, "version")} to be a number`,
+      path: getPath(path, "version")
+    } satisfies WorkbenchImportError;
+  }
+
   return {
     id: readString(value, "id", path),
-    version: Number(getRequiredField(value, "version", path)),
+    version,
     createdAt: readString(value, "createdAt", path),
     title: readString(value, "title", path),
     level: readString(value, "level", path),
