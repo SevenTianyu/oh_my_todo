@@ -107,7 +107,7 @@ export const sampleCompanies: CompanyRecord[] = [
           id: "negotiation-airtable-1",
           version: 1,
           createdAt: "2026-04-18T18:00:00-07:00",
-          title: "Senior PM",
+          title: "Staff PM",
           level: "P5",
           city: "San Francisco",
           workMode: "Hybrid",

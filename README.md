@@ -42,15 +42,16 @@
 
 ## Why this exists
 
-Typical todo apps are good at collecting tasks, but interviews are not just tasks.
+Typical todo apps are good at collecting tasks, but interview decisions are not just a task list.
 
-When you are evaluating a company, you usually need to see three things together:
+When you are evaluating a company, you usually need to see four things together:
 
 - what is already scheduled
 - how round progress maps to the current screening/interviewing lens
-- what you actually think about the company after each round
+- the negotiation history you have already captured
+- how the latest package compares against the rest of your active offers
 
-`oh_my_todo` is built around that reality. It is less about checking off chores and more about keeping timing, momentum, and judgment in the same workspace.
+`oh_my_todo` is built around that reality. It keeps scheduling, company judgment, compensation snapshots, and offer comparison in one workspace so you can decide what to do next without switching tools.
 
 ## Why it is different from other todo apps
 
@@ -65,8 +66,9 @@ When you are evaluating a company, you usually need to see three things together
 
 ## Highlights
 
-- **Interview-first layout**: a future-7-days view and a grouped company board live in the same workspace.
-- **Judgment in context**: each company keeps its overall impression next to the actual interview rounds that shaped that impression.
+- **Interview-first layout**: a future-7-days view, grouped company board, negotiation section, and offer comparison panel live together.
+- **Negotiation history stays visible**: each company keeps its overall impression, current negotiation status, and saved compensation snapshots side by side.
+- **Offer comparison is built in**: compare active or archived offers without leaving the workbench.
 - **Local-first privacy**: no account, no backend requirement, no mandatory sync.
 - **Portable by default**: export structured JSON, edit it locally if you want, then import it back.
 - **Made for real momentum**: better for “Should I keep pushing this company?” than “Did I finish task #14?”
@@ -75,7 +77,9 @@ When you are evaluating a company, you usually need to see three things together
 
 - Create companies and their first interview process without logging in.
 - Track interview rounds, notes, and schedules in one place; the screening/interviewing lens is derived from round progress.
-- Keep an overall company impression alongside negotiation snapshots and offer comparison data.
+- Save negotiation snapshots as the process moves forward, including the package details that matter later.
+- Compare current offers side by side in the built-in offer comparison view.
+- Keep an overall company impression alongside the interview history that shaped it.
 - Group the board by company type or the derived screening/interviewing lens.
 - Archive ended processes after you mark them archived.
 - Export your full workspace as JSON.
@@ -141,8 +145,10 @@ Clone https://github.com/SevenTianyu/oh_my_todo.git, install dependencies, and s
 2. Add the company, type, and role; the app creates the first round for you.
 3. Expand `Company Judgment` when you want to edit your overall view.
 4. Expand `Interview Schedule` when you want to add or update rounds.
-5. Export JSON whenever you want a backup or want to move data between browsers or devices.
-6. Import the same JSON format to restore your board later.
+5. Open the negotiation section when you want to save a new compensation snapshot or review the latest offer details.
+6. Use `Offer Comparison` to compare the active packages you are considering.
+7. Export JSON whenever you want a backup or want to move data between browsers or devices.
+8. Import the same JSON format to restore your board later.
 
 ## Privacy and storage
 

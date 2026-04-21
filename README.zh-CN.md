@@ -139,10 +139,12 @@ Clone https://github.com/SevenTianyu/oh_my_todo.git, install dependencies, and s
 
 1. 打开应用，创建第一家公司。
 2. 填写公司、类型和岗位；应用会自动创建第一轮面试。
-3. 需要编辑公司判断或谈薪版本时，展开 `Company Judgment`。
-4. 需要维护轮次安排或查看 `Offer Comparison` 时，展开对应区域。
-5. 想做备份或跨浏览器迁移时，导出 JSON。
-6. 之后再导入同样的 JSON 结构，就能恢复你的工作台。
+3. 需要编辑公司判断时，展开 `Company Judgment`。
+4. 需要编辑谈薪版本或记录新的薪资/包裹快照时，展开 `谈薪`。
+5. 需要维护轮次安排时，展开 `Interview Schedule`。
+6. 需要查看 `Offer Comparison` 时，打开对应区域比较当前包裹。
+7. 想做备份或跨浏览器迁移时，导出 JSON。
+8. 之后再导入同样的 JSON 结构，就能恢复你的工作台。
 
 ## 隐私和存储
 
