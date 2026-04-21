@@ -267,6 +267,35 @@ describe("selectors", () => {
     expect(getNegotiationSuggestionProcessIds(sampleCompanies)).toEqual({});
   });
 
+  it("does not suggest negotiation for ambiguous HR interview signals without explicit comp language", () => {
+    const company: CompanyRecord = {
+      id: "orbit",
+      name: "Orbit",
+      companyType: "startup",
+      overallImpression: "流程还在推进",
+      negotiation: defaultNegotiation,
+      processes: [
+        {
+          id: "orbit-hr",
+          roleName: "PM",
+          nextStep: "HR 面",
+          status: "active",
+          rounds: [
+            {
+              id: "orbit-hr-round-1",
+              name: "终面",
+              scheduledAt: "2026-04-20T10:00:00-07:00",
+              status: "completed",
+              notes: "等待 HR 安排后续沟通"
+            }
+          ]
+        }
+      ]
+    };
+
+    expect(getNegotiationSuggestionProcessIds([company])).toEqual({});
+  });
+
   it("suggests only late-stage active processes with negotiation signals instead of the first active process", () => {
     const company: CompanyRecord = {
       id: "zenith",
@@ -310,6 +339,37 @@ describe("selectors", () => {
 
     expect(getNegotiationSuggestionProcessIds([company])).toEqual({
       zenith: "zenith-offer"
+    });
+  });
+
+  it("suggests negotiation for explicit compensation or offer language on a progressed process", () => {
+    const company: CompanyRecord = {
+      id: "apex",
+      name: "Apex",
+      companyType: "big-tech",
+      overallImpression: "已经进入晚期流程",
+      negotiation: defaultNegotiation,
+      processes: [
+        {
+          id: "apex-offer",
+          roleName: "Staff PM",
+          nextStep: "Compensation package review",
+          status: "active",
+          rounds: [
+            {
+              id: "apex-offer-round-1",
+              name: "Offer call",
+              scheduledAt: "2026-04-21T11:00:00-07:00",
+              status: "waiting-result",
+              notes: "Recruiter will discuss total package and 薪酬结构"
+            }
+          ]
+        }
+      ]
+    };
+
+    expect(getNegotiationSuggestionProcessIds([company])).toEqual({
+      apex: "apex-offer"
     });
   });
 

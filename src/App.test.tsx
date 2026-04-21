@@ -170,6 +170,24 @@ describe("App", () => {
     expect(screen.getByText("切换工作台视角")).toBeInTheDocument();
   });
 
+  it("shows archived negotiation summary and snapshot history inside the archive UI", async () => {
+    seedWorkbench();
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByText("归档流程（1）"));
+
+    const archiveCard = screen.getByText("Google").closest("article");
+    expect(archiveCard).not.toBeNull();
+    expect(within(archiveCard!).getByText("谈薪结果")).toBeInTheDocument();
+    expect(within(archiveCard!).getByText("已接受")).toBeInTheDocument();
+    expect(within(archiveCard!).getByText("关联岗位：PM")).toBeInTheDocument();
+    expect(within(archiveCard!).getAllByText("42,000 × 15 薪")).toHaveLength(2);
+    expect(within(archiveCard!).getByText("谈薪历史（1）")).toBeInTheDocument();
+    expect(within(archiveCard!).getByText("版本 1")).toBeInTheDocument();
+    expect(within(archiveCard!).getAllByText("最终包已接受")).toHaveLength(2);
+  });
+
   it("creates a first company from the empty-state form and persists it across reloads", async () => {
     const user = userEvent.setup();
     const view = render(<App />);

@@ -35,12 +35,11 @@ const NEGOTIATION_PROGRESS_STATUSES = new Set<RoundStatus>(["completed", "waitin
 const NEGOTIATION_SIGNAL_PATTERNS = [
   /offer/i,
   /package/i,
+  /compensation/i,
   /谈薪/,
   /薪资/,
   /薪酬/,
-  /薪/,
-  /hr 面/i,
-  /hrbp/i
+  /总包/
 ];
 
 type DerivedStage = "screening" | "interviewing" | "negotiating";
