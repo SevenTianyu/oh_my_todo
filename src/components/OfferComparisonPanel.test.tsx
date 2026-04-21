@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import type { OfferComparisonRow } from "../lib/selectors";
 import { sampleCompanies } from "../lib/sampleData";
 import { OfferComparisonPanel } from "./OfferComparisonPanel";
 
@@ -8,11 +9,12 @@ describe("OfferComparisonPanel", () => {
   it("defaults to active negotiations and can switch to all negotiated companies", async () => {
     const user = userEvent.setup();
     const onScopeChange = vi.fn();
-    const rows = [
+    const rows: OfferComparisonRow[] = [
       {
         companyId: "acme",
         companyName: "ACME",
         sourceProcessId: "acme-pm",
+        sourceRoleName: "Senior PM",
         latestVersion: 2,
         latestSnapshot: sampleCompanies[3].negotiation.snapshots[0]!,
         metrics: {
@@ -26,6 +28,7 @@ describe("OfferComparisonPanel", () => {
         companyId: "google",
         companyName: "Google",
         sourceProcessId: "google-ads",
+        sourceRoleName: "PM",
         latestVersion: 1,
         latestSnapshot: sampleCompanies[4].negotiation.snapshots[0]!,
         metrics: {
