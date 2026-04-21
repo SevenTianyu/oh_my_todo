@@ -1,18 +1,11 @@
 import { useState } from "react";
 import { getLatestNegotiationSnapshot } from "../lib/compensation";
-import type { CompanyRecord, NegotiationSnapshot, NegotiationStatus } from "../types/interview";
-
-type NegotiationSnapshotDraft = Omit<NegotiationSnapshot, "id" | "version" | "createdAt">;
+import type { CompanyRecord } from "../types/interview";
 
 interface NegotiationSectionProps {
   company: CompanyRecord;
   suggestionProcessId?: string | null;
   onStartNegotiation?: (companyId: string, processId: string) => void;
-  onSaveNegotiationSnapshot?: (companyId: string, draft: NegotiationSnapshotDraft) => void;
-  onFinishNegotiation?: (
-    companyId: string,
-    status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">
-  ) => void;
 }
 
 function formatCash(value: number | null) {
@@ -24,9 +17,7 @@ function formatCash(value: number | null) {
 export function NegotiationSection({
   company,
   suggestionProcessId,
-  onStartNegotiation,
-  onSaveNegotiationSnapshot: _onSaveNegotiationSnapshot,
-  onFinishNegotiation: _onFinishNegotiation
+  onStartNegotiation
 }: NegotiationSectionProps) {
   const [expanded, setExpanded] = useState(false);
   const latestSnapshot = getLatestNegotiationSnapshot(company.negotiation);
@@ -48,13 +39,13 @@ export function NegotiationSection({
 
       {expanded ? (
         <div className="company-card__negotiation">
-          {company.negotiation.status === "inactive" && suggestionProcessId ? (
+          {company.negotiation.status === "inactive" && suggestionProcessId && onStartNegotiation ? (
             <div className="company-card__negotiation-suggestion">
               <p>系统建议：这个流程已经接近 offer 沟通，可以进入谈薪。</p>
               <button
                 className="button button--primary"
                 type="button"
-                onClick={() => onStartNegotiation?.(company.id, suggestionProcessId)}
+                onClick={() => onStartNegotiation(company.id, suggestionProcessId)}
               >
                 确认进入谈薪
               </button>

@@ -3,8 +3,6 @@ import type {
   CompanyGroup,
   CompanyRecord,
   InterviewProcess,
-  NegotiationSnapshot,
-  NegotiationStatus,
   RoundRecord
 } from "../types/interview";
 
@@ -28,14 +26,6 @@ interface CompanyBoardProps {
   ) => void;
   negotiationSuggestionProcessIds?: Partial<Record<string, string | null>>;
   onStartNegotiation?: (companyId: string, processId: string) => void;
-  onSaveNegotiationSnapshot?: (
-    companyId: string,
-    draft: Omit<NegotiationSnapshot, "id" | "version" | "createdAt">
-  ) => void;
-  onFinishNegotiation?: (
-    companyId: string,
-    status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">
-  ) => void;
 }
 
 export function CompanyBoard({
@@ -46,9 +36,7 @@ export function CompanyBoard({
   onUpdateProcess,
   onUpdateRound,
   negotiationSuggestionProcessIds,
-  onStartNegotiation,
-  onSaveNegotiationSnapshot,
-  onFinishNegotiation
+  onStartNegotiation
 }: CompanyBoardProps) {
   return (
     <section className="board-grid">
@@ -73,8 +61,6 @@ export function CompanyBoard({
                 onUpdateRound={onUpdateRound}
                 negotiationSuggestionProcessId={negotiationSuggestionProcessIds?.[company.id] ?? null}
                 onStartNegotiation={onStartNegotiation}
-                onSaveNegotiationSnapshot={onSaveNegotiationSnapshot}
-                onFinishNegotiation={onFinishNegotiation}
               />
             ))}
           </div>

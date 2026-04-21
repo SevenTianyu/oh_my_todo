@@ -333,8 +333,6 @@ describe("CompanyCard", () => {
         onUpdateRound={() => {}}
         negotiationSuggestionProcessId="nova-product"
         onStartNegotiation={onStartNegotiation}
-        onSaveNegotiationSnapshot={() => {}}
-        onFinishNegotiation={() => {}}
       />
     );
 
@@ -342,6 +340,36 @@ describe("CompanyCard", () => {
     await user.click(screen.getByRole("button", { name: "确认进入谈薪" }));
 
     expect(onStartNegotiation).toHaveBeenCalledWith("nova", "nova-product");
+  });
+
+  it("does not render the negotiation activation CTA when no start handler is provided", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <CompanyCard
+        company={{
+          ...sampleCompanies[1],
+          negotiation: {
+            status: "inactive",
+            sourceProcessId: null,
+            startedAt: null,
+            endedAt: null,
+            latestSnapshotId: null,
+            snapshots: []
+          }
+        }}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+        negotiationSuggestionProcessId="nova-product"
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "展开谈薪" }));
+
+    expect(screen.queryByRole("button", { name: "确认进入谈薪" })).not.toBeInTheDocument();
   });
 
   it("renders snapshot history newest-first inside the negotiation section", async () => {
@@ -408,8 +436,6 @@ describe("CompanyCard", () => {
         onArchiveProcess={() => {}}
         onUpdateRound={() => {}}
         onStartNegotiation={() => {}}
-        onSaveNegotiationSnapshot={() => {}}
-        onFinishNegotiation={() => {}}
       />
     );
 
