@@ -278,8 +278,7 @@ describe("storage", () => {
                 signOnBonus: 50000,
                 relocationBonus: 0,
                 equityShares: 4000,
-                equityStrikePrice: 12,
-                equityReferencePrice: 30,
+                equityPerShareValue: 18,
                 equityVestingYears: 4,
                 deadline: "2026-04-25",
                 hrSignal: "可继续谈",
@@ -296,6 +295,92 @@ describe("storage", () => {
     expect(result).toEqual({
       ok: true,
       snapshot: richSnapshot
+    });
+  });
+
+  it("maps legacy strike and reference prices into a single per-share value when importing", () => {
+    const result = parseWorkbenchSnapshotImport(
+      JSON.stringify({
+        version: 2,
+        grouping: "companyType",
+        companies: [
+          {
+            ...sampleCompanies[0],
+            negotiation: {
+              status: "active",
+              sourceProcessId: "acme-pm",
+              startedAt: "2026-04-25T09:00:00.000Z",
+              endedAt: null,
+              latestSnapshotId: "negotiation-acme-1",
+              snapshots: [
+                {
+                  id: "negotiation-acme-1",
+                  version: 1,
+                  createdAt: "2026-04-25T09:10:00.000Z",
+                  title: "Senior PM",
+                  level: "P5",
+                  city: "San Francisco",
+                  workMode: "Hybrid",
+                  baseMonthlySalary: 50000,
+                  salaryMonths: 15,
+                  annualBonusCash: 120000,
+                  signOnBonus: 50000,
+                  relocationBonus: 0,
+                  equityShares: 4000,
+                  equityStrikePrice: 12,
+                  equityReferencePrice: 30,
+                  equityVestingYears: 4,
+                  deadline: "2026-04-25",
+                  hrSignal: "可继续谈",
+                  notes: "首轮口头包"
+                }
+              ]
+            }
+          }
+        ]
+      })
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      snapshot: {
+        version: 2,
+        grouping: "companyType",
+        companies: [
+          {
+            ...sampleCompanies[0],
+            negotiation: {
+              status: "active",
+              sourceProcessId: "acme-pm",
+              startedAt: "2026-04-25T09:00:00.000Z",
+              endedAt: null,
+              latestSnapshotId: "negotiation-acme-1",
+              snapshots: [
+                {
+                  id: "negotiation-acme-1",
+                  version: 1,
+                  createdAt: "2026-04-25T09:10:00.000Z",
+                  title: "Senior PM",
+                  level: "P5",
+                  city: "San Francisco",
+                  workMode: "Hybrid",
+                  baseMonthlySalary: 50000,
+                  salaryMonths: 15,
+                  annualBonusCash: 120000,
+                  signOnBonus: 50000,
+                  relocationBonus: 0,
+                  equityShares: 4000,
+                  equityPerShareValue: 18,
+                  equityVestingYears: 4,
+                  deadline: "2026-04-25",
+                  hrSignal: "可继续谈",
+                  notes: "首轮口头包"
+                }
+              ]
+            }
+          }
+        ]
+      }
     });
   });
 

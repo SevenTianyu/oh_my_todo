@@ -235,6 +235,33 @@ export function saveNegotiationSnapshot(
   });
 }
 
+export function deleteNegotiationSnapshot(
+  companies: CompanyRecord[],
+  companyId: string,
+  snapshotId: string
+): CompanyRecord[] {
+  return companies.map((company) => {
+    if (company.id !== companyId) return company;
+
+    const negotiation = getNegotiation(company);
+    const nextSnapshots = negotiation.snapshots
+      .filter((snapshot) => snapshot.id !== snapshotId)
+      .map((snapshot, index) => ({
+        ...snapshot,
+        version: index + 1
+      }));
+
+    return {
+      ...company,
+      negotiation: {
+        ...negotiation,
+        latestSnapshotId: nextSnapshots.at(-1)?.id ?? null,
+        snapshots: nextSnapshots
+      }
+    };
+  });
+}
+
 export function finishNegotiation(
   companies: CompanyRecord[],
   companyId: string,

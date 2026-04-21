@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 import { getLatestNegotiationSnapshot } from "../lib/compensation";
+import {
+  formatCashDisplayInWan,
+  formatCashInputFromYuan,
+  parseCashInputToYuan
+} from "../lib/negotiationUnits";
 import type { CompanyRecord, NegotiationSnapshot, NegotiationStatus } from "../types/interview";
 
 interface NegotiationSectionProps {
@@ -10,6 +15,7 @@ interface NegotiationSectionProps {
     companyId: string,
     draft: Omit<NegotiationSnapshot, "id" | "version" | "createdAt">
   ) => void;
+  onDeleteNegotiationSnapshot?: (companyId: string, snapshotId: string) => void;
   onFinishNegotiation?: (
     companyId: string,
     status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">
@@ -27,8 +33,7 @@ interface NegotiationFormState {
   signOnBonus: string;
   relocationBonus: string;
   equityShares: string;
-  equityStrikePrice: string;
-  equityReferencePrice: string;
+  equityPerShareValue: string;
   equityVestingYears: string;
   deadline: string;
   hrSignal: string;
@@ -43,12 +48,6 @@ const TERMINAL_NEGOTIATION_LABELS: Record<
   declined: "已拒绝",
   terminated: "已终止"
 };
-
-function formatCash(value: number | null) {
-  if (value === null) return "待补充";
-
-  return value.toLocaleString("zh-CN");
-}
 
 function toInputValue(value: number | null) {
   return value === null ? "" : String(value);
@@ -74,14 +73,13 @@ function createNegotiationFormState(company: CompanyRecord): NegotiationFormStat
       level: latestSnapshot.level,
       city: latestSnapshot.city,
       workMode: latestSnapshot.workMode,
-      baseMonthlySalary: toInputValue(latestSnapshot.baseMonthlySalary),
+      baseMonthlySalary: formatCashInputFromYuan(latestSnapshot.baseMonthlySalary),
       salaryMonths: toInputValue(latestSnapshot.salaryMonths),
-      annualBonusCash: toInputValue(latestSnapshot.annualBonusCash),
-      signOnBonus: toInputValue(latestSnapshot.signOnBonus),
-      relocationBonus: toInputValue(latestSnapshot.relocationBonus),
+      annualBonusCash: formatCashInputFromYuan(latestSnapshot.annualBonusCash),
+      signOnBonus: formatCashInputFromYuan(latestSnapshot.signOnBonus),
+      relocationBonus: formatCashInputFromYuan(latestSnapshot.relocationBonus),
       equityShares: toInputValue(latestSnapshot.equityShares),
-      equityStrikePrice: toInputValue(latestSnapshot.equityStrikePrice),
-      equityReferencePrice: toInputValue(latestSnapshot.equityReferencePrice),
+      equityPerShareValue: toInputValue(latestSnapshot.equityPerShareValue),
       equityVestingYears: toInputValue(latestSnapshot.equityVestingYears),
       deadline: latestSnapshot.deadline ?? "",
       hrSignal: latestSnapshot.hrSignal,
@@ -100,8 +98,7 @@ function createNegotiationFormState(company: CompanyRecord): NegotiationFormStat
     signOnBonus: "",
     relocationBonus: "",
     equityShares: "",
-    equityStrikePrice: "",
-    equityReferencePrice: "",
+    equityPerShareValue: "",
     equityVestingYears: "",
     deadline: "",
     hrSignal: "",
@@ -114,6 +111,7 @@ export function NegotiationSection({
   suggestionProcessId,
   onStartNegotiation,
   onSaveNegotiationSnapshot,
+  onDeleteNegotiationSnapshot,
   onFinishNegotiation
 }: NegotiationSectionProps) {
   const [expanded, setExpanded] = useState(false);
@@ -122,6 +120,8 @@ export function NegotiationSection({
   const sourceProcess = company.processes.find(
     (process) => process.id === company.negotiation.sourceProcessId
   );
+  const fallbackStartProcess = company.processes.find((process) => process.status === "active");
+  const activationProcessId = suggestionProcessId ?? fallbackStartProcess?.id ?? null;
   const [formState, setFormState] = useState(() => createNegotiationFormState(company));
 
   useEffect(() => {
@@ -136,6 +136,8 @@ export function NegotiationSection({
   ]);
 
   const canEditNegotiation = company.negotiation.status === "active" && !!onSaveNegotiationSnapshot;
+  const canDeleteNegotiationSnapshots =
+    company.negotiation.status === "active" && !!onDeleteNegotiationSnapshot;
   const terminalStatus =
     company.negotiation.status === "accepted" ||
     company.negotiation.status === "declined" ||
@@ -160,19 +162,30 @@ export function NegotiationSection({
       level: formState.level.trim(),
       city: formState.city.trim(),
       workMode: formState.workMode.trim(),
-      baseMonthlySalary: parseOptionalNumber(formState.baseMonthlySalary),
+      baseMonthlySalary: parseCashInputToYuan(formState.baseMonthlySalary),
       salaryMonths: parseOptionalNumber(formState.salaryMonths),
-      annualBonusCash: parseOptionalNumber(formState.annualBonusCash),
-      signOnBonus: parseOptionalNumber(formState.signOnBonus),
-      relocationBonus: parseOptionalNumber(formState.relocationBonus),
+      annualBonusCash: parseCashInputToYuan(formState.annualBonusCash),
+      signOnBonus: parseCashInputToYuan(formState.signOnBonus),
+      relocationBonus: parseCashInputToYuan(formState.relocationBonus),
       equityShares: parseOptionalNumber(formState.equityShares),
-      equityStrikePrice: parseOptionalNumber(formState.equityStrikePrice),
-      equityReferencePrice: parseOptionalNumber(formState.equityReferencePrice),
+      equityPerShareValue: parseOptionalNumber(formState.equityPerShareValue),
       equityVestingYears: parseOptionalNumber(formState.equityVestingYears),
       deadline: formState.deadline || null,
       hrSignal: formState.hrSignal.trim(),
       notes: formState.notes.trim()
     });
+  }
+
+  function handleDeleteSnapshot(snapshot: NegotiationSnapshot) {
+    if (!onDeleteNegotiationSnapshot) {
+      return;
+    }
+
+    if (!window.confirm(`确认删除第 ${snapshot.version} 轮谈薪吗？此操作不可撤销。`)) {
+      return;
+    }
+
+    onDeleteNegotiationSnapshot(company.id, snapshot.id);
   }
 
   return (
@@ -191,13 +204,17 @@ export function NegotiationSection({
 
       {expanded ? (
         <div className="company-card__negotiation">
-          {company.negotiation.status === "inactive" && suggestionProcessId && onStartNegotiation ? (
+          {company.negotiation.status === "inactive" && activationProcessId && onStartNegotiation ? (
             <div className="company-card__negotiation-suggestion">
-              <p>系统建议：这个流程已经接近 offer 沟通，可以进入谈薪。</p>
+              <p>
+                {suggestionProcessId
+                  ? "系统建议：这个流程已经接近 offer 沟通，可以进入谈薪。"
+                  : "如果你已经开始和 HR 确认报价、总包或薪资空间，可以手动进入谈薪。"}
+              </p>
               <button
                 className="button button--primary"
                 type="button"
-                onClick={() => onStartNegotiation(company.id, suggestionProcessId)}
+                onClick={() => onStartNegotiation(company.id, activationProcessId)}
               >
                 确认进入谈薪
               </button>
@@ -212,7 +229,7 @@ export function NegotiationSection({
               </div>
               {sourceProcess ? <p>关联岗位：{sourceProcess.roleName}</p> : null}
               <p>
-                {formatCash(latestSnapshot.baseMonthlySalary)} ×{" "}
+                {formatCashDisplayInWan(latestSnapshot.baseMonthlySalary)} ×{" "}
                 {latestSnapshot.salaryMonths ?? "待补充"} 薪
               </p>
             </div>
@@ -230,6 +247,9 @@ export function NegotiationSection({
 
           {canEditNegotiation ? (
             <div className="company-card__negotiation-form">
+              <p className="company-card__negotiation-form-note">
+                现金字段统一按万元填写，例如月基本工资填 2.3 表示 2.3 万/月；股票/期权统一按数量乘每股估值填写，期权请先自行折算成每股估值。
+              </p>
               <div className="company-card__negotiation-form-grid">
                 <label className="company-card__negotiation-field">
                   <span>谈薪标题</span>
@@ -268,57 +288,62 @@ export function NegotiationSection({
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>月基本工资</span>
+                  <span>月基本工资（万元）</span>
                   <input
                     aria-label="月基本工资"
                     className="field field--input"
-                    inputMode="numeric"
+                    inputMode="decimal"
+                    placeholder="例如 2.3"
                     value={formState.baseMonthlySalary}
                     onChange={(event) => updateField("baseMonthlySalary", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>薪资月数</span>
+                  <span>薪资月数（薪）</span>
                   <input
                     aria-label="薪资月数"
                     className="field field--input"
-                    inputMode="numeric"
+                    inputMode="decimal"
+                    placeholder="例如 15.5"
                     value={formState.salaryMonths}
                     onChange={(event) => updateField("salaryMonths", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>年终现金奖金</span>
+                  <span>年终现金奖金（万元）</span>
                   <input
                     aria-label="年终现金奖金"
                     className="field field--input"
-                    inputMode="numeric"
+                    inputMode="decimal"
+                    placeholder="例如 8"
                     value={formState.annualBonusCash}
                     onChange={(event) => updateField("annualBonusCash", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>签字费</span>
+                  <span>签字费（万元）</span>
                   <input
                     aria-label="签字费"
                     className="field field--input"
-                    inputMode="numeric"
+                    inputMode="decimal"
+                    placeholder="例如 3"
                     value={formState.signOnBonus}
                     onChange={(event) => updateField("signOnBonus", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>搬家补贴</span>
+                  <span>搬家补贴（万元）</span>
                   <input
                     aria-label="搬家补贴"
                     className="field field--input"
-                    inputMode="numeric"
+                    inputMode="decimal"
+                    placeholder="例如 1"
                     value={formState.relocationBonus}
                     onChange={(event) => updateField("relocationBonus", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>股票数量</span>
+                  <span>股票数量（股）</span>
                   <input
                     aria-label="股票数量"
                     className="field field--input"
@@ -328,31 +353,22 @@ export function NegotiationSection({
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>行权价</span>
+                  <span>每股估值（每股）</span>
                   <input
-                    aria-label="行权价"
+                    aria-label="每股估值"
                     className="field field--input"
-                    inputMode="numeric"
-                    value={formState.equityStrikePrice}
-                    onChange={(event) => updateField("equityStrikePrice", event.target.value)}
+                    inputMode="decimal"
+                    placeholder="例如 18"
+                    value={formState.equityPerShareValue}
+                    onChange={(event) => updateField("equityPerShareValue", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>参考股价</span>
-                  <input
-                    aria-label="参考股价"
-                    className="field field--input"
-                    inputMode="numeric"
-                    value={formState.equityReferencePrice}
-                    onChange={(event) => updateField("equityReferencePrice", event.target.value)}
-                  />
-                </label>
-                <label className="company-card__negotiation-field">
-                  <span>归属年限</span>
+                  <span>归属年限（年）</span>
                   <input
                     aria-label="归属年限"
                     className="field field--input"
-                    inputMode="numeric"
+                    inputMode="decimal"
                     value={formState.equityVestingYears}
                     onChange={(event) => updateField("equityVestingYears", event.target.value)}
                   />
@@ -427,11 +443,24 @@ export function NegotiationSection({
               {snapshots.map((snapshot) => (
                 <article className="company-card__negotiation-item" key={snapshot.id}>
                   <div className="company-card__negotiation-item-header">
-                    <strong>{`第 ${snapshot.version} 轮谈薪`}</strong>
-                    <span>{snapshot.title}</span>
+                    <div className="company-card__negotiation-item-copy">
+                      <strong>{`第 ${snapshot.version} 轮谈薪`}</strong>
+                      <span>{snapshot.title}</span>
+                    </div>
+                    {canDeleteNegotiationSnapshots ? (
+                      <button
+                        className="button button--ghost button--danger company-card__negotiation-delete"
+                        type="button"
+                        aria-label={`删除第 ${snapshot.version} 轮谈薪`}
+                        onClick={() => handleDeleteSnapshot(snapshot)}
+                      >
+                        删除
+                      </button>
+                    ) : null}
                   </div>
                   <p>
-                    {formatCash(snapshot.baseMonthlySalary)} × {snapshot.salaryMonths ?? "待补充"} 薪
+                    {formatCashDisplayInWan(snapshot.baseMonthlySalary)} ×{" "}
+                    {snapshot.salaryMonths ?? "待补充"} 薪
                   </p>
                 </article>
               ))}

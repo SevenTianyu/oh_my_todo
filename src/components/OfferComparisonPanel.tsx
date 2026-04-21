@@ -1,4 +1,5 @@
 import type { OfferComparisonRow } from "../lib/selectors";
+import { formatCashDisplayInWan } from "../lib/negotiationUnits";
 
 interface OfferComparisonPanelProps {
   rows: OfferComparisonRow[];
@@ -7,11 +8,7 @@ interface OfferComparisonPanelProps {
 }
 
 function formatCurrency(value: number | null) {
-  if (value === null) {
-    return "待补充";
-  }
-
-  return value.toLocaleString("zh-CN");
+  return formatCashDisplayInWan(value);
 }
 
 function formatSalaryRange(row: OfferComparisonRow) {
@@ -21,7 +18,7 @@ function formatSalaryRange(row: OfferComparisonRow) {
     return "待补充";
   }
 
-  return `${formatCurrency(baseMonthlySalary)} × ${salaryMonths}`;
+  return `${formatCurrency(baseMonthlySalary)} × ${salaryMonths} 薪`;
 }
 
 export function OfferComparisonPanel({
@@ -29,6 +26,16 @@ export function OfferComparisonPanel({
   scope,
   onScopeChange
 }: OfferComparisonPanelProps) {
+  function getFilterButtonClassName(nextScope: "active" | "all") {
+    const isActive = scope === nextScope;
+
+    return [
+      "button",
+      isActive ? "button--primary page__hero-action page__hero-action--primary" : "button--secondary page__hero-action page__hero-action--support",
+      "offer-panel__filter-button"
+    ].join(" ");
+  }
+
   return (
     <section className="panel offer-panel">
       <div className="section-heading">
@@ -37,10 +44,20 @@ export function OfferComparisonPanel({
           <h2>Offer 对比</h2>
         </div>
         <div className="offer-panel__filters" aria-label="谈薪范围切换">
-          <button type="button" aria-pressed={scope === "active"} onClick={() => onScopeChange("active")}>
+          <button
+            className={getFilterButtonClassName("active")}
+            type="button"
+            aria-pressed={scope === "active"}
+            onClick={() => onScopeChange("active")}
+          >
             当前谈薪公司
           </button>
-          <button type="button" aria-pressed={scope === "all"} onClick={() => onScopeChange("all")}>
+          <button
+            className={getFilterButtonClassName("all")}
+            type="button"
+            aria-pressed={scope === "all"}
+            onClick={() => onScopeChange("all")}
+          >
             全部有薪资记录的公司
           </button>
         </div>

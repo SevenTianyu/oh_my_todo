@@ -372,6 +372,42 @@ describe("CompanyCard", () => {
     expect(screen.queryByRole("button", { name: "确认进入谈薪" })).not.toBeInTheDocument();
   });
 
+  it("renders a manual negotiation activation CTA when no suggestion process is provided", async () => {
+    const user = userEvent.setup();
+    const onStartNegotiation = vi.fn();
+
+    render(
+      <CompanyCard
+        company={{
+          ...sampleCompanies[1],
+          negotiation: {
+            status: "inactive",
+            sourceProcessId: null,
+            startedAt: null,
+            endedAt: null,
+            latestSnapshotId: null,
+            snapshots: []
+          }
+        }}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+        onStartNegotiation={onStartNegotiation}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "展开谈薪" }));
+    expect(
+      screen.getByText(/如果你已经开始和 HR 确认报价、总包或薪资空间，可以手动进入谈薪。/)
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "确认进入谈薪" }));
+
+    expect(onStartNegotiation).toHaveBeenCalledWith("nova", "nova-product");
+  });
+
   it("renders snapshot history newest-first inside the negotiation section", async () => {
     const user = userEvent.setup();
     render(
@@ -399,8 +435,7 @@ describe("CompanyCard", () => {
                 signOnBonus: 30000,
                 relocationBonus: 10000,
                 equityShares: 2000,
-                equityStrikePrice: 12,
-                equityReferencePrice: 28,
+                equityPerShareValue: 16,
                 equityVestingYears: 4,
                 deadline: "2026-04-25",
                 hrSignal: "继续推进",
@@ -420,8 +455,7 @@ describe("CompanyCard", () => {
                 signOnBonus: 50000,
                 relocationBonus: 10000,
                 equityShares: 2200,
-                equityStrikePrice: 12,
-                equityReferencePrice: 28,
+                equityPerShareValue: 16,
                 equityVestingYears: 4,
                 deadline: "2026-04-26",
                 hrSignal: "等待回复",
@@ -470,10 +504,12 @@ describe("CompanyCard", () => {
     await user.click(screen.getByRole("button", { name: "展开谈薪" }));
 
     expect(screen.getByLabelText("谈薪标题")).toHaveValue("Staff PM");
-    expect(screen.getByLabelText("月基本工资")).toHaveValue("52000");
+    expect(screen.getByText("月基本工资（万元）")).toBeInTheDocument();
+    expect(screen.getByText(/股票\/期权统一按数量乘每股估值填写/)).toBeInTheDocument();
+    expect(screen.getByLabelText("月基本工资")).toHaveValue("5.2");
 
     await user.clear(screen.getByLabelText("月基本工资"));
-    await user.type(screen.getByLabelText("月基本工资"), "53000");
+    await user.type(screen.getByLabelText("月基本工资"), "5.3");
     await user.clear(screen.getByLabelText("备注"));
     await user.type(screen.getByLabelText("备注"), "继续争取更高 base");
     await user.click(screen.getByRole("button", { name: "保存谈薪快照" }));
@@ -489,8 +525,7 @@ describe("CompanyCard", () => {
       signOnBonus: 80000,
       relocationBonus: 0,
       equityShares: 3500,
-      equityStrikePrice: 25,
-      equityReferencePrice: 55,
+      equityPerShareValue: 30,
       equityVestingYears: 4,
       deadline: "2026-04-25",
       hrSignal: "首轮口头 offer",
@@ -502,5 +537,53 @@ describe("CompanyCard", () => {
     expect(onFinishNegotiation).toHaveBeenCalledWith("airtable", "accepted");
     expect(screen.getByRole("button", { name: "标记为拒绝" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "终止谈薪" })).toBeInTheDocument();
+  });
+
+  it("confirms before deleting a negotiation snapshot and dispatches the targeted id", async () => {
+    const user = userEvent.setup();
+    const onDeleteNegotiationSnapshot = vi.fn();
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    render(
+      <CompanyCard
+        company={{
+          ...sampleCompanies[3],
+          negotiation: {
+            ...sampleCompanies[3].negotiation,
+            latestSnapshotId: "negotiation-airtable-2",
+            snapshots: [
+              {
+                ...sampleCompanies[3].negotiation.snapshots[0],
+                id: "negotiation-airtable-1",
+                version: 1,
+                createdAt: "2026-04-18T18:00:00-07:00",
+                notes: "第一轮"
+              },
+              {
+                ...sampleCompanies[3].negotiation.snapshots[0],
+                id: "negotiation-airtable-2",
+                version: 2,
+                createdAt: "2026-04-19T18:00:00-07:00",
+                notes: "第二轮"
+              }
+            ]
+          }
+        }}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+        onStartNegotiation={() => {}}
+        onSaveNegotiationSnapshot={() => {}}
+        onDeleteNegotiationSnapshot={onDeleteNegotiationSnapshot}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "展开谈薪" }));
+    await user.click(screen.getByRole("button", { name: "删除第 2 轮谈薪" }));
+
+    expect(confirmSpy).toHaveBeenCalledWith("确认删除第 2 轮谈薪吗？此操作不可撤销。");
+    expect(onDeleteNegotiationSnapshot).toHaveBeenCalledWith("airtable", "negotiation-airtable-2");
   });
 });

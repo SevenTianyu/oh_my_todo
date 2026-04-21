@@ -4,6 +4,7 @@ import {
   addRoundToProcess,
   archiveProcessById,
   createCompanyWithProcess,
+  deleteNegotiationSnapshot,
   finishNegotiation,
   saveNegotiationSnapshot,
   startNegotiation,
@@ -122,8 +123,7 @@ describe("mutations", () => {
       signOnBonus: 50000,
       relocationBonus: 0,
       equityShares: 4000,
-      equityStrikePrice: 12,
-      equityReferencePrice: 30,
+      equityPerShareValue: 18,
       equityVestingYears: 4,
       deadline: "2026-04-25",
       hrSignal: "可继续谈",
@@ -157,8 +157,7 @@ describe("mutations", () => {
       signOnBonus: 50000,
       relocationBonus: 0,
       equityShares: 4000,
-      equityStrikePrice: 12,
-      equityReferencePrice: 30,
+      equityPerShareValue: 18,
       equityVestingYears: 4,
       deadline: "2026-04-25",
       hrSignal: "可继续谈",
@@ -175,8 +174,7 @@ describe("mutations", () => {
       signOnBonus: 60000,
       relocationBonus: 0,
       equityShares: 4200,
-      equityStrikePrice: 12,
-      equityReferencePrice: 30,
+      equityPerShareValue: 18,
       equityVestingYears: 4,
       deadline: "2026-04-27",
       hrSignal: "可继续谈",
@@ -211,8 +209,7 @@ describe("mutations", () => {
       signOnBonus: 50000,
       relocationBonus: 0,
       equityShares: 4000,
-      equityStrikePrice: 12,
-      equityReferencePrice: 30,
+      equityPerShareValue: 18,
       equityVestingYears: 4,
       deadline: "2026-04-25",
       hrSignal: "可继续谈",
@@ -268,8 +265,7 @@ describe("mutations", () => {
             signOnBonus: 40000,
             relocationBonus: 0,
             equityShares: 2000,
-            equityStrikePrice: 12,
-            equityReferencePrice: 28,
+            equityPerShareValue: 16,
             equityVestingYears: 4,
             deadline: "2026-04-25",
             hrSignal: "原岗位已结束",
@@ -294,5 +290,69 @@ describe("mutations", () => {
       latestSnapshotId: null,
       snapshots: []
     });
+  });
+
+  it("deletes any negotiation snapshot, reindexes versions, and repoints the latest snapshot", () => {
+    const company = {
+      ...sampleCompanies[3],
+      negotiation: {
+        ...sampleCompanies[3].negotiation,
+        latestSnapshotId: "negotiation-airtable-3",
+        snapshots: [
+          {
+            ...sampleCompanies[3].negotiation.snapshots[0],
+            id: "negotiation-airtable-1",
+            version: 1,
+            createdAt: "2026-04-18T18:00:00-07:00",
+            notes: "第一轮"
+          },
+          {
+            ...sampleCompanies[3].negotiation.snapshots[0],
+            id: "negotiation-airtable-2",
+            version: 2,
+            createdAt: "2026-04-19T18:00:00-07:00",
+            baseMonthlySalary: 53000,
+            notes: "第二轮"
+          },
+          {
+            ...sampleCompanies[3].negotiation.snapshots[0],
+            id: "negotiation-airtable-3",
+            version: 3,
+            createdAt: "2026-04-20T18:00:00-07:00",
+            baseMonthlySalary: 54000,
+            notes: "第三轮"
+          }
+        ]
+      }
+    };
+
+    const deletedMiddle = deleteNegotiationSnapshot([company], "airtable", "negotiation-airtable-2");
+
+    expect(deletedMiddle[0].negotiation.latestSnapshotId).toBe("negotiation-airtable-3");
+    expect(deletedMiddle[0].negotiation.snapshots).toMatchObject([
+      { id: "negotiation-airtable-1", version: 1, notes: "第一轮" },
+      { id: "negotiation-airtable-3", version: 2, notes: "第三轮" }
+    ]);
+
+    const deletedLatest = deleteNegotiationSnapshot(
+      deletedMiddle,
+      "airtable",
+      "negotiation-airtable-3"
+    );
+
+    expect(deletedLatest[0].negotiation.latestSnapshotId).toBe("negotiation-airtable-1");
+    expect(deletedLatest[0].negotiation.snapshots).toMatchObject([
+      { id: "negotiation-airtable-1", version: 1, notes: "第一轮" }
+    ]);
+
+    const deletedLast = deleteNegotiationSnapshot(
+      deletedLatest,
+      "airtable",
+      "negotiation-airtable-1"
+    );
+
+    expect(deletedLast[0].negotiation.status).toBe("active");
+    expect(deletedLast[0].negotiation.latestSnapshotId).toBeNull();
+    expect(deletedLast[0].negotiation.snapshots).toEqual([]);
   });
 });

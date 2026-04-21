@@ -34,8 +34,7 @@ export interface NegotiationSnapshot {
   signOnBonus: number | null;
   relocationBonus: number | null;
   equityShares: number | null;
-  equityStrikePrice: number | null;
-  equityReferencePrice: number | null;
+  equityPerShareValue: number | null;
   equityVestingYears: number | null;
   deadline: string | null;
   hrSignal: string;

@@ -44,6 +44,8 @@ describe("OfferComparisonPanel", () => {
     );
 
     expect(screen.getByText("ACME")).toBeInTheDocument();
+    expect(screen.getByText("5.2 万 × 15 薪")).toBeInTheDocument();
+    expect(screen.getByText("89.8 万")).toBeInTheDocument();
     expect(screen.queryByText("Google")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "全部有薪资记录的公司" }));
@@ -52,5 +54,6 @@ describe("OfferComparisonPanel", () => {
     rerender(<OfferComparisonPanel rows={rows} scope="all" onScopeChange={onScopeChange} />);
 
     expect(screen.getByText("Google")).toBeInTheDocument();
+    expect(screen.getByText("4.2 万 × 15 薪")).toBeInTheDocument();
   });
 });

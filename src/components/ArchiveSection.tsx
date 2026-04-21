@@ -1,4 +1,5 @@
 import { getLatestNegotiationSnapshot } from "../lib/compensation";
+import { formatCashDisplayInWan } from "../lib/negotiationUnits";
 import type { CompanyRecord, NegotiationStatus } from "../types/interview";
 
 const TERMINAL_NEGOTIATION_LABELS: Record<
@@ -9,14 +10,6 @@ const TERMINAL_NEGOTIATION_LABELS: Record<
   declined: "已拒绝",
   terminated: "已终止"
 };
-
-function formatCash(value: number | null) {
-  if (value === null) {
-    return "待补充";
-  }
-
-  return value.toLocaleString("zh-CN");
-}
 
 export function ArchiveSection({ companies }: { companies: CompanyRecord[] }) {
   return (
@@ -61,7 +54,7 @@ export function ArchiveSection({ companies }: { companies: CompanyRecord[] }) {
                     <p>{latestSnapshot.title}</p>
                     {sourceProcess ? <p>关联岗位：{sourceProcess.roleName}</p> : null}
                     <p>
-                      {formatCash(latestSnapshot.baseMonthlySalary)} ×{" "}
+                      {formatCashDisplayInWan(latestSnapshot.baseMonthlySalary)} ×{" "}
                       {latestSnapshot.salaryMonths ?? "待补充"} 薪
                     </p>
                     {latestSnapshot.notes ? <p>{latestSnapshot.notes}</p> : null}
@@ -78,7 +71,8 @@ export function ArchiveSection({ companies }: { companies: CompanyRecord[] }) {
                           <span>{snapshot.title}</span>
                         </div>
                         <p>
-                          {formatCash(snapshot.baseMonthlySalary)} × {snapshot.salaryMonths ?? "待补充"} 薪
+                          {formatCashDisplayInWan(snapshot.baseMonthlySalary)} ×{" "}
+                          {snapshot.salaryMonths ?? "待补充"} 薪
                         </p>
                         {snapshot.hrSignal ? <p>HR 信号：{snapshot.hrSignal}</p> : null}
                         {snapshot.notes ? <p>{snapshot.notes}</p> : null}

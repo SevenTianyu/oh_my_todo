@@ -48,6 +48,7 @@ interface CompanyCardProps {
     companyId: string,
     draft: Omit<NegotiationSnapshot, "id" | "version" | "createdAt">
   ) => void;
+  onDeleteNegotiationSnapshot?: (companyId: string, snapshotId: string) => void;
   onFinishNegotiation?: (
     companyId: string,
     status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">
@@ -499,6 +500,7 @@ export function CompanyCard(props: CompanyCardProps) {
           suggestionProcessId={props.negotiationSuggestionProcessId}
           onStartNegotiation={props.onStartNegotiation}
           onSaveNegotiationSnapshot={props.onSaveNegotiationSnapshot}
+          onDeleteNegotiationSnapshot={props.onDeleteNegotiationSnapshot}
           onFinishNegotiation={props.onFinishNegotiation}
         />
       </div>

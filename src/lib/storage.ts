@@ -194,6 +194,49 @@ function readNullableNumber(record: RawRecord, key: string, path: string): numbe
   } satisfies WorkbenchImportError;
 }
 
+function readOptionalNullableNumber(record: RawRecord, key: string, path: string): number | null | undefined {
+  if (!(key in record)) {
+    return undefined;
+  }
+
+  const value = record[key];
+
+  if (typeof value === "number" || value === null) {
+    return value;
+  }
+
+  throw {
+    code: "invalid_shape",
+    message: `Expected ${getPath(path, key)} to be a number or null`,
+    path: getPath(path, key)
+  } satisfies WorkbenchImportError;
+}
+
+function readEquityPerShareValue(record: RawRecord, path: string) {
+  const directValue = readOptionalNullableNumber(record, "equityPerShareValue", path);
+
+  if (typeof directValue !== "undefined") {
+    return directValue;
+  }
+
+  const legacyStrikePrice = readOptionalNullableNumber(record, "equityStrikePrice", path);
+  const legacyReferencePrice = readOptionalNullableNumber(record, "equityReferencePrice", path);
+
+  if (typeof legacyStrikePrice === "undefined" && typeof legacyReferencePrice === "undefined") {
+    return null;
+  }
+
+  if (legacyStrikePrice === null || legacyReferencePrice === null) {
+    return null;
+  }
+
+  if (typeof legacyStrikePrice === "number" && typeof legacyReferencePrice === "number") {
+    return Math.max(legacyReferencePrice - legacyStrikePrice, 0);
+  }
+
+  return null;
+}
+
 function readRound(value: unknown, path: string): RoundRecord {
   if (!isRecord(value)) {
     throw {
@@ -244,8 +287,7 @@ function readNegotiationSnapshot(value: unknown, path: string): NegotiationSnaps
     signOnBonus: readNullableNumber(value, "signOnBonus", path),
     relocationBonus: readNullableNumber(value, "relocationBonus", path),
     equityShares: readNullableNumber(value, "equityShares", path),
-    equityStrikePrice: readNullableNumber(value, "equityStrikePrice", path),
-    equityReferencePrice: readNullableNumber(value, "equityReferencePrice", path),
+    equityPerShareValue: readEquityPerShareValue(value, path),
     equityVestingYears: readNullableNumber(value, "equityVestingYears", path),
     deadline: readNullableString(value, "deadline", path),
     hrSignal: readString(value, "hrSignal", path),

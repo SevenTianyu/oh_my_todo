@@ -242,6 +242,7 @@ export default function App() {
               negotiationSuggestionProcessIds={workbench.negotiationSuggestionProcessIds}
               onStartNegotiation={workbench.startNegotiation}
               onSaveNegotiationSnapshot={workbench.saveNegotiationSnapshot}
+              onDeleteNegotiationSnapshot={workbench.deleteNegotiationSnapshot}
               onFinishNegotiation={workbench.finishNegotiation}
               onArchiveProcess={workbench.archiveProcessById}
               onUpdateProcess={workbench.updateProcessRecord}

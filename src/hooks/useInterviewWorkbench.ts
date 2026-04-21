@@ -3,6 +3,7 @@ import {
   addRoundToProcess,
   archiveProcessById,
   createCompanyWithProcess,
+  deleteNegotiationSnapshot,
   finishNegotiation,
   saveNegotiationSnapshot,
   startNegotiation,
@@ -87,6 +88,11 @@ export function useInterviewWorkbench() {
       setSnapshot((current) => ({
         ...current,
         companies: saveNegotiationSnapshot(current.companies, companyId, draft)
+      })),
+    deleteNegotiationSnapshot: (companyId: string, snapshotId: string) =>
+      setSnapshot((current) => ({
+        ...current,
+        companies: deleteNegotiationSnapshot(current.companies, companyId, snapshotId)
       })),
     finishNegotiation: (
       companyId: string,

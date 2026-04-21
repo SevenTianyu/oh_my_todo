@@ -32,6 +32,7 @@ interface CompanyBoardProps {
     companyId: string,
     draft: Omit<NegotiationSnapshot, "id" | "version" | "createdAt">
   ) => void;
+  onDeleteNegotiationSnapshot?: (companyId: string, snapshotId: string) => void;
   onFinishNegotiation?: (
     companyId: string,
     status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">
@@ -48,6 +49,7 @@ export function CompanyBoard({
   negotiationSuggestionProcessIds,
   onStartNegotiation,
   onSaveNegotiationSnapshot,
+  onDeleteNegotiationSnapshot,
   onFinishNegotiation
 }: CompanyBoardProps) {
   return (
@@ -74,6 +76,7 @@ export function CompanyBoard({
                 negotiationSuggestionProcessId={negotiationSuggestionProcessIds?.[company.id] ?? null}
                 onStartNegotiation={onStartNegotiation}
                 onSaveNegotiationSnapshot={onSaveNegotiationSnapshot}
+                onDeleteNegotiationSnapshot={onDeleteNegotiationSnapshot}
                 onFinishNegotiation={onFinishNegotiation}
               />
             ))}

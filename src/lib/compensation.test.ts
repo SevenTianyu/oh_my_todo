@@ -19,8 +19,7 @@ function createSnapshot(
     signOnBonus: 50000,
     relocationBonus: 10000,
     equityShares: 4000,
-    equityStrikePrice: 12,
-    equityReferencePrice: 30,
+    equityPerShareValue: 18,
     equityVestingYears: 4,
     deadline: "2026-04-25",
     hrSignal: "可继续谈",
@@ -86,6 +85,26 @@ describe("compensation", () => {
     expect(
       getNegotiationMetrics(createSnapshot({ equityVestingYears: -2 })).equityAnnualized
     ).toBeNull();
+  });
+
+  it("floors underwater equity to zero instead of producing negative compensation totals", () => {
+    const metrics = getNegotiationMetrics(
+      createSnapshot({
+        baseMonthlySalary: 23000,
+        salaryMonths: 15.5,
+        annualBonusCash: 0,
+        signOnBonus: 0,
+        relocationBonus: 0,
+        equityShares: 10000,
+        equityPerShareValue: -2,
+        equityVestingYears: 4
+      })
+    );
+
+    expect(metrics.firstYearCash).toBe(356500);
+    expect(metrics.equityAnnualized).toBe(0);
+    expect(metrics.firstYearTotal).toBe(356500);
+    expect(metrics.longTermAnnualizedTotal).toBe(356500);
   });
 
   it("returns the explicit latest snapshot when latestSnapshotId is present", () => {

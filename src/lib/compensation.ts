@@ -36,11 +36,10 @@ export function getNegotiationMetrics(snapshot: NegotiationSnapshot): Negotiatio
 
   const equityAnnualized =
     snapshot.equityShares !== null &&
-    snapshot.equityReferencePrice !== null &&
-    snapshot.equityStrikePrice !== null &&
+    snapshot.equityPerShareValue !== null &&
     snapshot.equityVestingYears !== null &&
     snapshot.equityVestingYears > 0
-      ? ((snapshot.equityReferencePrice - snapshot.equityStrikePrice) * snapshot.equityShares) /
+      ? (Math.max(snapshot.equityPerShareValue, 0) * snapshot.equityShares) /
         snapshot.equityVestingYears
       : null;
 
