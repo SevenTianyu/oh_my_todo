@@ -456,6 +456,53 @@ body {
   justify-content: flex-start;
 }
 
+.company-card__negotiation {
+  display: grid;
+  gap: 14px;
+}
+
+.company-card__negotiation-suggestion,
+.company-card__negotiation-summary,
+.company-card__negotiation-item {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 248, 252, 0.88));
+}
+
+.company-card__negotiation-suggestion p,
+.company-card__negotiation-summary p,
+.company-card__negotiation-item p,
+.company-card__negotiation-empty {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.company-card__negotiation-eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(16, 32, 59, 0.48);
+}
+
+.company-card__negotiation-history {
+  display: grid;
+  gap: 12px;
+}
+
+.company-card__negotiation-item-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .company-card__summary-row,
 .company-card__round-row {
   display: grid;

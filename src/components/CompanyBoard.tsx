@@ -1,5 +1,12 @@
 import { CompanyCard } from "./CompanyCard";
-import type { CompanyGroup, CompanyRecord, InterviewProcess, RoundRecord } from "../types/interview";
+import type {
+  CompanyGroup,
+  CompanyRecord,
+  InterviewProcess,
+  NegotiationSnapshot,
+  NegotiationStatus,
+  RoundRecord
+} from "../types/interview";
 
 type CompanySummaryPatch = Partial<Pick<CompanyRecord, "name" | "companyType" | "overallImpression">>;
 
@@ -19,6 +26,16 @@ interface CompanyBoardProps {
     roundId: string,
     patch: Partial<RoundRecord>
   ) => void;
+  negotiationSuggestionProcessIds?: Partial<Record<string, string | null>>;
+  onStartNegotiation?: (companyId: string, processId: string) => void;
+  onSaveNegotiationSnapshot?: (
+    companyId: string,
+    draft: Omit<NegotiationSnapshot, "id" | "version" | "createdAt">
+  ) => void;
+  onFinishNegotiation?: (
+    companyId: string,
+    status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">
+  ) => void;
 }
 
 export function CompanyBoard({
@@ -27,7 +44,11 @@ export function CompanyBoard({
   onAddRound,
   onArchiveProcess,
   onUpdateProcess,
-  onUpdateRound
+  onUpdateRound,
+  negotiationSuggestionProcessIds,
+  onStartNegotiation,
+  onSaveNegotiationSnapshot,
+  onFinishNegotiation
 }: CompanyBoardProps) {
   return (
     <section className="board-grid">
@@ -50,6 +71,10 @@ export function CompanyBoard({
                 onArchiveProcess={onArchiveProcess}
                 onUpdateProcess={onUpdateProcess}
                 onUpdateRound={onUpdateRound}
+                negotiationSuggestionProcessId={negotiationSuggestionProcessIds?.[company.id] ?? null}
+                onStartNegotiation={onStartNegotiation}
+                onSaveNegotiationSnapshot={onSaveNegotiationSnapshot}
+                onFinishNegotiation={onFinishNegotiation}
               />
             ))}
           </div>

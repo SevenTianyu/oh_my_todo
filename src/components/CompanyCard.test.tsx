@@ -308,4 +308,117 @@ describe("CompanyCard", () => {
     });
     expect(screen.queryByLabelText("面试名称")).not.toBeInTheDocument();
   });
+
+  it("shows the third negotiation section and lets the user activate it from a suggestion", async () => {
+    const user = userEvent.setup();
+    const onStartNegotiation = vi.fn();
+
+    render(
+      <CompanyCard
+        company={{
+          ...sampleCompanies[1],
+          negotiation: {
+            status: "inactive",
+            sourceProcessId: null,
+            startedAt: null,
+            endedAt: null,
+            latestSnapshotId: null,
+            snapshots: []
+          }
+        }}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+        negotiationSuggestionProcessId="nova-product"
+        onStartNegotiation={onStartNegotiation}
+        onSaveNegotiationSnapshot={() => {}}
+        onFinishNegotiation={() => {}}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "展开谈薪" }));
+    await user.click(screen.getByRole("button", { name: "确认进入谈薪" }));
+
+    expect(onStartNegotiation).toHaveBeenCalledWith("nova", "nova-product");
+  });
+
+  it("renders snapshot history newest-first inside the negotiation section", async () => {
+    const user = userEvent.setup();
+    render(
+      <CompanyCard
+        company={{
+          ...sampleCompanies[0],
+          negotiation: {
+            ...sampleCompanies[0].negotiation,
+            status: "active",
+            sourceProcessId: "acme-pm",
+            latestSnapshotId: "acme-negotiation-2",
+            snapshots: [
+              ...sampleCompanies[0].negotiation.snapshots,
+              {
+                id: "acme-negotiation-1",
+                version: 1,
+                createdAt: "2026-04-18T09:00:00.000Z",
+                title: "Senior PM",
+                level: "P5",
+                city: "San Francisco",
+                workMode: "Hybrid",
+                baseMonthlySalary: 45000,
+                salaryMonths: 15,
+                annualBonusCash: 120000,
+                signOnBonus: 30000,
+                relocationBonus: 10000,
+                equityShares: 2000,
+                equityStrikePrice: 12,
+                equityReferencePrice: 28,
+                equityVestingYears: 4,
+                deadline: "2026-04-25",
+                hrSignal: "继续推进",
+                notes: "等待书面确认"
+              },
+              {
+                id: "acme-negotiation-2",
+                version: 2,
+                createdAt: "2026-04-19T09:00:00.000Z",
+                title: "Senior PM",
+                level: "P5",
+                city: "San Francisco",
+                workMode: "Hybrid",
+                baseMonthlySalary: 47000,
+                salaryMonths: 15,
+                annualBonusCash: 130000,
+                signOnBonus: 50000,
+                relocationBonus: 10000,
+                equityShares: 2200,
+                equityStrikePrice: 12,
+                equityReferencePrice: 28,
+                equityVestingYears: 4,
+                deadline: "2026-04-26",
+                hrSignal: "等待回复",
+                notes: "补充 sign-on"
+              }
+            ]
+          }
+        }}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+        onStartNegotiation={() => {}}
+        onSaveNegotiationSnapshot={() => {}}
+        onFinishNegotiation={() => {}}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "展开谈薪" }));
+
+    const versionTwo = screen.getByText("第 2 轮谈薪");
+    const versionOne = screen.getByText("第 1 轮谈薪");
+    expect(versionTwo).toBeInTheDocument();
+    expect(versionOne).toBeInTheDocument();
+    expect(versionTwo.compareDocumentPosition(versionOne)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
 });

@@ -1,6 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { TextareaHTMLAttributes } from "react";
-import type { CompanyRecord, InterviewProcess, RoundRecord } from "../types/interview";
+import type {
+  CompanyRecord,
+  InterviewProcess,
+  NegotiationSnapshot,
+  NegotiationStatus,
+  RoundRecord
+} from "../types/interview";
+import { NegotiationSection } from "./NegotiationSection";
 
 const COMPANY_TYPE_LABELS = {
   startup: "创业公司",
@@ -34,6 +41,16 @@ interface CompanyCardProps {
     processId: string,
     roundId: string,
     patch: Partial<RoundRecord>
+  ) => void;
+  negotiationSuggestionProcessId?: string | null;
+  onStartNegotiation?: (companyId: string, processId: string) => void;
+  onSaveNegotiationSnapshot?: (
+    companyId: string,
+    draft: Omit<NegotiationSnapshot, "id" | "version" | "createdAt">
+  ) => void;
+  onFinishNegotiation?: (
+    companyId: string,
+    status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">
   ) => void;
 }
 
@@ -476,6 +493,14 @@ export function CompanyCard(props: CompanyCardProps) {
             </>
           ) : null}
         </section>
+
+        <NegotiationSection
+          company={props.company}
+          suggestionProcessId={props.negotiationSuggestionProcessId}
+          onStartNegotiation={props.onStartNegotiation}
+          onSaveNegotiationSnapshot={props.onSaveNegotiationSnapshot}
+          onFinishNegotiation={props.onFinishNegotiation}
+        />
       </div>
     </article>
   );
