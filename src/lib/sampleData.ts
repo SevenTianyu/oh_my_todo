@@ -17,7 +17,14 @@ export const sampleCompanies: CompanyRecord[] = [
     name: "ACME",
     companyType: "startup",
     overallImpression: "团队强，方向贴合，但节奏偏快。",
-    negotiation: createDefaultNegotiation(),
+    negotiation: {
+      status: "active",
+      sourceProcessId: "acme-pm",
+      startedAt: "2026-04-19T09:00:00.000Z",
+      endedAt: null,
+      latestSnapshotId: null,
+      snapshots: []
+    },
     processes: [
       {
         id: "acme-pm",
@@ -96,7 +103,36 @@ export const sampleCompanies: CompanyRecord[] = [
     name: "Google",
     companyType: "big-tech",
     overallImpression: "品牌吸引力强，但业务匹配度一般。",
-    negotiation: createDefaultNegotiation(),
+    negotiation: {
+      status: "accepted",
+      sourceProcessId: "google-ads",
+      startedAt: "2026-04-05T09:30:00.000Z",
+      endedAt: "2026-04-14T09:00:00.000Z",
+      latestSnapshotId: "negotiation-google-1",
+      snapshots: [
+        {
+          id: "negotiation-google-1",
+          version: 1,
+          createdAt: "2026-04-05T09:30:00.000Z",
+          title: "PM",
+          level: "L4",
+          city: "Mountain View",
+          workMode: "Hybrid",
+          baseMonthlySalary: 42000,
+          salaryMonths: 15,
+          annualBonusCash: 100000,
+          signOnBonus: 30000,
+          relocationBonus: 20000,
+          equityShares: 2500,
+          equityStrikePrice: 50,
+          equityReferencePrice: 90,
+          equityVestingYears: 4,
+          deadline: "2026-04-12",
+          hrSignal: "已确认",
+          notes: "最终包已接受"
+        }
+      ]
+    },
     processes: [
       {
         id: "google-ads",

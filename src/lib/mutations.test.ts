@@ -138,7 +138,8 @@ describe("mutations", () => {
     });
     expect(acme?.negotiation?.snapshots).toHaveLength(1);
     expect(sampleCompanies.find((company) => company.id === "acme")?.negotiation).toMatchObject({
-      status: "inactive",
+      status: "active",
+      sourceProcessId: "acme-pm",
       snapshots: []
     });
   });

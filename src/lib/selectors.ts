@@ -13,13 +13,14 @@ const GROUP_LABELS: Record<GroupingMode, Record<string, string>> = {
   },
   stage: {
     screening: "筛选中",
-    interviewing: "面试中"
+    interviewing: "面试中",
+    negotiating: "谈薪中"
   }
 };
 
 const GROUP_ORDER: Record<GroupingMode, string[]> = {
   companyType: ["startup", "big-tech"],
-  stage: ["screening", "interviewing"]
+  stage: ["screening", "interviewing", "negotiating"]
 };
 
 const INTERVIEWING_ROUND_STATUSES = new Set<RoundStatus>([
@@ -29,7 +30,7 @@ const INTERVIEWING_ROUND_STATUSES = new Set<RoundStatus>([
   "closed"
 ]);
 
-type DerivedStage = "screening" | "interviewing";
+type DerivedStage = "screening" | "interviewing" | "negotiating";
 
 function endOfWindow(now: Date) {
   const end = new Date(now);
@@ -47,6 +48,10 @@ function getProcessStage(process: CompanyRecord["processes"][number]): DerivedSt
 }
 
 function getPrimaryStage(company: CompanyRecord): DerivedStage {
+  if (company.negotiation.status === "active") {
+    return "negotiating";
+  }
+
   return company.processes
     .filter((process) => process.status === "active")
     .some((process) => getProcessStage(process) === "interviewing")
@@ -126,4 +131,12 @@ export function getGroupedCompanies(
       label: GROUP_LABELS[grouping][key],
       companies: buckets.get(key) ?? []
     }));
+}
+
+export function getOfferComparisonCompanies(companies: CompanyRecord[], scope: "active" | "all") {
+  return companies.filter((company) =>
+    scope === "active"
+      ? company.negotiation.status === "active"
+      : company.negotiation.snapshots.length > 0
+  );
 }

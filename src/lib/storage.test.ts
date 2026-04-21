@@ -23,6 +23,10 @@ const sampleCompaniesWithNegotiation = sampleCompanies.map((company) => ({
   negotiation: company.negotiation ?? defaultNegotiation
 }));
 const legacyCompanies = sampleCompanies.map(({ negotiation, ...company }) => company);
+const legacyCompaniesWithNegotiation = legacyCompanies.map((company) => ({
+  ...company,
+  negotiation: defaultNegotiation
+}));
 
 describe("storage", () => {
   beforeEach(() => {
@@ -241,7 +245,7 @@ describe("storage", () => {
     expect(JSON.parse(content)).toEqual({
       version: 2,
       grouping: "stage",
-      companies: sampleCompaniesWithNegotiation
+      companies: legacyCompaniesWithNegotiation
     });
     expect(JSON.parse(content).companies[0].processes[0]).not.toHaveProperty("stage");
   });

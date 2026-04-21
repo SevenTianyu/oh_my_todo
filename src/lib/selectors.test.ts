@@ -86,14 +86,21 @@ describe("selectors", () => {
 
     const groups = getGroupedCompanies([...sampleCompanies, multiProcessCompany, scheduled], "stage");
 
-    expect(groups.map((group) => group.label)).toEqual(["筛选中", "面试中"]);
+    expect(groups.map((group) => group.label)).toEqual(["筛选中", "面试中", "谈薪中"]);
     expect(groups[0].companies.map((company) => company.name)).toEqual(["Nova AI"]);
     expect(groups[1].companies.map((company) => company.name)).toEqual([
-      "ACME",
       "字节跳动",
       "Epsilon",
       "Cursor"
     ]);
+    expect(groups[2].companies.map((company) => company.name)).toEqual(["ACME"]);
+  });
+
+  it("prioritizes active negotiation over interviewing when grouping by stage", () => {
+    const groups = getGroupedCompanies(sampleCompanies, "stage");
+
+    expect(groups.map((group) => group.label)).toEqual(["筛选中", "面试中", "谈薪中"]);
+    expect(groups[2].companies.map((company) => company.name)).toEqual(["ACME"]);
   });
 
   it("keeps fully archived companies out of the active board", () => {
