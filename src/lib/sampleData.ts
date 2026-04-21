@@ -95,20 +95,20 @@ export const sampleCompanies: CompanyRecord[] = [
     id: "airtable",
     name: "Airtable",
     companyType: "startup",
-    overallImpression: "团队成熟，包裹清晰，已经进入谈薪阶段。",
+    overallImpression: "团队成熟，已经进入谈薪与 offer 对比阶段。",
     negotiation: {
       status: "active",
       sourceProcessId: "airtable-staff-pm",
-      startedAt: "2026-04-19T09:00:00.000Z",
+      startedAt: "2026-04-18T18:00:00-07:00",
       endedAt: null,
       latestSnapshotId: "negotiation-airtable-1",
       snapshots: [
         {
           id: "negotiation-airtable-1",
           version: 1,
-          createdAt: "2026-04-19T09:10:00.000Z",
-          title: "Staff PM",
-          level: "P6",
+          createdAt: "2026-04-18T18:00:00-07:00",
+          title: "Senior PM",
+          level: "P5",
           city: "San Francisco",
           workMode: "Hybrid",
           baseMonthlySalary: 52000,
@@ -120,9 +120,9 @@ export const sampleCompanies: CompanyRecord[] = [
           equityStrikePrice: 25,
           equityReferencePrice: 55,
           equityVestingYears: 4,
-          deadline: "2026-04-26",
-          hrSignal: "可继续谈",
-          notes: "等待正式书面 offer"
+          deadline: "2026-04-25",
+          hrSignal: "首轮口头 offer",
+          notes: "还可以继续谈 base"
         }
       ]
     },

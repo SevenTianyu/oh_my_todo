@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  A local-first board for interview schedules, company judgment, and round-by-round notes.
+  A local-first board for interview schedules, company judgment, negotiation versions, and offer comparison.
 </p>
 
 <p align="center">
@@ -75,7 +75,7 @@ When you are evaluating a company, you usually need to see three things together
 
 - Create companies and their first interview process without logging in.
 - Track interview rounds, notes, and schedules in one place; the screening/interviewing lens is derived from round progress.
-- Keep an overall company impression that grows with round-by-round notes.
+- Keep an overall company impression alongside negotiation snapshots and offer comparison data.
 - Group the board by company type or the derived screening/interviewing lens.
 - Archive ended processes after you mark them archived.
 - Export your full workspace as JSON.

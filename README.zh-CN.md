@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  一个把面试日程、公司判断和轮次备注放在同一张桌面上的本地优先工作台。
+  一个把面试日程、公司判断、谈薪版本和 Offer 对比放在同一张桌面上的本地优先工作台。
 </p>
 
 <p align="center">
@@ -139,8 +139,8 @@ Clone https://github.com/SevenTianyu/oh_my_todo.git, install dependencies, and s
 
 1. 打开应用，创建第一家公司。
 2. 填写公司、类型和岗位；应用会自动创建第一轮面试。
-3. 需要编辑整体判断时，展开 `Company Judgment`。
-4. 需要维护轮次安排时，展开 `Interview Schedule`。
+3. 需要编辑公司判断或谈薪版本时，展开 `Company Judgment`。
+4. 需要维护轮次安排或查看 `Offer Comparison` 时，展开对应区域。
 5. 想做备份或跨浏览器迁移时，导出 JSON。
 6. 之后再导入同样的 JSON 结构，就能恢复你的工作台。
 

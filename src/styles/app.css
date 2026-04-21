@@ -113,7 +113,7 @@ body {
 }
 
 .page__intro {
-  max-width: 560px;
+  max-width: 620px;
   margin: 0;
   color: var(--text-inverse);
   font-size: 1.05rem;
@@ -201,7 +201,7 @@ body {
 
 .section-heading__description,
 .panel__description {
-  max-width: 520px;
+  max-width: 600px;
   margin: 0;
   color: var(--text-secondary);
   line-height: 1.65;

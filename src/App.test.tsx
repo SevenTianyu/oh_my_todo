@@ -66,6 +66,15 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Offer 对比" })).toBeInTheDocument();
   });
 
+  it("explains the workbench as company judgment, interviews, and compensation comparison", () => {
+    seedWorkbench();
+    render(<App />);
+
+    expect(
+      screen.getByText(/直接维护公司判断、轮次时间、谈薪版本与最终对比/)
+    ).toBeInTheDocument();
+  });
+
   it("surfaces the start-negotiation CTA for suggested inactive companies", async () => {
     seedWorkbench();
     const user = userEvent.setup();

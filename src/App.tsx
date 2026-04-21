@@ -106,7 +106,7 @@ export default function App() {
             <p className="page__eyebrow">Interview Workbench</p>
             <h1>面试工作台</h1>
             <p className="page__intro">
-              先看未来 7 天已定面试，再把仍在推进的公司流程和主观判断留在同一个桌面控制台里。
+              先看未来 7 天已定面试，再把公司判断、轮次时间、谈薪版本与最终对比留在同一个桌面控制台里。
             </p>
 
             <div className="page__hero-actions">
@@ -231,7 +231,7 @@ export default function App() {
                 <h2>活跃流程工作区</h2>
               </div>
               <p className="section-heading__description">
-                在同一页切换分组视角，直接维护公司判断、轮次时间和备注，不再拆散到日历、待办和笔记里。
+                在同一页切换分组视角，直接维护公司判断、轮次时间、谈薪版本与最终对比，不再拆散到日历、待办和笔记里。
               </p>
             </div>
             <GroupingTabs value={workbench.grouping} onChange={workbench.setGrouping} />
