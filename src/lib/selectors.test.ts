@@ -6,6 +6,7 @@ import {
   getActiveCompanies,
   getArchivedCompanies,
   getGroupedCompanies,
+  getOfferComparisonCompanies,
   getUpcomingInterviews
 } from "./selectors";
 
@@ -49,6 +50,29 @@ const multiProcessCompany: CompanyRecord = {
     }
   ]
 };
+const negotiatingOnlyCompany: CompanyRecord = {
+  id: "lambda",
+  name: "Lambda",
+  companyType: "startup",
+  overallImpression: "测试用谈薪公司",
+  negotiation: {
+    status: "active",
+    sourceProcessId: "lambda-pm",
+    startedAt: "2026-04-19T09:00:00.000Z",
+    endedAt: null,
+    latestSnapshotId: null,
+    snapshots: []
+  },
+  processes: [
+    {
+      id: "lambda-pm",
+      roleName: "PM",
+      nextStep: "结束",
+      status: "archived",
+      rounds: []
+    }
+  ]
+};
 describe("selectors", () => {
   it("returns only scheduled interviews within the next 7 days in ascending order", () => {
     const upcoming = getUpcomingInterviews(sampleCompanies, NOW);
@@ -63,7 +87,11 @@ describe("selectors", () => {
     const groups = getGroupedCompanies(sampleCompanies, "companyType");
 
     expect(groups.map((group) => group.label)).toEqual(["创业公司", "大厂"]);
-    expect(groups[0].companies.map((company) => company.name)).toEqual(["ACME", "Nova AI"]);
+    expect(groups[0].companies.map((company) => company.name)).toEqual([
+      "ACME",
+      "Nova AI",
+      "Airtable"
+    ]);
     expect(groups[1].companies.map((company) => company.name)).toEqual(["字节跳动"]);
   });
 
@@ -89,25 +117,57 @@ describe("selectors", () => {
     expect(groups.map((group) => group.label)).toEqual(["筛选中", "面试中", "谈薪中"]);
     expect(groups[0].companies.map((company) => company.name)).toEqual(["Nova AI"]);
     expect(groups[1].companies.map((company) => company.name)).toEqual([
+      "ACME",
       "字节跳动",
       "Epsilon",
       "Cursor"
     ]);
-    expect(groups[2].companies.map((company) => company.name)).toEqual(["ACME"]);
+    expect(groups[2].companies.map((company) => company.name)).toEqual(["Airtable"]);
   });
 
   it("prioritizes active negotiation over interviewing when grouping by stage", () => {
     const groups = getGroupedCompanies(sampleCompanies, "stage");
 
     expect(groups.map((group) => group.label)).toEqual(["筛选中", "面试中", "谈薪中"]);
-    expect(groups[2].companies.map((company) => company.name)).toEqual(["ACME"]);
+    expect(groups[2].companies.map((company) => company.name)).toEqual(["Airtable"]);
+  });
+
+  it("includes active negotiation companies on the active board even without active processes", () => {
+    const activeCompanies = getActiveCompanies([...sampleCompanies, negotiatingOnlyCompany]);
+    const stageGroups = getGroupedCompanies([...sampleCompanies, negotiatingOnlyCompany], "stage");
+    const archivedCompanies = getArchivedCompanies([...sampleCompanies, negotiatingOnlyCompany]);
+
+    expect(activeCompanies.map((company) => company.name)).toEqual([
+      "ACME",
+      "Nova AI",
+      "字节跳动",
+      "Airtable",
+      "Lambda"
+    ]);
+    expect(stageGroups[2].companies.map((company) => company.name)).toEqual([
+      "Airtable",
+      "Lambda"
+    ]);
+    expect(archivedCompanies.map((company) => company.name)).toEqual(["Google"]);
+  });
+
+  it("filters offer comparison companies by active or any saved negotiation snapshots", () => {
+    const allScoped = getOfferComparisonCompanies([...sampleCompanies, negotiatingOnlyCompany], "all");
+    const activeScoped = getOfferComparisonCompanies(
+      [...sampleCompanies, negotiatingOnlyCompany],
+      "active"
+    );
+
+    expect(allScoped.map((company) => company.name)).toEqual(["Airtable", "Google"]);
+    expect(activeScoped.map((company) => company.name)).toEqual(["Airtable", "Lambda"]);
   });
 
   it("keeps fully archived companies out of the active board", () => {
     expect(getActiveCompanies(sampleCompanies).map((company) => company.name)).toEqual([
       "ACME",
       "Nova AI",
-      "字节跳动"
+      "字节跳动",
+      "Airtable"
     ]);
 
     expect(getArchivedCompanies(sampleCompanies).map((company) => company.name)).toEqual([

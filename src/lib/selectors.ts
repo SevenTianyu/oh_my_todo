@@ -61,6 +61,7 @@ function getPrimaryStage(company: CompanyRecord): DerivedStage {
 
 export function getActiveCompanies(companies: CompanyRecord[]) {
   return companies.filter((company) =>
+    company.negotiation.status === "active" ||
     company.processes.some((process) => process.status === "active")
   );
 }
@@ -68,6 +69,7 @@ export function getActiveCompanies(companies: CompanyRecord[]) {
 export function getArchivedCompanies(companies: CompanyRecord[]) {
   return companies.filter(
     (company) =>
+      company.negotiation.status !== "active" &&
       company.processes.length > 0 &&
       company.processes.every((process) => process.status === "archived")
   );

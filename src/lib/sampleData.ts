@@ -17,14 +17,7 @@ export const sampleCompanies: CompanyRecord[] = [
     name: "ACME",
     companyType: "startup",
     overallImpression: "团队强，方向贴合，但节奏偏快。",
-    negotiation: {
-      status: "active",
-      sourceProcessId: "acme-pm",
-      startedAt: "2026-04-19T09:00:00.000Z",
-      endedAt: null,
-      latestSnapshotId: null,
-      snapshots: []
-    },
+    negotiation: createDefaultNegotiation(),
     processes: [
       {
         id: "acme-pm",
@@ -93,6 +86,59 @@ export const sampleCompanies: CompanyRecord[] = [
             scheduledAt: "2026-04-18T10:30:00-07:00",
             status: "scheduled",
             notes: "需要确认汇报关系"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "airtable",
+    name: "Airtable",
+    companyType: "startup",
+    overallImpression: "团队成熟，包裹清晰，已经进入谈薪阶段。",
+    negotiation: {
+      status: "active",
+      sourceProcessId: "airtable-staff-pm",
+      startedAt: "2026-04-19T09:00:00.000Z",
+      endedAt: null,
+      latestSnapshotId: "negotiation-airtable-1",
+      snapshots: [
+        {
+          id: "negotiation-airtable-1",
+          version: 1,
+          createdAt: "2026-04-19T09:10:00.000Z",
+          title: "Staff PM",
+          level: "P6",
+          city: "San Francisco",
+          workMode: "Hybrid",
+          baseMonthlySalary: 52000,
+          salaryMonths: 15,
+          annualBonusCash: 150000,
+          signOnBonus: 80000,
+          relocationBonus: 0,
+          equityShares: 3500,
+          equityStrikePrice: 25,
+          equityReferencePrice: 55,
+          equityVestingYears: 4,
+          deadline: "2026-04-26",
+          hrSignal: "可继续谈",
+          notes: "等待正式书面 offer"
+        }
+      ]
+    },
+    processes: [
+      {
+        id: "airtable-staff-pm",
+        roleName: "Staff PM",
+        nextStep: "等待书面 offer",
+        status: "archived",
+        rounds: [
+          {
+            id: "airtable-round-1",
+            name: "终面",
+            scheduledAt: "2026-04-18T16:00:00-07:00",
+            status: "completed",
+            notes: "面试通过，进入谈薪"
           }
         ]
       }
