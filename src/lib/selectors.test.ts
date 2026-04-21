@@ -7,6 +7,8 @@ import {
   getArchivedCompanies,
   getGroupedCompanies,
   getOfferComparisonCompanies,
+  getOfferComparisonRows,
+  getNegotiationSuggestionProcessIds,
   getUpcomingInterviews
 } from "./selectors";
 
@@ -160,6 +162,113 @@ describe("selectors", () => {
 
     expect(allScoped.map((company) => company.name)).toEqual(["Airtable", "Google"]);
     expect(activeScoped.map((company) => company.name)).toEqual(["Airtable", "Lambda"]);
+  });
+
+  it("derives offer comparison rows from the latest snapshot and resolved source process role", () => {
+    const rows = getOfferComparisonRows(sampleCompanies, "all");
+
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toMatchObject({
+      companyId: "airtable",
+      companyName: "Airtable",
+      sourceProcessId: "airtable-staff-pm",
+      sourceRoleName: "Staff PM",
+      latestVersion: 1,
+      latestSnapshot: {
+        id: "negotiation-airtable-1"
+      },
+      metrics: {
+        firstYearCash: 1010000,
+        equityAnnualized: 26250,
+        firstYearTotal: 1036250,
+        longTermAnnualizedTotal: 956250
+      }
+    });
+    expect(rows[1]).toMatchObject({
+      companyId: "google",
+      companyName: "Google",
+      sourceProcessId: "google-ads",
+      sourceRoleName: "PM",
+      latestVersion: 1,
+      latestSnapshot: {
+        id: "negotiation-google-1"
+      },
+      metrics: {
+        firstYearCash: 780000,
+        equityAnnualized: 25000,
+        firstYearTotal: 805000,
+        longTermAnnualizedTotal: 755000
+      }
+    });
+  });
+
+  it("skips malformed offer comparison rows when the source process cannot be resolved", () => {
+    const rows = getOfferComparisonRows([
+      {
+        ...sampleCompanies[0],
+        negotiation: {
+          status: "active",
+          sourceProcessId: "missing-process",
+          startedAt: "2026-04-19T09:00:00.000Z",
+          endedAt: null,
+          latestSnapshotId: "acme-negotiation-2",
+          snapshots: [
+            {
+              id: "acme-negotiation-1",
+              version: 1,
+              createdAt: "2026-04-20T09:00:00.000Z",
+              title: "Old title",
+              level: "P5",
+              city: "San Francisco",
+              workMode: "Hybrid",
+              baseMonthlySalary: 50000,
+              salaryMonths: 15,
+              annualBonusCash: 120000,
+              signOnBonus: 20000,
+              relocationBonus: 0,
+              equityShares: 1000,
+              equityStrikePrice: 10,
+              equityReferencePrice: 20,
+              equityVestingYears: 4,
+              deadline: "2026-04-25",
+              hrSignal: "可继续谈",
+              notes: ""
+            },
+            {
+              id: "acme-negotiation-2",
+              version: 2,
+              createdAt: "2026-04-21T09:00:00.000Z",
+              title: "Latest title",
+              level: "P6",
+              city: "San Francisco",
+              workMode: "Hybrid",
+              baseMonthlySalary: 52000,
+              salaryMonths: 15,
+              annualBonusCash: 130000,
+              signOnBonus: 30000,
+              relocationBonus: 0,
+              equityShares: 1200,
+              equityStrikePrice: 10,
+              equityReferencePrice: 22,
+              equityVestingYears: 4,
+              deadline: "2026-04-27",
+              hrSignal: "可继续谈",
+              notes: ""
+            }
+          ]
+        }
+      }
+    ], "active");
+
+    expect(rows).toEqual([]);
+  });
+
+  it("derives negotiation suggestion ids for inactive companies with active processes", () => {
+    expect(getNegotiationSuggestionProcessIds(sampleCompanies)).toEqual({
+      acme: "acme-pm",
+      nova: "nova-product",
+      bytedance: "byte-growth"
+    });
   });
 
   it("keeps fully archived companies out of the active board", () => {

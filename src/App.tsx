@@ -239,6 +239,7 @@ export default function App() {
               groups={workbench.groupedCompanies}
               onSaveSummary={workbench.updateCompanySummary}
               onAddRound={workbench.addRoundToProcess}
+              negotiationSuggestionProcessIds={workbench.negotiationSuggestionProcessIds}
               onStartNegotiation={workbench.startNegotiation}
               onArchiveProcess={workbench.archiveProcessById}
               onUpdateProcess={workbench.updateProcessRecord}

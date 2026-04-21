@@ -66,6 +66,19 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Offer 对比" })).toBeInTheDocument();
   });
 
+  it("surfaces the start-negotiation CTA for suggested inactive companies", async () => {
+    seedWorkbench();
+    const user = userEvent.setup();
+    render(<App />);
+
+    const novaCard = screen.getByText("Nova AI").closest("article");
+    expect(novaCard).not.toBeNull();
+
+    await user.click(within(novaCard!).getByRole("button", { name: "展开谈薪" }));
+
+    expect(within(novaCard!).getByRole("button", { name: "确认进入谈薪" })).toBeInTheDocument();
+  });
+
   it("adds a pending round to the upcoming timeline when the user schedules it", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-17T09:00:00-07:00"));

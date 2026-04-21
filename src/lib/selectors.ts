@@ -38,6 +38,7 @@ export interface OfferComparisonRow {
   companyId: string;
   companyName: string;
   sourceProcessId: string;
+  sourceRoleName: string;
   latestVersion: number;
   latestSnapshot: NegotiationSnapshot;
   metrics: NegotiationMetrics;
@@ -160,8 +161,11 @@ export function getOfferComparisonRows(
 ): OfferComparisonRow[] {
   return getOfferComparisonCompanies(companies, scope).flatMap((company) => {
     const latestSnapshot = getLatestNegotiationSnapshot(company.negotiation);
+    const sourceProcess = company.processes.find(
+      (process) => process.id === company.negotiation.sourceProcessId
+    );
 
-    if (!latestSnapshot || !company.negotiation.sourceProcessId) {
+    if (!latestSnapshot || !company.negotiation.sourceProcessId || !sourceProcess) {
       return [];
     }
 
@@ -170,10 +174,25 @@ export function getOfferComparisonRows(
         companyId: company.id,
         companyName: company.name,
         sourceProcessId: company.negotiation.sourceProcessId,
+        sourceRoleName: sourceProcess.roleName,
         latestVersion: latestSnapshot.version,
         latestSnapshot,
         metrics: getNegotiationMetrics(latestSnapshot)
       }
     ];
   });
+}
+
+export function getNegotiationSuggestionProcessIds(companies: CompanyRecord[]) {
+  return Object.fromEntries(
+    companies.flatMap((company) => {
+      if (company.negotiation.status !== "inactive") {
+        return [];
+      }
+
+      const activeProcess = company.processes.find((process) => process.status === "active");
+
+      return activeProcess ? [[company.id, activeProcess.id]] : [];
+    })
+  );
 }

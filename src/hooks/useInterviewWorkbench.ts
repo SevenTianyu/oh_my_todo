@@ -11,6 +11,7 @@ import {
 import {
   getArchivedCompanies,
   getGroupedCompanies,
+  getNegotiationSuggestionProcessIds,
   getOfferComparisonRows,
   getUpcomingInterviews
 } from "../lib/selectors";
@@ -51,6 +52,10 @@ export function useInterviewWorkbench() {
       setSnapshot((current) => ({ ...current, grouping: nextGrouping })),
     groupedCompanies: useMemo(() => getGroupedCompanies(companies, grouping), [companies, grouping]),
     archivedCompanies: useMemo(() => getArchivedCompanies(companies), [companies]),
+    negotiationSuggestionProcessIds: useMemo(
+      () => getNegotiationSuggestionProcessIds(companies),
+      [companies]
+    ),
     offerComparisonRows: useMemo(
       () => getOfferComparisonRows(companies, comparisonScope),
       [companies, comparisonScope]

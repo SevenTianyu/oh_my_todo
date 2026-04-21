@@ -61,7 +61,7 @@ export function OfferComparisonPanel({
             rows.map((row) => (
               <tr key={`${row.companyId}-${row.latestVersion}`}>
                 <td>{row.companyName}</td>
-                <td>{row.latestSnapshot.title}</td>
+                <td>{row.sourceRoleName}</td>
                 <td>{formatSalaryRange(row)}</td>
                 <td>{formatCurrency(row.metrics.firstYearTotal)}</td>
                 <td>{formatCurrency(row.metrics.longTermAnnualizedTotal)}</td>
