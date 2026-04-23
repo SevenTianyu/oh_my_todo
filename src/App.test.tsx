@@ -36,7 +36,7 @@ describe("App", () => {
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "面试工作台" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "未来 7 天面试" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "未来 7 天安排" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "创业公司" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "大厂" })).toBeInTheDocument();
     expect(screen.getByText("归档流程（1）")).toBeInTheDocument();
@@ -190,7 +190,7 @@ describe("App", () => {
 
     render(<App />);
 
-    const timeline = screen.getByRole("heading", { name: "未来 7 天面试" }).closest("section");
+    const timeline = screen.getByRole("heading", { name: "未来 7 天安排" }).closest("section");
     expect(within(timeline!).queryByText("Nova AI")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "展开 Nova AI" })).not.toBeInTheDocument();
     fireEvent.click(screen.getAllByRole("button", { name: "展开面试安排" })[1]);
@@ -210,7 +210,7 @@ describe("App", () => {
 
     render(<App />);
 
-    const timeline = screen.getByRole("heading", { name: "未来 7 天面试" }).closest("section");
+    const timeline = screen.getByRole("heading", { name: "未来 7 天安排" }).closest("section");
 
     expect(within(timeline!).queryByText("ACME")).not.toBeInTheDocument();
     expect(within(timeline!).queryByText("字节跳动")).not.toBeInTheDocument();
@@ -225,7 +225,7 @@ describe("App", () => {
     expect(screen.getByLabelText("工作台概览")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "活跃流程工作区" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "历史判断区" })).toBeInTheDocument();
-    expect(screen.getByText("切换工作台视角")).toBeInTheDocument();
+    expect(screen.getByText("工作台索引")).toBeInTheDocument();
   });
 
   it("shows archived negotiation summary and snapshot history inside the archive UI", async () => {

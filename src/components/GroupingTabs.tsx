@@ -14,18 +14,19 @@ export function GroupingTabs({
 }) {
   return (
     <div className="group-tabs__shell">
-      <span className="group-tabs__label">切换工作台视角</span>
+      <span className="group-tabs__label">工作台索引</span>
       <div className="group-tabs" aria-label="分组切换">
-        {OPTIONS.map((option) => (
+        {OPTIONS.map((option, index) => (
           <button
             className="group-tabs__button"
             key={option.value}
             aria-label={option.ariaLabel}
             aria-pressed={value === option.value}
-            onClick={() => onChange(option.value)}
             type="button"
+            onClick={() => onChange(option.value)}
           >
-            {option.label}
+            <span className="group-tabs__index">{String(index + 1).padStart(2, "0")}</span>
+            <span>{option.label}</span>
           </button>
         ))}
       </div>
