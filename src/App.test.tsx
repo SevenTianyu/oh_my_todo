@@ -44,6 +44,19 @@ describe("App", () => {
     expect(screen.getByLabelText("分组切换")).toBeInTheDocument();
   });
 
+  it("renders the paper masthead shell and local-first status rail", () => {
+    seedWorkbench();
+    render(<App />);
+
+    const masthead = screen.getByLabelText("工作台首页");
+    expect(within(masthead).getByText("Private Interview Desk")).toBeInTheDocument();
+    expect(
+      within(masthead).getByText("把时间、判断和谈薪记录留在同一张私人工作台上。")
+    ).toBeInTheDocument();
+    expect(within(masthead).getByText("本地优先 / 无登录 / JSON 可迁移")).toBeInTheDocument();
+    expect(within(masthead).getByRole("button", { name: "新建公司" })).toBeInTheDocument();
+  });
+
   it("switches grouping tabs without reloading the page", async () => {
     seedWorkbench();
     const user = userEvent.setup();
@@ -207,7 +220,8 @@ describe("App", () => {
     seedWorkbench();
     render(<App />);
 
-    expect(screen.getByText("Interview Workbench")).toBeInTheDocument();
+    expect(screen.getByLabelText("工作台首页")).toBeInTheDocument();
+    expect(screen.getByText("Private Interview Desk")).toBeInTheDocument();
     expect(screen.getByLabelText("工作台概览")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "活跃流程工作区" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "历史判断区" })).toBeInTheDocument();

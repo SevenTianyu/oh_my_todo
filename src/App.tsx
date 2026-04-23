@@ -100,90 +100,73 @@ export default function App() {
 
   return (
     <main className="page">
-      <header className="page__hero">
-        <div className="page__hero-panel">
-          <div className="page__hero-copy">
-            <p className="page__eyebrow">Interview Workbench</p>
-            <h1>面试工作台</h1>
-            <p className="page__intro">
-              先看未来 7 天已定面试，再把公司判断、轮次时间、谈薪版本与最终对比留在同一个桌面控制台里。
-            </p>
+      <header className="page__masthead" aria-label="工作台首页">
+        <div className="page__masthead-copy">
+          <p className="page__kicker">Private Interview Desk</p>
+          <h1>面试工作台</h1>
+          <p className="page__lede">把时间、判断和谈薪记录留在同一张私人工作台上。</p>
+          <p className="page__status-strip">本地优先 / 无登录 / JSON 可迁移</p>
 
-            <div className="page__hero-actions">
-              <div className="page__hero-primary-actions">
-                <button
-                  className="button button--primary page__hero-action page__hero-action--primary"
-                  type="button"
-                  onClick={handleCreateCompany}
-                >
-                  {isEmpty ? "新建第一个公司" : "新建公司"}
-                </button>
-                <button
-                  className="button button--secondary page__hero-action page__hero-action--support"
-                  type="button"
-                  onClick={handleExport}
-                  disabled={isEmpty}
-                >
-                  导出数据
-                </button>
-                <button
-                  className="button button--secondary page__hero-action page__hero-action--support"
-                  type="button"
-                  onClick={openImportPicker}
-                >
-                  导入 JSON
-                </button>
-                <input
-                  ref={fileInputRef}
-                  aria-label="导入工作台 JSON"
-                  className="sr-only"
-                  type="file"
-                  accept="application/json,.json"
-                  onChange={handleImport}
-                />
-              </div>
-            </div>
-
-            <p className="page__privacy-note">
-              数据默认只保存在当前浏览器；刷新页面不会丢，清缓存、换浏览器或换设备不会自动同步，迁移请使用导出/导入。
-            </p>
-
-            {notice ? (
-              <p className={`page__notice page__notice--${notice.tone}`} role="status">
-                {notice.message}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="page__hero-metrics" aria-label="工作台概览">
-            <article className="page__hero-metric">
-              <span>未来 7 天</span>
-              <strong>{workbench.upcomingInterviews.length}</strong>
-              <small>场已定面试</small>
-            </article>
-            <article className="page__hero-metric">
-              <span>活跃公司</span>
-              <strong>{activeCompanyCount}</strong>
-              <small>个在推进中的判断对象</small>
-            </article>
-            <article className="page__hero-metric">
-              <span>归档记录</span>
-              <strong>{workbench.archivedCompanies.length}</strong>
-              <small>个已结束或搁置流程</small>
-            </article>
-          </div>
-
-          <div className="page__hero-danger-zone">
+          <div className="page__masthead-actions">
+            <button className="button button--primary" type="button" onClick={handleCreateCompany}>
+              {isEmpty ? "新建第一个公司" : "新建公司"}
+            </button>
             <button
-              className="button button--ghost button--danger page__hero-clear"
+              className="button button--secondary"
               type="button"
-              onClick={handleClear}
+              onClick={handleExport}
               disabled={isEmpty}
             >
-              清空本地数据
+              导出数据
             </button>
+            <button className="button button--ghost" type="button" onClick={openImportPicker}>
+              导入 JSON
+            </button>
+            <input
+              ref={fileInputRef}
+              aria-label="导入工作台 JSON"
+              className="sr-only"
+              type="file"
+              accept="application/json,.json"
+              onChange={handleImport}
+            />
           </div>
+
+          <p className="page__privacy-note">
+            数据默认只保存在当前浏览器；刷新页面不会丢，清缓存、换浏览器或换设备不会自动同步。
+          </p>
+          {notice ? (
+            <p className={`page__notice page__notice--${notice.tone}`} role="status">
+              {notice.message}
+            </p>
+          ) : null}
         </div>
+
+        <aside className="page__masthead-rail" aria-label="工作台概览">
+          <div className="page__rail-card">
+            <span>已定面试</span>
+            <strong>{workbench.upcomingInterviews.length}</strong>
+            <small>未来 7 天</small>
+          </div>
+          <div className="page__rail-card">
+            <span>活跃判断</span>
+            <strong>{activeCompanyCount}</strong>
+            <small>正在推进</small>
+          </div>
+          <div className="page__rail-card">
+            <span>归档记录</span>
+            <strong>{workbench.archivedCompanies.length}</strong>
+            <small>历史判断</small>
+          </div>
+          <button
+            className="button button--ghost button--danger page__clear-button"
+            type="button"
+            onClick={handleClear}
+            disabled={isEmpty}
+          >
+            清空本地数据
+          </button>
+        </aside>
       </header>
 
       {showComposer ? (
