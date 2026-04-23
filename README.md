@@ -5,7 +5,7 @@
 <h1 align="center">oh_my_todo</h1>
 
 <p align="center">
-  <strong>A private interview desk for agenda, judgment, negotiation, and comparison.</strong>
+  <strong>A personal interview desk for agenda, judgment, negotiation, and comparison.</strong>
 </p>
 
 <p align="center">

@@ -139,7 +139,12 @@ export function getUpcomingInterviews(companies: CompanyRecord[], now: Date): Up
         })
       )
     )
-    .sort((left, right) => left.scheduledAt.localeCompare(right.scheduledAt));
+    .sort((left, right) => {
+      const leftTime = new Date(left.scheduledAt).getTime();
+      const rightTime = new Date(right.scheduledAt).getTime();
+
+      return leftTime - rightTime || left.scheduledAt.localeCompare(right.scheduledAt);
+    });
 }
 
 export function getGroupedCompanies(

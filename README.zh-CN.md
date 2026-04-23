@@ -5,7 +5,7 @@
 <h1 align="center">oh_my_todo</h1>
 
 <p align="center">
-  <strong>一个把日程、判断、谈薪和对比放在同一张桌面上的私人面试工作台。</strong>
+  <strong>一个把日程、判断、谈薪和对比放在同一张桌面上的个人面试工作台。</strong>
 </p>
 
 <p align="center">

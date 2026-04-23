@@ -85,6 +85,64 @@ describe("selectors", () => {
     ]);
   });
 
+  it("orders upcoming interviews by actual instant across mixed timestamp offsets", () => {
+    const upcoming = getUpcomingInterviews(
+      [
+        {
+          id: "beta",
+          name: "Beta",
+          companyType: "startup",
+          overallImpression: "",
+          negotiation: defaultNegotiation,
+          processes: [
+            {
+              id: "beta-pm",
+              roleName: "PM",
+              nextStep: "一面",
+              status: "active",
+              rounds: [
+                {
+                  id: "beta-round-1",
+                  name: "一面",
+                  scheduledAt: "2026-04-17T09:30:00-08:00",
+                  status: "scheduled",
+                  notes: ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "alpha",
+          name: "Alpha",
+          companyType: "startup",
+          overallImpression: "",
+          negotiation: defaultNegotiation,
+          processes: [
+            {
+              id: "alpha-pm",
+              roleName: "PM",
+              nextStep: "一面",
+              status: "active",
+              rounds: [
+                {
+                  id: "alpha-round-1",
+                  name: "一面",
+                  scheduledAt: "2026-04-17T10:00:00-07:00",
+                  status: "scheduled",
+                  notes: ""
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      NOW
+    );
+
+    expect(upcoming.map((item) => item.companyName)).toEqual(["Alpha", "Beta"]);
+  });
+
   it("groups active companies by company type", () => {
     const groups = getGroupedCompanies(sampleCompanies, "companyType");
 

@@ -39,7 +39,7 @@ test("user can switch grouping, edit a company note, and keep the change after r
   }, SEEDED_WORKBENCH);
   await page.reload();
 
-  await expect(page.getByRole("heading", { name: "未来 7 天面试" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "未来 7 天安排" })).toBeVisible();
 
   await page.getByRole("button", { name: "按流程阶段分组" }).click();
   await expect(page.getByRole("heading", { name: "面试中" })).toBeVisible();
