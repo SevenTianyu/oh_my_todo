@@ -558,6 +558,16 @@ body {
   font-size: 1rem;
 }
 
+.company-card__section-kicker {
+  margin: 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent-umber) 74%, var(--ink-soft));
+}
+
 .company-card__details-actions {
   display: flex;
   justify-content: flex-start;

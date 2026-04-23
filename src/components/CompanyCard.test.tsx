@@ -23,6 +23,28 @@ describe("CompanyCard", () => {
     expect(container).toHaveTextContent("团队强，方向贴合，但节奏偏快。");
   });
 
+  it("falls back to negotiation context when the source process is archived", () => {
+    const company = sampleCompanies[3];
+    const { container } = render(
+      <CompanyCard
+        company={company}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+      />
+    );
+
+    const mastheadRole = container.querySelector(".company-card__role");
+    const mastheadStatus = container.querySelector(".company-card__mastrail-note");
+
+    expect(container).not.toHaveTextContent("暂无活跃流程");
+    expect(container).not.toHaveTextContent("当前没有活跃流程");
+    expect(mastheadRole).toHaveTextContent("Staff PM");
+    expect(mastheadStatus).toHaveTextContent("谈薪进行中");
+  });
+
   it("renders a unified overall impression preview with interview notes appended line-by-line", () => {
     const company = sampleCompanies[0];
     const { container } = render(

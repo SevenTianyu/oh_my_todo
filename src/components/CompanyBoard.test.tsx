@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CompanyBoard } from "./CompanyBoard";
 import { sampleCompanies } from "../lib/sampleData";
 
@@ -13,6 +13,10 @@ vi.mock("./CompanyCard", () => ({
 }));
 
 describe("CompanyBoard", () => {
+  beforeEach(() => {
+    companyCardMock.mockClear();
+  });
+
   it("renders each group as a dossier lane with a padded count", () => {
     const { container } = render(
       <CompanyBoard
@@ -61,7 +65,7 @@ describe("CompanyBoard", () => {
       />
     );
 
-    expect(companyCardMock).toHaveBeenCalled();
+    expect(companyCardMock.mock.calls.at(-1)).toBeDefined();
     const passedProps = companyCardMock.mock.calls.at(-1)?.[0] as Record<string, unknown>;
     expect(passedProps).toMatchObject({
       company: sampleCompanies[1],

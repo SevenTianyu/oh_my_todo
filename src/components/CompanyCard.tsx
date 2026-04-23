@@ -7,6 +7,7 @@ import type {
   NegotiationStatus,
   RoundRecord
 } from "../types/interview";
+import { getLatestNegotiationSnapshot } from "../lib/compensation";
 import { NegotiationSection } from "./NegotiationSection";
 
 const COMPANY_TYPE_LABELS = {
@@ -115,6 +116,40 @@ function getCompanyImpressionPreview(company: CompanyRecord) {
   return [company.overallImpression.trim(), ...getInterviewImpressionLines(company)]
     .filter(Boolean)
     .join("\n");
+}
+
+function getCompanyMastheadRole(company: CompanyRecord) {
+  const activeProcesses = company.processes.filter((process) => process.status === "active");
+  if (activeProcesses.length > 0) {
+    return activeProcesses.map((process) => process.roleName).join(" · ");
+  }
+
+  const latestSnapshot = getLatestNegotiationSnapshot(company.negotiation);
+  const sourceProcess = company.processes.find(
+    (process) => process.id === company.negotiation.sourceProcessId
+  );
+
+  return latestSnapshot?.title || sourceProcess?.roleName || "谈薪档案";
+}
+
+function getCompanyMastheadStatus(company: CompanyRecord) {
+  const activeProcesses = company.processes.filter((process) => process.status === "active");
+  if (activeProcesses.length > 0) {
+    return `${activeProcesses.length} 个活跃流程`;
+  }
+
+  switch (company.negotiation.status) {
+    case "active":
+      return "谈薪进行中";
+    case "accepted":
+      return "谈薪已接受";
+    case "declined":
+      return "谈薪已拒绝";
+    case "terminated":
+      return "谈薪已终止";
+    default:
+      return "暂无活跃流程";
+  }
 }
 
 function RoundEditor({
@@ -344,9 +379,9 @@ export function CompanyCard(props: CompanyCardProps) {
     props.company.companyType,
     props.company.overallImpression
   ]);
-  const activeProcesses = props.company.processes.filter((process) => process.status === "active");
-  const activeProcessNames = activeProcesses.map((process) => process.roleName).join(" · ");
   const companyCatalog = `Dossier / ${COMPANY_TYPE_LABELS[props.company.companyType]}`;
+  const mastheadRole = getCompanyMastheadRole(props.company);
+  const mastheadStatus = getCompanyMastheadStatus(props.company);
 
   return (
     <article className="company-card">
@@ -354,7 +389,7 @@ export function CompanyCard(props: CompanyCardProps) {
         <div className="company-card__mastcopy">
           <p className="company-card__catalog">{companyCatalog}</p>
           <h3 className="company-card__name">{props.company.name}</h3>
-          <p className="company-card__role">{activeProcessNames || "暂无活跃流程"}</p>
+          <p className="company-card__role">{mastheadRole}</p>
           <div className="company-card__summary-lines">
             <div className="company-card__summary-item">
               <span>整体判断</span>
@@ -367,9 +402,7 @@ export function CompanyCard(props: CompanyCardProps) {
             {COMPANY_TYPE_LABELS[props.company.companyType]}
           </span>
           <p className="company-card__mastrail-note">
-            {activeProcesses.length > 0
-              ? `${activeProcesses.length} 个活跃流程`
-              : "当前没有活跃流程"}
+            {mastheadStatus}
           </p>
         </div>
       </header>
@@ -505,7 +538,9 @@ export function CompanyCard(props: CompanyCardProps) {
         </section>
 
         <div className="company-card__negotiation-shell">
-          <h4 className="company-card__section-title">Negotiation</h4>
+          <p className="company-card__section-kicker" aria-hidden="true">
+            Negotiation
+          </p>
           <NegotiationSection
             company={props.company}
             suggestionProcessId={props.negotiationSuggestionProcessId}
