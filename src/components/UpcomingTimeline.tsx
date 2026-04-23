@@ -1,15 +1,30 @@
 import type { UpcomingInterview } from "../types/interview";
 
+const FALLBACK_AGENDA_PARTS = {
+  dayLabel: "--/--",
+  weekdayLabel: "未知",
+  timeLabel: "--:--"
+};
+
+const DAY_FORMATTER = new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric" });
+const WEEKDAY_FORMATTER = new Intl.DateTimeFormat("zh-CN", { weekday: "short" });
+const TIME_FORMATTER = new Intl.DateTimeFormat("zh-CN", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false
+});
+
 function formatAgendaParts(value: string) {
-  const [datePart, timePart = "00:00"] = value.split("T");
-  const [year, month, day] = datePart.split("-").map(Number);
-  const [hour = "00", minute = "00"] = timePart.split(/[:+-]/);
-  const date = new Date(year, month - 1, day);
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return FALLBACK_AGENDA_PARTS;
+  }
 
   return {
-    dayLabel: new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric" }).format(date),
-    weekdayLabel: new Intl.DateTimeFormat("zh-CN", { weekday: "short" }).format(date),
-    timeLabel: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`
+    dayLabel: DAY_FORMATTER.format(date),
+    weekdayLabel: WEEKDAY_FORMATTER.format(date),
+    timeLabel: TIME_FORMATTER.format(date)
   };
 }
 
