@@ -36,8 +36,8 @@ Interview work is rarely just a checklist. The real question is usually whether 
 
 - A next-7-days agenda for interviews that are already scheduled.
 - Active company dossiers with summary notes, round history, and negotiation context.
-- An offer comparison sheet for current or saved packages.
-- An archive area for finished processes you still want to revisit later.
+- An offer comparison sheet for active negotiations or the latest saved package per company.
+- An archive area for companies whose work has been fully archived.
 - JSON export and import for backup or moving between browsers.
 
 ## Quick start
@@ -63,7 +63,7 @@ Then open [http://localhost:5173](http://localhost:5173).
 1. Create a company and its first process.
 2. Keep the company summary, interview rounds, and negotiation snapshots on the same dossier.
 3. Switch the board between company type and stage views.
-4. Review the comparison sheet when you need to weigh active or saved offers.
+4. Review the comparison sheet when you need to weigh active negotiations or each company's latest saved package.
 5. Export JSON whenever you want a backup, then import the same shape to restore the desk later.
 
 ## Privacy and storage
