@@ -30,7 +30,12 @@
   --radius-card: 24px;
   font-family: "IBM Plex Sans", "PingFang SC", sans-serif;
   color: var(--ink-strong);
-  background: linear-gradient(180deg, #f5eee4 0%, #f2eadf 52%, #eee4d6 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, white 32%, var(--bg-page)) 0%,
+    var(--bg-page) 52%,
+    color-mix(in srgb, var(--bg-page) 62%, var(--bg-panel-strong)) 100%
+  );
 }
 
 body {
@@ -55,7 +60,11 @@ body {
 }
 
 .panel {
-  background: linear-gradient(180deg, rgba(255, 251, 245, 0.96), rgba(247, 241, 231, 0.94));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, white 46%, var(--bg-panel)) 0%,
+    color-mix(in srgb, var(--bg-panel) 72%, var(--bg-panel-strong)) 100%
+  );
   border: 1px solid var(--line-subtle);
   border-radius: var(--radius-panel);
   padding: 24px;
@@ -69,7 +78,11 @@ body {
   padding: 32px;
   border: 1px solid var(--line-strong);
   border-radius: 32px;
-  background: linear-gradient(180deg, rgba(255, 251, 245, 0.84), rgba(247, 241, 231, 0.96));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, white 34%, var(--bg-panel)) 0%,
+    color-mix(in srgb, var(--bg-panel) 55%, var(--bg-panel-strong)) 100%
+  );
   box-shadow: var(--shadow-paper);
 }
 
