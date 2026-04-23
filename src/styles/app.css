@@ -80,6 +80,18 @@ body {
   border-color: color-mix(in srgb, var(--border-strong) 78%, transparent);
 }
 
+.empty-state,
+.composer-panel,
+.offer-panel,
+.archive-panel {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, white 58%, var(--bg-panel)) 0%,
+    color-mix(in srgb, var(--bg-panel) 82%, var(--bg-panel-strong)) 100%
+  );
+  border-color: color-mix(in srgb, var(--border-subtle) 88%, transparent);
+}
+
 .page__masthead {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.85fr);
@@ -923,7 +935,7 @@ body {
 }
 
 .empty-state {
-  background: linear-gradient(180deg, rgba(255, 251, 245, 0.98), rgba(239, 230, 214, 0.92));
+  box-shadow: var(--shadow-panel);
 }
 
 .sr-only {
@@ -1028,6 +1040,12 @@ body {
   table-layout: fixed;
 }
 
+.offer-panel__table thead th {
+  padding-top: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-subtle);
+}
+
 .offer-panel__table th,
 .offer-panel__table td {
   padding: 10px 12px;
@@ -1036,14 +1054,21 @@ body {
 }
 
 .offer-panel__table th {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--text-primary);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
 .offer-panel__table td {
   font-size: 0.95rem;
   color: var(--text-secondary);
+}
+
+.offer-panel__table tbody tr + tr td {
+  border-top: 1px solid rgba(68, 53, 39, 0.08);
 }
 
 .offer-panel__col--company {
@@ -1071,7 +1096,7 @@ body {
 }
 
 .archive-panel {
-  background: linear-gradient(180deg, rgba(255, 251, 245, 0.92), rgba(247, 241, 231, 0.88));
+  box-shadow: var(--shadow-panel);
 }
 
 .archive-panel__summary {
@@ -1086,8 +1111,10 @@ body {
 .archive-panel__title {
   display: block;
   margin-top: 8px;
-  font-size: 1.1rem;
+  font-family: "Newsreader", serif;
+  font-size: 1.2rem;
   font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .company-card__datetime::-webkit-calendar-picker-indicator {
@@ -1120,10 +1147,6 @@ body {
 }
 
 @media (max-width: 1180px) {
-  .page__masthead {
-    grid-template-columns: 1fr;
-  }
-
   .page__masthead-rail {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1134,12 +1157,21 @@ body {
 }
 
 @media (max-width: 960px) {
+  .page__masthead {
+    grid-template-columns: 1fr;
+  }
+
   .board-grid {
     grid-template-columns: 1fr;
   }
 
   .composer-form {
     grid-template-columns: 1fr;
+  }
+
+  .agenda-item {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .company-card__summary-row,
@@ -1194,11 +1226,6 @@ body {
   .group-tabs__button {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .agenda-item {
-    grid-template-columns: 1fr;
-    gap: 10px;
   }
 
   .agenda-item__time {

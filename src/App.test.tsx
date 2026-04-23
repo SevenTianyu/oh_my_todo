@@ -22,11 +22,11 @@ function seedWorkbench() {
 }
 
 describe("App", () => {
-  it("shows an empty-state entry point on first visit", () => {
+  it("shows a title-page style empty state on first visit", () => {
     render(<App />);
 
-    expect(screen.getByText(/数据默认只保存在当前浏览器/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "你的面试工作台还是空的" })).toBeInTheDocument();
+    expect(screen.getByText("先写下公司，再逐步补上时间、判断和谈薪记录。")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "从第一家公司开始建立判断台" })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "新建第一个公司" })).toHaveLength(2);
     expect(screen.getAllByRole("button", { name: "导入 JSON" })).toHaveLength(2);
   });
@@ -39,7 +39,7 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "未来 7 天安排" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "创业公司" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "大厂" })).toBeInTheDocument();
-    expect(screen.getByText("归档流程（1）")).toBeInTheDocument();
+    expect(screen.getByText("历史判断档案（1）")).toBeInTheDocument();
     expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
     expect(screen.getByLabelText("分组切换")).toBeInTheDocument();
   });
@@ -233,7 +233,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByText("归档流程（1）"));
+    await user.click(screen.getByText("历史判断档案（1）"));
 
     const archiveCard = screen.getByText("Google").closest("article");
     expect(archiveCard).not.toBeNull();
@@ -361,7 +361,7 @@ describe("App", () => {
 
     await user.click(screen.getByRole("button", { name: "清空本地数据" }));
 
-    expect(screen.getByRole("heading", { name: "你的面试工作台还是空的" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "从第一家公司开始建立判断台" })).toBeInTheDocument();
     expect(confirmSpy).toHaveBeenCalled();
 
     confirmSpy.mockRestore();

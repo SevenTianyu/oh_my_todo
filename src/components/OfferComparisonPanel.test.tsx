@@ -43,6 +43,11 @@ describe("OfferComparisonPanel", () => {
       <OfferComparisonPanel rows={[rows[0]]} scope="active" onScopeChange={onScopeChange} />
     );
 
+    expect(screen.getByRole("button", { name: "当前谈薪公司" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(screen.getByRole("table")).toHaveClass("offer-panel__table");
     expect(screen.getByText("ACME")).toBeInTheDocument();
     expect(screen.getByText("5.2 万 × 15 薪")).toBeInTheDocument();
     expect(screen.getByText("89.8 万")).toBeInTheDocument();

@@ -31,7 +31,7 @@ export function OfferComparisonPanel({
 
     return [
       "button",
-      isActive ? "button--primary page__hero-action page__hero-action--primary" : "button--secondary page__hero-action page__hero-action--support",
+      isActive ? "button--primary" : "button--ghost",
       "offer-panel__filter-button"
     ].join(" ");
   }
@@ -40,7 +40,7 @@ export function OfferComparisonPanel({
     <section className="panel offer-panel">
       <div className="section-heading">
         <div>
-          <p className="section-heading__eyebrow">Offer Comparison</p>
+          <p className="section-heading__eyebrow">Comparison Sheet</p>
           <h2>Offer 对比</h2>
         </div>
         <div className="offer-panel__filters" aria-label="谈薪范围切换">

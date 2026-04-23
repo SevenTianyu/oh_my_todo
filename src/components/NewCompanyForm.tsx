@@ -49,9 +49,9 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
       <div className="composer-panel__header">
         <div>
           <p className="panel__eyebrow">Quick Capture</p>
-          <h2>新建公司与首个流程</h2>
+          <h2>写下第一条新判断</h2>
         </div>
-        <p className="panel__description">先录入最少字段，系统会自动补上首轮初筛沟通，后续再补充判断、时间和备注。</p>
+        <p className="panel__description">只填最少字段，后面再补充真实上下文。</p>
       </div>
 
       <form className="composer-form" onSubmit={handleSubmit}>

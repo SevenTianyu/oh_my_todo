@@ -188,16 +188,14 @@ export default function App() {
       {isEmpty ? (
         <section className="stack-section">
           <section className="panel empty-state">
-            <p className="panel__eyebrow">Local-First Setup</p>
-            <h2>你的面试工作台还是空的</h2>
-            <p className="panel__description">
-              先手动录入第一个公司，或者直接导入你已经整理好的 JSON 快照。没有登录，没有云端存档，默认只保存在这台设备的当前浏览器里。
-            </p>
+            <p className="panel__eyebrow">Title Page</p>
+            <h2>从第一家公司开始建立判断台</h2>
+            <p className="panel__description">先写下公司，再逐步补上时间、判断和谈薪记录。</p>
             <div className="empty-state__actions">
               <button className="button button--primary" type="button" onClick={handleCreateCompany}>
                 新建第一个公司
               </button>
-              <button className="button button--secondary" type="button" onClick={openImportPicker}>
+              <button className="button button--ghost" type="button" onClick={openImportPicker}>
                 导入 JSON
               </button>
             </div>

@@ -17,9 +17,9 @@ export function ArchiveSection({ companies }: { companies: CompanyRecord[] }) {
       <summary className="archive-panel__summary">
         <div>
           <p className="archive-panel__eyebrow">Archive</p>
-          <span className="archive-panel__title">归档流程（{companies.length}）</span>
+          <span className="archive-panel__title">历史判断档案（{companies.length}）</span>
         </div>
-        <span className="archive-panel__hint">保留历史判断</span>
+        <span className="archive-panel__hint">保留已经走完的上下文</span>
       </summary>
       <div className="archive-panel__list">
         {companies.map((company) => {
