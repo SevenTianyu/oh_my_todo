@@ -5,6 +5,24 @@ import { CompanyCard } from "./CompanyCard";
 import { sampleCompanies } from "../lib/sampleData";
 
 describe("CompanyCard", () => {
+  it("renders the company card as a dossier sheet with summary-first hierarchy", () => {
+    const company = sampleCompanies[0];
+    const { container } = render(
+      <CompanyCard
+        company={company}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+      />
+    );
+
+    expect(container.querySelector(".company-card__masthead")).not.toBeNull();
+    expect(container).toHaveTextContent("整体判断");
+    expect(container).toHaveTextContent("团队强，方向贴合，但节奏偏快。");
+  });
+
   it("renders a unified overall impression preview with interview notes appended line-by-line", () => {
     const company = sampleCompanies[0];
     const { container } = render(
@@ -20,7 +38,7 @@ describe("CompanyCard", () => {
 
     const summaryBlock = container.querySelector(".company-card__summary-item");
     expect(summaryBlock).not.toBeNull();
-    expect(summaryBlock).toHaveTextContent("整体印象");
+    expect(summaryBlock).toHaveTextContent("整体判断");
     expect(summaryBlock).toHaveTextContent("团队强，方向贴合，但节奏偏快。");
     expect(summaryBlock).toHaveTextContent("2026-04-17 一面：关注 owner 意识");
     expect(summaryBlock).toHaveTextContent("2026-04-15 简历沟通：招聘经理反馈积极");

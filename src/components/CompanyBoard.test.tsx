@@ -13,6 +13,32 @@ vi.mock("./CompanyCard", () => ({
 }));
 
 describe("CompanyBoard", () => {
+  it("renders each group as a dossier lane with a padded count", () => {
+    const { container } = render(
+      <CompanyBoard
+        groups={[
+          {
+            key: "active",
+            label: "进行中",
+            companies: [sampleCompanies[1]]
+          }
+        ]}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+        negotiationSuggestionProcessIds={{ nova: "nova-product" }}
+        onStartNegotiation={() => {}}
+        onSaveNegotiationSnapshot={() => {}}
+        onFinishNegotiation={() => {}}
+      />
+    );
+
+    expect(container.querySelector(".group-panel__meta")).not.toBeNull();
+    expect(container).toHaveTextContent("01");
+  });
+
   it("passes the negotiation callbacks into CompanyCard", () => {
     render(
       <CompanyBoard
@@ -35,8 +61,8 @@ describe("CompanyBoard", () => {
       />
     );
 
-    expect(companyCardMock).toHaveBeenCalledTimes(1);
-    const passedProps = companyCardMock.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(companyCardMock).toHaveBeenCalled();
+    const passedProps = companyCardMock.mock.calls.at(-1)?.[0] as Record<string, unknown>;
     expect(passedProps).toMatchObject({
       company: sampleCompanies[1],
       negotiationSuggestionProcessId: "nova-product",

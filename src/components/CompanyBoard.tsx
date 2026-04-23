@@ -58,10 +58,15 @@ export function CompanyBoard({
         <section className="panel panel--group" key={group.key}>
           <div className="group-panel__header">
             <div>
-              <p className="group-panel__eyebrow">Active Lane</p>
+              <p className="group-panel__eyebrow">Dossier Lane</p>
               <h3>{group.label}</h3>
             </div>
-            <span className="group-panel__count">{group.companies.length}</span>
+            <div className="group-panel__meta">
+              <span className="group-panel__count">
+                {String(group.companies.length).padStart(2, "0")}
+              </span>
+              <span className="group-panel__caption">份活跃判断</span>
+            </div>
           </div>
           <div className="group-panel__stack">
             {group.companies.map((company) => (

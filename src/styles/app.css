@@ -71,6 +71,15 @@ body {
   box-shadow: var(--shadow-panel);
 }
 
+.panel--group {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, white 38%, var(--surface-panel-strong)) 0%,
+    color-mix(in srgb, var(--surface-panel) 56%, var(--bg-panel-strong)) 100%
+  );
+  border-color: color-mix(in srgb, var(--border-strong) 78%, transparent);
+}
+
 .page__masthead {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.85fr);
@@ -193,6 +202,12 @@ body {
 .panel__header h2,
 .group-panel__header h3 {
   font-size: 1.35rem;
+}
+
+.group-panel__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .section-heading__eyebrow,
@@ -358,6 +373,22 @@ body {
   color: color-mix(in srgb, var(--accent-umber) 72%, var(--ink-soft));
 }
 
+.group-panel__count {
+  font-family: "Newsreader", serif;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--accent-ink);
+}
+
+.group-panel__caption {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
 .button {
   min-height: 46px;
   padding: 0 18px;
@@ -398,8 +429,12 @@ body {
 }
 
 .company-card {
-  background: linear-gradient(180deg, rgba(255, 251, 245, 0.98), rgba(247, 241, 231, 0.96));
-  border: 1px solid var(--line-subtle);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, white 42%, var(--surface-panel-strong)) 0%,
+    color-mix(in srgb, var(--surface-panel) 62%, var(--bg-panel-strong)) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--border-strong) 72%, transparent);
   border-radius: var(--radius-card);
   padding: 22px;
   box-shadow: var(--shadow-card);
@@ -411,11 +446,36 @@ body {
   box-shadow: none;
 }
 
-.company-card__header {
+.company-card__masthead {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line-subtle) 88%, transparent);
+}
+
+.company-card__mastcopy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.company-card__mastrail {
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+  min-width: 10rem;
+}
+
+.company-card__catalog {
+  margin: 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-umber);
 }
 
 .company-card__summary {
@@ -425,8 +485,24 @@ body {
 
 .company-card__name,
 .company-card__process-title {
+  font-family: "Newsreader", serif;
   font-size: 1.45rem;
   letter-spacing: -0.04em;
+}
+
+.company-card__role {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.company-card__mastrail-note {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  text-align: right;
 }
 
 .company-card__summary-lines {
@@ -458,6 +534,11 @@ body {
   margin-top: 20px;
   display: grid;
   gap: 22px;
+}
+
+.company-card__negotiation-shell {
+  display: grid;
+  gap: 12px;
 }
 
 .company-card__section {
@@ -848,7 +929,6 @@ body {
 }
 
 .badge,
-.group-panel__count,
 .archive-panel__hint {
   display: inline-flex;
   align-items: center;
@@ -905,7 +985,6 @@ body {
   gap: 18px;
 }
 
-.group-panel__count,
 .archive-panel__hint {
   border: 1px solid var(--line-subtle);
   background: rgba(95, 107, 92, 0.08);
@@ -1019,7 +1098,7 @@ body {
   }
 
   .company-card__process-header,
-  .company-card__header {
+  .company-card__masthead {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -1067,7 +1146,7 @@ body {
   .panel__header,
   .group-panel__header,
   .archive-panel__summary,
-  .company-card__header,
+  .company-card__masthead,
   .company-card__process-header,
   .group-tabs__shell,
   .composer-panel__header {

@@ -344,31 +344,40 @@ export function CompanyCard(props: CompanyCardProps) {
     props.company.companyType,
     props.company.overallImpression
   ]);
+  const activeProcesses = props.company.processes.filter((process) => process.status === "active");
+  const activeProcessNames = activeProcesses.map((process) => process.roleName).join(" · ");
+  const companyCatalog = `Dossier / ${COMPANY_TYPE_LABELS[props.company.companyType]}`;
 
   return (
     <article className="company-card">
-      <div className="company-card__header">
-        <div className="company-card__summary">
-          <div className="company-card__badges">
-            <span className={`badge badge--company-type badge--company-type-${props.company.companyType}`}>
-              {COMPANY_TYPE_LABELS[props.company.companyType]}
-            </span>
-          </div>
-
-          <strong className="company-card__name">{props.company.name}</strong>
+      <header className="company-card__masthead">
+        <div className="company-card__mastcopy">
+          <p className="company-card__catalog">{companyCatalog}</p>
+          <h3 className="company-card__name">{props.company.name}</h3>
+          <p className="company-card__role">{activeProcessNames || "暂无活跃流程"}</p>
           <div className="company-card__summary-lines">
             <div className="company-card__summary-item">
-              <span>整体印象</span>
+              <span>整体判断</span>
               <p>{getCompanyImpressionPreview(props.company)}</p>
             </div>
           </div>
         </div>
-      </div>
+        <div className="company-card__mastrail">
+          <span className={`badge badge--company-type badge--company-type-${props.company.companyType}`}>
+            {COMPANY_TYPE_LABELS[props.company.companyType]}
+          </span>
+          <p className="company-card__mastrail-note">
+            {activeProcesses.length > 0
+              ? `${activeProcesses.length} 个活跃流程`
+              : "当前没有活跃流程"}
+          </p>
+        </div>
+      </header>
 
       <div className="company-card__details">
         <section className="company-card__section">
           <div className="company-card__section-header">
-            <h4 className="company-card__section-title">公司判断</h4>
+            <h4 className="company-card__section-title">Company Judgment</h4>
             <button
               className="button button--ghost"
               type="button"
@@ -455,7 +464,7 @@ export function CompanyCard(props: CompanyCardProps) {
 
         <section className="company-card__section">
           <div className="company-card__section-header">
-            <h4 className="company-card__section-title">面试安排</h4>
+            <h4 className="company-card__section-title">Interview Schedule</h4>
             <button
               className="button button--ghost"
               type="button"
@@ -495,14 +504,17 @@ export function CompanyCard(props: CompanyCardProps) {
           ) : null}
         </section>
 
-        <NegotiationSection
-          company={props.company}
-          suggestionProcessId={props.negotiationSuggestionProcessId}
-          onStartNegotiation={props.onStartNegotiation}
-          onSaveNegotiationSnapshot={props.onSaveNegotiationSnapshot}
-          onDeleteNegotiationSnapshot={props.onDeleteNegotiationSnapshot}
-          onFinishNegotiation={props.onFinishNegotiation}
-        />
+        <div className="company-card__negotiation-shell">
+          <h4 className="company-card__section-title">Negotiation</h4>
+          <NegotiationSection
+            company={props.company}
+            suggestionProcessId={props.negotiationSuggestionProcessId}
+            onStartNegotiation={props.onStartNegotiation}
+            onSaveNegotiationSnapshot={props.onSaveNegotiationSnapshot}
+            onDeleteNegotiationSnapshot={props.onDeleteNegotiationSnapshot}
+            onFinishNegotiation={props.onFinishNegotiation}
+          />
+        </div>
       </div>
     </article>
   );
