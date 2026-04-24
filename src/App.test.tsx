@@ -288,7 +288,6 @@ describe("App", () => {
     seedWorkbench();
     const user = userEvent.setup();
     render(<App />);
-    const acmeCard = screen.getByRole("heading", { name: "ACME" }).closest("article");
 
     expect(screen.getByLabelText("Workbench Home")).toBeInTheDocument();
     expect(screen.queryByText("Personal Interview Desk")).not.toBeInTheDocument();
@@ -302,6 +301,14 @@ describe("App", () => {
     expect(screen.queryByText("Offer Comparison")).not.toBeInTheDocument();
     expect(screen.getAllByText("Archive (1)")).toHaveLength(1);
     expect(screen.queryByRole("heading", { name: "Archive" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Group by stage" }));
+    expect(screen.getByRole("heading", { name: "Screening" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Interviewing" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Negotiating" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "筛选中" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "面试中" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "谈薪中" })).not.toBeInTheDocument();
+    const acmeCard = screen.getByRole("heading", { name: "ACME" }).closest("article");
     expect(acmeCard).not.toBeNull();
 
     await user.click(within(acmeCard!).getByRole("button", { name: "Expand Company Judgment" }));

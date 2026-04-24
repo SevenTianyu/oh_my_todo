@@ -9,7 +9,7 @@ import { NewCompanyForm } from "./components/NewCompanyForm";
 import { OfferComparisonPanel } from "./components/OfferComparisonPanel";
 import { UpcomingTimeline } from "./components/UpcomingTimeline";
 import { useInterviewWorkbench } from "./hooks/useInterviewWorkbench";
-import { resolveAppLocale, type AppLocale } from "./lib/locale";
+import { getGroupLabel, resolveAppLocale, type AppLocale } from "./lib/locale";
 import { getWorkbenchExportFilename, serializeWorkbenchSnapshot } from "./lib/storage";
 
 type NoticeTone = "neutral" | "success" | "error";
@@ -138,7 +138,14 @@ export default function App() {
           archiveDescription:
             "主工作区只保留活跃流程，已结束与搁置的公司统一存下来，保留后续回看依据。"
         };
-  const groupedCompanies = workbench.groupedCompanies;
+  const groupedCompanies = workbench.groupedCompanies.map((group) =>
+    workbench.grouping === "stage"
+      ? {
+          ...group,
+          label: getGroupLabel(locale, "stage", group.key)
+        }
+      : group
+  );
   const activeCompanyCount = new Set(
     groupedCompanies.flatMap((group) => group.companies.map((company) => company.id))
   ).size;
