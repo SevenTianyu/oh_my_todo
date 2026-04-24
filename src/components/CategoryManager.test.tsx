@@ -38,7 +38,7 @@ describe("CategoryManager", () => {
     expect(onCreate).toHaveBeenCalledWith(" 中厂 ");
   });
 
-  it("preserves dirty draft names when category order changes", () => {
+  it("preserves dirty draft names and refreshes clean names when categories change", () => {
     const { rerender } = render(
       <CategoryManager
         open
@@ -59,7 +59,7 @@ describe("CategoryManager", () => {
         open
         companyCategories={[
           { id: "foreign", name: "外企", order: 0 },
-          { id: "startup", name: "创业公司", order: 1 },
+          { id: "startup", name: "早期团队", order: 1 },
           { id: "big-tech", name: "大厂", order: 2 }
         ]}
         categoryUsage={{ startup: 1, "big-tech": 1, foreign: 0 }}
@@ -72,6 +72,7 @@ describe("CategoryManager", () => {
     );
 
     expect(screen.getByLabelText("分类名称 外企")).toHaveValue("外资公司");
+    expect(screen.getByLabelText("分类名称 早期团队")).toHaveValue("早期团队");
   });
 
   it("focuses the dialog, closes on Escape, and restores focus after close", async () => {
@@ -115,6 +116,41 @@ describe("CategoryManager", () => {
     expect(launchButton).toHaveFocus();
     unmount();
     launchButton.remove();
+  });
+
+  it("wraps Tab and Shift+Tab focus inside the dialog", async () => {
+    const user = userEvent.setup();
+    const backgroundButton = document.createElement("button");
+    document.body.append(backgroundButton);
+
+    render(
+      <CategoryManager
+        open
+        companyCategories={categories}
+        categoryUsage={{ startup: 1, "big-tech": 1, foreign: 0 }}
+        onCreateCategory={() => ({ ok: true as const })}
+        onRenameCategory={() => ({ ok: true as const })}
+        onMoveCategory={() => {}}
+        onDeleteCategory={() => ({ ok: true as const })}
+        onClose={() => {}}
+      />
+    );
+
+    const dialog = screen.getByRole("dialog", { name: "管理分类" });
+    const firstControl = screen.getByRole("button", { name: "关闭" });
+    const lastControl = screen.getByRole("button", { name: "删除 外企" });
+
+    await user.tab({ shift: true });
+    expect(lastControl).toHaveFocus();
+
+    await user.tab();
+    expect(firstControl).toHaveFocus();
+
+    backgroundButton.focus();
+    await user.tab();
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+
+    backgroundButton.remove();
   });
 
   it("shows a duplicate-name error from create", async () => {

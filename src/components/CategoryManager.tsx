@@ -5,6 +5,15 @@ import type { CompanyCategory } from "../types/interview";
 
 type CategoryActionResult = { ok: true } | { ok: false; error: CategoryMutationError };
 
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])'
+].join(",");
+
 interface CategoryManagerProps {
   open: boolean;
   companyCategories: CompanyCategory[];
@@ -81,15 +90,24 @@ export function CategoryManager({
   const dialogRef = useRef<HTMLElement | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [draftNames, setDraftNames] = useState<Record<string, string>>({});
+  const [dirtyCategoryIds, setDirtyCategoryIds] = useState<Set<string>>(() => new Set());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setDraftNames((current) =>
       Object.fromEntries(
-        sortedCategories.map((category) => [category.id, current[category.id] ?? category.name])
+        sortedCategories.map((category) => [
+          category.id,
+          dirtyCategoryIds.has(category.id) ? (current[category.id] ?? category.name) : category.name
+        ])
       )
     );
-  }, [sortedCategories]);
+    setDirtyCategoryIds((current) => {
+      const categoryIds = new Set(sortedCategories.map((category) => category.id));
+      const next = new Set([...current].filter((categoryId) => categoryIds.has(categoryId)));
+      return next.size === current.size ? current : next;
+    });
+  }, [dirtyCategoryIds, sortedCategories]);
 
   useEffect(() => {
     if (!open) return;
@@ -103,6 +121,34 @@ export function CategoryManager({
       if (event.key === "Escape") {
         event.preventDefault();
         onClose();
+        return;
+      }
+
+      if (event.key === "Tab") {
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+
+        const focusableElements = [...dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)];
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+        if (!firstElement || !lastElement) {
+          event.preventDefault();
+          dialog.focus();
+          return;
+        }
+
+        if (event.shiftKey) {
+          if (document.activeElement === firstElement || document.activeElement === dialog) {
+            event.preventDefault();
+            lastElement.focus();
+          }
+          return;
+        }
+
+        if (!dialog.contains(document.activeElement) || document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
       }
     }
 
@@ -189,9 +235,10 @@ export function CategoryManager({
                   aria-label={copy.categoryName(category.name)}
                   className="field field--input"
                   value={draftNames[category.id] ?? category.name}
-                  onChange={(event) =>
-                    setDraftNames((current) => ({ ...current, [category.id]: event.target.value }))
-                  }
+                  onChange={(event) => {
+                    setDirtyCategoryIds((current) => new Set(current).add(category.id));
+                    setDraftNames((current) => ({ ...current, [category.id]: event.target.value }));
+                  }}
                 />
                 <span className="category-manager__usage">
                   {usage > 0 ? copy.inUse(usage) : copy.empty}
