@@ -327,6 +327,7 @@ export default function App() {
       {showComposer ? (
         <section className="stack-section">
           <NewCompanyForm
+            companyCategories={workbench.companyCategories}
             onSubmit={(draft) => {
               workbench.createCompanyWithProcess(draft);
               setShowComposer(false);
@@ -372,6 +373,7 @@ export default function App() {
             <GroupingTabs value={workbench.grouping} onChange={workbench.setGrouping} />
             <CompanyBoard
               groups={groupedCompanies}
+              companyCategories={workbench.companyCategories}
               onSaveSummary={workbench.updateCompanySummary}
               onAddRound={workbench.addRoundToProcess}
               negotiationSuggestionProcessIds={workbench.negotiationSuggestionProcessIds}

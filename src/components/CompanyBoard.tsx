@@ -1,6 +1,7 @@
 import { CompanyCard } from "./CompanyCard";
 import { resolveAppLocale } from "../lib/locale";
 import type {
+  CompanyCategory,
   CompanyGroup,
   CompanyRecord,
   InterviewProcess,
@@ -13,6 +14,7 @@ type CompanySummaryPatch = Partial<Pick<CompanyRecord, "name" | "companyType" | 
 
 interface CompanyBoardProps {
   groups: CompanyGroup[];
+  companyCategories: CompanyCategory[];
   onSaveSummary: (companyId: string, patch: CompanySummaryPatch) => void;
   onAddRound: (companyId: string, processId: string) => void;
   onArchiveProcess: (companyId: string, processId: string, archiveNote: string) => void;
@@ -42,6 +44,7 @@ interface CompanyBoardProps {
 
 export function CompanyBoard({
   groups,
+  companyCategories,
   onSaveSummary,
   onAddRound,
   onArchiveProcess,
@@ -81,6 +84,7 @@ export function CompanyBoard({
               <CompanyCard
                 key={company.id}
                 company={company}
+                companyCategories={companyCategories}
                 onSaveSummary={onSaveSummary}
                 onAddRound={onAddRound}
                 onArchiveProcess={onArchiveProcess}

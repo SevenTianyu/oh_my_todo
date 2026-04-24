@@ -1,24 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { getCompanyTypeLabel, resolveAppLocale } from "../lib/locale";
-import type { CompanyType, NewCompanyDraft } from "../types/interview";
+import { resolveAppLocale } from "../lib/locale";
+import type { CompanyCategory, NewCompanyDraft } from "../types/interview";
 
-function createInitialDraft(): NewCompanyDraft {
+function getInitialCategoryId(companyCategories: CompanyCategory[]) {
+  return [...companyCategories].sort((left, right) => left.order - right.order)[0]?.id ?? "";
+}
+
+function createInitialDraft(companyCategories: CompanyCategory[]): NewCompanyDraft {
   return {
     companyName: "",
-    companyType: "startup",
+    companyType: getInitialCategoryId(companyCategories),
     roleName: ""
   };
 }
 
 interface NewCompanyFormProps {
+  companyCategories: CompanyCategory[];
+  onManageCategories?: () => void;
   onSubmit: (draft: NewCompanyDraft) => void;
   onCancel?: () => void;
 }
 
-export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
+export function NewCompanyForm({
+  companyCategories,
+  onManageCategories,
+  onSubmit,
+  onCancel
+}: NewCompanyFormProps) {
   const locale = resolveAppLocale();
-  const [draft, setDraft] = useState<NewCompanyDraft>(() => createInitialDraft());
+  const sortedCompanyCategories = [...companyCategories].sort(
+    (left, right) => left.order - right.order || left.name.localeCompare(right.name)
+  );
+  const [draft, setDraft] = useState<NewCompanyDraft>(() => createInitialDraft(companyCategories));
   const copy =
     locale === "en"
       ? {
@@ -28,6 +42,7 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
           companyName: "Company Name",
           companyType: "Company Type",
           roleName: "Role Name",
+          manageCategories: "Manage Categories",
           save: "Save to Workbench",
           cancel: "Cancel"
         }
@@ -38,13 +53,18 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
           companyName: "公司名称",
           companyType: "公司类型",
           roleName: "岗位名称",
+          manageCategories: "管理分类",
           save: "保存到工作台",
           cancel: "取消"
         };
-  const companyTypeOptions: Array<{ value: CompanyType; label: string }> = [
-    { value: "startup", label: getCompanyTypeLabel(locale, "startup") },
-    { value: "big-tech", label: getCompanyTypeLabel(locale, "big-tech") }
-  ];
+
+  useEffect(() => {
+    setDraft((current) =>
+      sortedCompanyCategories.some((category) => category.id === current.companyType)
+        ? current
+        : { ...current, companyType: getInitialCategoryId(sortedCompanyCategories) }
+    );
+  }, [sortedCompanyCategories]);
 
   function updateDraft<K extends keyof NewCompanyDraft>(key: K, value: NewCompanyDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -64,7 +84,7 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
     }
 
     onSubmit(normalizedDraft);
-    setDraft(createInitialDraft());
+    setDraft(createInitialDraft(companyCategories));
   }
 
   return (
@@ -96,15 +116,22 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
             aria-label={copy.companyType}
             className="field composer-field__control"
             value={draft.companyType}
-            onChange={(event) => updateDraft("companyType", event.target.value as CompanyType)}
+            onChange={(event) => updateDraft("companyType", event.target.value)}
           >
-            {companyTypeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+            {sortedCompanyCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
               </option>
             ))}
           </select>
         </label>
+        {onManageCategories ? (
+          <div className="composer-field__inline-actions">
+            <button className="button button--ghost" type="button" onClick={onManageCategories}>
+              {copy.manageCategories}
+            </button>
+          </div>
+        ) : null}
 
         <label className="composer-field">
           <span>{copy.roleName}</span>

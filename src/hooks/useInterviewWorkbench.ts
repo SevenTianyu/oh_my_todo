@@ -51,6 +51,7 @@ export function useInterviewWorkbench() {
   return {
     grouping,
     companies,
+    companyCategories,
     snapshot,
     comparisonScope,
     setComparisonScope,
