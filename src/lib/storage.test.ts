@@ -27,6 +27,10 @@ const legacyCompaniesWithNegotiation = legacyCompanies.map((company) => ({
   ...company,
   negotiation: defaultNegotiation
 }));
+const defaultCompanyCategories = [
+  { id: "startup", name: "创业公司", order: 0 },
+  { id: "big-tech", name: "大厂", order: 1 }
+];
 
 describe("storage", () => {
   beforeEach(() => {
@@ -35,15 +39,17 @@ describe("storage", () => {
 
   it("saves and loads the v2 workbench snapshot", () => {
     saveWorkbenchSnapshot({
-      version: 2,
+      version: 3,
       grouping: "companyType",
+      companyCategories: defaultCompanyCategories,
       companies: sampleCompanies
     });
 
     const snapshot = loadWorkbenchSnapshot();
 
-    expect(snapshot?.version).toBe(2);
+    expect(snapshot?.version).toBe(3);
     expect(snapshot?.grouping).toBe("companyType");
+    expect(snapshot?.companyCategories).toEqual(defaultCompanyCategories);
     expect(snapshot?.companies).toEqual(sampleCompaniesWithNegotiation);
   });
 
@@ -63,8 +69,9 @@ describe("storage", () => {
     const snapshot = loadWorkbenchSnapshot();
 
     expect(snapshot).toEqual({
-      version: 2,
+      version: 3,
       grouping: "companyType",
+      companyCategories: defaultCompanyCategories,
       companies: sampleCompaniesWithNegotiation
     });
   });
@@ -112,8 +119,9 @@ describe("storage", () => {
     expect(result).toEqual({
       ok: true,
       snapshot: {
-        version: 2,
+        version: 3,
         grouping: "companyType",
+        companyCategories: defaultCompanyCategories,
         companies: sampleCompaniesWithNegotiation
       }
     });
@@ -156,8 +164,9 @@ describe("storage", () => {
     expect(result).toEqual({
       ok: true,
       snapshot: {
-        version: 2,
+        version: 3,
         grouping: "companyType",
+        companyCategories: defaultCompanyCategories,
         companies: [
           {
             id: "cursor",
@@ -228,8 +237,9 @@ describe("storage", () => {
     expect(result).toEqual({
       ok: true,
       snapshot: {
-        version: 2,
+        version: 3,
         grouping: "companyType",
+        companyCategories: defaultCompanyCategories,
         companies: sampleCompaniesWithNegotiation
       }
     });
@@ -237,23 +247,50 @@ describe("storage", () => {
 
   it("serializes snapshots for export using the same persisted shape", () => {
     const content = serializeWorkbenchSnapshot({
-      version: 2,
+      version: 3,
       grouping: "stage",
+      companyCategories: defaultCompanyCategories,
       companies: legacyCompanies as never
     });
 
     expect(JSON.parse(content)).toEqual({
-      version: 2,
+      version: 3,
       grouping: "stage",
+      companyCategories: defaultCompanyCategories,
       companies: legacyCompaniesWithNegotiation
     });
     expect(JSON.parse(content).companies[0].processes[0]).not.toHaveProperty("stage");
   });
 
+  it("round-trips v3 snapshots with custom company categories", () => {
+    const snapshot = {
+      version: 3 as const,
+      grouping: "companyType" as const,
+      companyCategories: [
+        { id: "startup", name: "早期团队", order: 0 },
+        { id: "foreign", name: "外企", order: 1 }
+      ],
+      companies: [
+        {
+          ...sampleCompanies[0],
+          companyType: "foreign"
+        }
+      ]
+    };
+
+    const result = parseWorkbenchSnapshotImport(serializeWorkbenchSnapshot(snapshot));
+
+    expect(result).toEqual({
+      ok: true,
+      snapshot
+    });
+  });
+
   it("round-trips a populated negotiation payload through export and import", () => {
     const richSnapshot = {
-      version: 2 as const,
+      version: 3 as const,
       grouping: "companyType" as const,
+      companyCategories: defaultCompanyCategories,
       companies: [
         {
           ...sampleCompanies[0],
@@ -300,8 +337,9 @@ describe("storage", () => {
 
   it("round-trips archived process notes through export and import", () => {
     const snapshotWithArchiveNote = {
-      version: 2 as const,
+      version: 3 as const,
       grouping: "companyType" as const,
+      companyCategories: defaultCompanyCategories,
       companies: [
         {
           ...sampleCompanies[4],
@@ -370,8 +408,9 @@ describe("storage", () => {
     expect(result).toEqual({
       ok: true,
       snapshot: {
-        version: 2,
+        version: 3,
         grouping: "companyType",
+        companyCategories: defaultCompanyCategories,
         companies: [
           {
             ...sampleCompanies[0],
@@ -418,9 +457,97 @@ describe("storage", () => {
 
   it("creates an empty v2 workbench snapshot", () => {
     expect(createEmptyWorkbenchSnapshot()).toEqual({
-      version: 2,
+      version: 3,
       grouping: "companyType",
+      companyCategories: defaultCompanyCategories,
       companies: []
+    });
+  });
+
+  it("rejects duplicate category ids in v3 imports", () => {
+    const result = parseWorkbenchSnapshotImport(
+      JSON.stringify({
+        version: 3,
+        grouping: "companyType",
+        companyCategories: [
+          { id: "startup", name: "创业公司", order: 0 },
+          { id: "startup", name: "早期团队", order: 1 }
+        ],
+        companies: []
+      })
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      error: expect.objectContaining({
+        code: "invalid_shape",
+        path: "companyCategories[1].id"
+      })
+    });
+  });
+
+  it("rejects blank category names in v3 imports", () => {
+    const result = parseWorkbenchSnapshotImport(
+      JSON.stringify({
+        version: 3,
+        grouping: "companyType",
+        companyCategories: [{ id: "startup", name: "  ", order: 0 }],
+        companies: []
+      })
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      error: expect.objectContaining({
+        code: "invalid_shape",
+        path: "companyCategories[0].name"
+      })
+    });
+  });
+
+  it("rejects duplicate category names after trimming", () => {
+    const result = parseWorkbenchSnapshotImport(
+      JSON.stringify({
+        version: 3,
+        grouping: "companyType",
+        companyCategories: [
+          { id: "startup", name: "外企", order: 0 },
+          { id: "foreign", name: " 外企 ", order: 1 }
+        ],
+        companies: []
+      })
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      error: expect.objectContaining({
+        code: "invalid_shape",
+        path: "companyCategories[1].name"
+      })
+    });
+  });
+
+  it("rejects companies that reference missing category ids", () => {
+    const result = parseWorkbenchSnapshotImport(
+      JSON.stringify({
+        version: 3,
+        grouping: "companyType",
+        companyCategories: [{ id: "startup", name: "创业公司", order: 0 }],
+        companies: [
+          {
+            ...sampleCompanies[2],
+            companyType: "missing"
+          }
+        ]
+      })
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      error: expect.objectContaining({
+        code: "invalid_enum",
+        path: "companies[0].companyType"
+      })
     });
   });
 

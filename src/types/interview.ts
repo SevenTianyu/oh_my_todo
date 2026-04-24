@@ -1,8 +1,14 @@
 export type GroupingMode = "companyType" | "stage";
-export type CompanyType = "startup" | "big-tech";
+export type CompanyType = string;
 export type RoundStatus = "pending" | "scheduled" | "completed" | "waiting-result" | "closed";
 export type ProcessStatus = "active" | "archived";
 export type NegotiationStatus = "inactive" | "active" | "accepted" | "declined" | "terminated";
+
+export interface CompanyCategory {
+  id: string;
+  name: string;
+  order: number;
+}
 
 export interface RoundRecord {
   id: string;
