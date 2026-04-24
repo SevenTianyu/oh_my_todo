@@ -2,9 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import {
   addRoundToProcess,
   archiveProcessById,
+  createCompanyCategory,
   createCompanyWithProcess,
+  deleteCompanyCategory,
   deleteNegotiationSnapshot,
   finishNegotiation,
+  moveCompanyCategory,
+  renameCompanyCategory,
   saveNegotiationSnapshot,
   startNegotiation,
   updateCompanySummary,
@@ -47,11 +51,22 @@ export function useInterviewWorkbench() {
   const grouping = snapshot.grouping;
   const companies = snapshot.companies;
   const companyCategories = snapshot.companyCategories;
+  const categoryUsage = useMemo(
+    () =>
+      Object.fromEntries(
+        companyCategories.map((category) => [
+          category.id,
+          companies.filter((company) => company.companyType === category.id).length
+        ])
+      ),
+    [companyCategories, companies]
+  );
 
   return {
     grouping,
     companies,
     companyCategories,
+    categoryUsage,
     snapshot,
     comparisonScope,
     setComparisonScope,
@@ -136,6 +151,35 @@ export function useInterviewWorkbench() {
         ...current,
         companies: createCompanyWithProcess(current.companies, draft)
       })),
+    createCompanyCategory: (name: string) => {
+      let result: ReturnType<typeof createCompanyCategory> = { ok: false, error: "blank" };
+      setSnapshot((current) => {
+        result = createCompanyCategory(current.companyCategories, name);
+        return result.ok ? { ...current, companyCategories: result.categories } : current;
+      });
+      return result.ok ? { ok: true as const } : { ok: false as const, error: result.error };
+    },
+    renameCompanyCategory: (categoryId: string, name: string) => {
+      let result: ReturnType<typeof renameCompanyCategory> = { ok: false, error: "blank" };
+      setSnapshot((current) => {
+        result = renameCompanyCategory(current.companyCategories, categoryId, name);
+        return result.ok ? { ...current, companyCategories: result.categories } : current;
+      });
+      return result.ok ? { ok: true as const } : { ok: false as const, error: result.error };
+    },
+    moveCompanyCategory: (categoryId: string, direction: "up" | "down") =>
+      setSnapshot((current) => ({
+        ...current,
+        companyCategories: moveCompanyCategory(current.companyCategories, categoryId, direction)
+      })),
+    deleteCompanyCategory: (categoryId: string) => {
+      let result: ReturnType<typeof deleteCompanyCategory> = { ok: false, error: "missing" };
+      setSnapshot((current) => {
+        result = deleteCompanyCategory(current.companyCategories, current.companies, categoryId);
+        return result.ok ? { ...current, companyCategories: result.categories } : current;
+      });
+      return result.ok ? { ok: true as const } : { ok: false as const, error: result.error };
+    },
     resetWorkbench: () => setSnapshot(createEmptyWorkbenchSnapshot()),
     importWorkbenchSnapshot: (raw: string) => {
       const result = parseWorkbenchSnapshotImport(raw);

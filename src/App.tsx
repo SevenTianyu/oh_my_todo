@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import "./styles/app.css";
 import { ArchiveSection } from "./components/ArchiveSection";
+import { CategoryManager } from "./components/CategoryManager";
 import { CompanyBoard } from "./components/CompanyBoard";
 import { GroupingTabs } from "./components/GroupingTabs";
 import { NewCompanyForm } from "./components/NewCompanyForm";
 import { OfferComparisonPanel } from "./components/OfferComparisonPanel";
 import { UpcomingTimeline } from "./components/UpcomingTimeline";
 import { useInterviewWorkbench } from "./hooks/useInterviewWorkbench";
-import { getGroupLabel, resolveAppLocale, type AppLocale } from "./lib/locale";
+import { resolveAppLocale, type AppLocale } from "./lib/locale";
 import { getWorkbenchExportFilename, serializeWorkbenchSnapshot } from "./lib/storage";
 
 type NoticeTone = "neutral" | "success" | "error";
@@ -51,6 +52,7 @@ export default function App() {
   const workbench = useInterviewWorkbench();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showComposer, setShowComposer] = useState(false);
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [notice, setNotice] = useState<{ tone: NoticeTone; message: string } | null>(null);
   const copy =
     locale === "en"
@@ -136,10 +138,7 @@ export default function App() {
           archiveDescription:
             "主工作区只保留活跃流程，已结束与搁置的公司统一存下来，保留后续回看依据。"
         };
-  const groupedCompanies = workbench.groupedCompanies.map((group) => ({
-    ...group,
-    label: getGroupLabel(locale, workbench.grouping, group.key)
-  }));
+  const groupedCompanies = workbench.groupedCompanies;
   const activeCompanyCount = new Set(
     groupedCompanies.flatMap((group) => group.companies.map((company) => company.id))
   ).size;
@@ -328,6 +327,7 @@ export default function App() {
         <section className="stack-section">
           <NewCompanyForm
             companyCategories={workbench.companyCategories}
+            onManageCategories={() => setCategoryManagerOpen(true)}
             onSubmit={(draft) => {
               workbench.createCompanyWithProcess(draft);
               setShowComposer(false);
@@ -370,7 +370,11 @@ export default function App() {
                 {copy.boardDescription}
               </p>
             </div>
-            <GroupingTabs value={workbench.grouping} onChange={workbench.setGrouping} />
+            <GroupingTabs
+              value={workbench.grouping}
+              onChange={workbench.setGrouping}
+              onManageCategories={() => setCategoryManagerOpen(true)}
+            />
             <CompanyBoard
               groups={groupedCompanies}
               companyCategories={workbench.companyCategories}
@@ -410,6 +414,16 @@ export default function App() {
           </section>
         </>
       )}
+      <CategoryManager
+        open={categoryManagerOpen}
+        companyCategories={workbench.companyCategories}
+        categoryUsage={workbench.categoryUsage}
+        onCreateCategory={workbench.createCompanyCategory}
+        onRenameCategory={workbench.renameCompanyCategory}
+        onMoveCategory={workbench.moveCompanyCategory}
+        onDeleteCategory={workbench.deleteCompanyCategory}
+        onClose={() => setCategoryManagerOpen(false)}
+      />
     </main>
   );
 }

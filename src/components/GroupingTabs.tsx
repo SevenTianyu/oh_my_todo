@@ -3,10 +3,12 @@ import { resolveAppLocale } from "../lib/locale";
 
 export function GroupingTabs({
   value,
-  onChange
+  onChange,
+  onManageCategories
 }: {
   value: GroupingMode;
   onChange: (value: GroupingMode) => void;
+  onManageCategories: () => void;
 }) {
   const locale = resolveAppLocale();
   const copy =
@@ -14,6 +16,7 @@ export function GroupingTabs({
       ? {
           label: "Workbench Index",
           groupSwitcherAria: "Grouping switcher",
+          manageCategories: "Manage Categories",
           options: [
             { value: "companyType" as const, label: "Company Type", ariaLabel: "Group by company type" },
             { value: "stage" as const, label: "Stage", ariaLabel: "Group by stage" }
@@ -22,6 +25,7 @@ export function GroupingTabs({
       : {
           label: "工作台索引",
           groupSwitcherAria: "分组切换",
+          manageCategories: "管理分类",
           options: [
             { value: "companyType" as const, label: "公司类型", ariaLabel: "按公司类型分组" },
             { value: "stage" as const, label: "流程阶段", ariaLabel: "按流程阶段分组" }
@@ -46,6 +50,13 @@ export function GroupingTabs({
           </button>
         ))}
       </div>
+      <button
+        className="button button--ghost group-tabs__manage"
+        type="button"
+        onClick={onManageCategories}
+      >
+        {copy.manageCategories}
+      </button>
     </div>
   );
 }
