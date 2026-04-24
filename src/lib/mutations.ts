@@ -1,4 +1,5 @@
 import type {
+  CompanyCategory,
   CompanyRecord,
   CompensationNegotiation,
   InterviewProcess,
@@ -47,6 +48,21 @@ function toSlug(value: string) {
 function createId(prefix: string, value: string) {
   const base = toSlug(value) || prefix;
   return `${prefix}-${base}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export type CategoryMutationError = "blank" | "duplicate" | "missing" | "in-use" | "last-category";
+export type CategoryMutationResult =
+  | { ok: true; categories: CompanyCategory[] }
+  | { ok: false; error: CategoryMutationError };
+
+function normalizeCategoryOrder(categories: CompanyCategory[]): CompanyCategory[] {
+  return categories.map((category, index) => ({ ...category, order: index }));
+}
+
+function hasDuplicateCategoryName(categories: CompanyCategory[], name: string, exceptId?: string) {
+  return categories.some(
+    (category) => category.id !== exceptId && category.name.trim() === name
+  );
 }
 
 function createEmptyNegotiation(): CompensationNegotiation {
@@ -160,6 +176,87 @@ export function createCompanyWithProcess(
     },
     ...companies
   ];
+}
+
+export function createCompanyCategory(
+  categories: CompanyCategory[],
+  name: string
+): CategoryMutationResult {
+  const trimmedName = name.trim();
+  if (!trimmedName) return { ok: false, error: "blank" };
+  if (hasDuplicateCategoryName(categories, trimmedName)) return { ok: false, error: "duplicate" };
+
+  return {
+    ok: true,
+    categories: normalizeCategoryOrder([
+      ...categories,
+      {
+        id: createId("category", trimmedName),
+        name: trimmedName,
+        order: categories.length
+      }
+    ])
+  };
+}
+
+export function renameCompanyCategory(
+  categories: CompanyCategory[],
+  categoryId: string,
+  name: string
+): CategoryMutationResult {
+  const trimmedName = name.trim();
+  if (!trimmedName) return { ok: false, error: "blank" };
+  if (!categories.some((category) => category.id === categoryId)) {
+    return { ok: false, error: "missing" };
+  }
+  if (hasDuplicateCategoryName(categories, trimmedName, categoryId)) {
+    return { ok: false, error: "duplicate" };
+  }
+
+  return {
+    ok: true,
+    categories: normalizeCategoryOrder(
+      categories.map((category) =>
+        category.id === categoryId ? { ...category, name: trimmedName } : category
+      )
+    )
+  };
+}
+
+export function moveCompanyCategory(
+  categories: CompanyCategory[],
+  categoryId: string,
+  direction: "up" | "down"
+): CompanyCategory[] {
+  const sorted = [...categories].sort((left, right) => left.order - right.order);
+  const index = sorted.findIndex((category) => category.id === categoryId);
+  if (index === -1) return normalizeCategoryOrder(sorted);
+
+  const nextIndex = direction === "up" ? index - 1 : index + 1;
+  if (nextIndex < 0 || nextIndex >= sorted.length) return normalizeCategoryOrder(sorted);
+
+  const next = [...sorted];
+  [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+  return normalizeCategoryOrder(next);
+}
+
+export function deleteCompanyCategory(
+  categories: CompanyCategory[],
+  companies: CompanyRecord[],
+  categoryId: string
+): CategoryMutationResult {
+  if (categories.length <= 1) return { ok: false, error: "last-category" };
+  if (!categories.some((category) => category.id === categoryId)) {
+    return { ok: false, error: "missing" };
+  }
+  if (companies.some((company) => company.companyType === categoryId)) {
+    return { ok: false, error: "in-use" };
+  }
+
+  return {
+    ok: true,
+    categories: normalizeCategoryOrder(categories.filter((category) => category.id !== categoryId))
+  };
 }
 
 export function archiveProcessById(

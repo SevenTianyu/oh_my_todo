@@ -1,4 +1,5 @@
 import type {
+  CompanyCategory,
   CompanyGroup,
   CompanyRecord,
   GroupingMode,
@@ -8,22 +9,13 @@ import type {
 } from "../types/interview";
 import { getLatestNegotiationSnapshot, getNegotiationMetrics, type NegotiationMetrics } from "./compensation";
 
-const GROUP_LABELS: Record<GroupingMode, Record<string, string>> = {
-  companyType: {
-    startup: "创业公司",
-    "big-tech": "大厂"
-  },
-  stage: {
-    screening: "筛选中",
-    interviewing: "面试中",
-    negotiating: "谈薪中"
-  }
+const STAGE_GROUP_LABELS: Record<string, string> = {
+  screening: "筛选中",
+  interviewing: "面试中",
+  negotiating: "谈薪中"
 };
 
-const GROUP_ORDER: Record<GroupingMode, string[]> = {
-  companyType: ["startup", "big-tech"],
-  stage: ["screening", "interviewing", "negotiating"]
-};
+const STAGE_GROUP_ORDER = ["screening", "interviewing", "negotiating"];
 
 const INTERVIEWING_ROUND_STATUSES = new Set<RoundStatus>([
   "scheduled",
@@ -149,27 +141,35 @@ export function getUpcomingInterviews(companies: CompanyRecord[], now: Date): Up
 
 export function getGroupedCompanies(
   companies: CompanyRecord[],
-  grouping: GroupingMode
+  grouping: GroupingMode,
+  companyCategories: CompanyCategory[] = []
 ): CompanyGroup[] {
   const activeCompanies = getActiveCompanies(companies);
   const buckets = new Map<string, CompanyRecord[]>();
 
   for (const company of activeCompanies) {
-    const key =
-      grouping === "companyType"
-        ? company.companyType
-        : getPrimaryStage(company);
-
+    const key = grouping === "companyType" ? company.companyType : getPrimaryStage(company);
     const bucket = buckets.get(key) ?? [];
     bucket.push(company);
     buckets.set(key, bucket);
   }
 
-  return GROUP_ORDER[grouping]
+  if (grouping === "companyType") {
+    return [...companyCategories]
+      .sort((left, right) => left.order - right.order || left.name.localeCompare(right.name))
+      .filter((category) => buckets.has(category.id))
+      .map((category) => ({
+        key: category.id,
+        label: category.name,
+        companies: buckets.get(category.id) ?? []
+      }));
+  }
+
+  return STAGE_GROUP_ORDER
     .filter((key) => buckets.has(key))
     .map((key) => ({
       key,
-      label: GROUP_LABELS[grouping][key],
+      label: STAGE_GROUP_LABELS[key],
       companies: buckets.get(key) ?? []
     }));
 }
