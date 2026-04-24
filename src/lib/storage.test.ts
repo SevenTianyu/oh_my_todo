@@ -480,6 +480,16 @@ describe("storage", () => {
     });
   });
 
+  it("creates empty snapshots with independent default category references", () => {
+    const first = createEmptyWorkbenchSnapshot();
+    const second = createEmptyWorkbenchSnapshot();
+
+    expect(first.companyCategories).toEqual(defaultCompanyCategories);
+    expect(second.companyCategories).toEqual(defaultCompanyCategories);
+    expect(first.companyCategories).not.toBe(second.companyCategories);
+    expect(first.companyCategories[0]).not.toBe(second.companyCategories[0]);
+  });
+
   it("rejects duplicate category ids in v3 imports", () => {
     const result = parseWorkbenchSnapshotImport(
       JSON.stringify({

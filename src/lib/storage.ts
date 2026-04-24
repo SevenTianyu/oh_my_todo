@@ -18,6 +18,9 @@ export const DEFAULT_COMPANY_CATEGORIES: CompanyCategory[] = [
   { id: "startup", name: "创业公司", order: 0 },
   { id: "big-tech", name: "大厂", order: 1 }
 ];
+function createDefaultCompanyCategories(): CompanyCategory[] {
+  return DEFAULT_COMPANY_CATEGORIES.map((category) => ({ ...category }));
+}
 const LEGACY_COMPANY_TYPES = new Set<CompanyType>(
   DEFAULT_COMPANY_CATEGORIES.map((category) => category.id)
 );
@@ -182,7 +185,7 @@ function normalizeSnapshotForExport(snapshot: PersistableWorkbenchSnapshot): Wor
     version: 3,
     grouping: snapshot.grouping,
     companyCategories:
-      snapshot.version === 3 ? snapshot.companyCategories : DEFAULT_COMPANY_CATEGORIES,
+      snapshot.version === 3 ? snapshot.companyCategories : createDefaultCompanyCategories(),
     companies: snapshot.companies.map(normalizeCompanyForExport)
   };
 }
@@ -523,7 +526,7 @@ export function createEmptyWorkbenchSnapshot(): WorkbenchSnapshot {
   return {
     version: 3,
     grouping: "companyType",
-    companyCategories: DEFAULT_COMPANY_CATEGORIES,
+    companyCategories: createDefaultCompanyCategories(),
     companies: []
   };
 }
@@ -565,7 +568,7 @@ export function parseWorkbenchSnapshotImport(raw: string): WorkbenchImportResult
     }
 
     const companyCategories =
-      parsedVersion === 3 ? readCompanyCategories(parsed) : DEFAULT_COMPANY_CATEGORIES;
+      parsedVersion === 3 ? readCompanyCategories(parsed) : createDefaultCompanyCategories();
     const categoryIds = new Set(companyCategories.map((category) => category.id));
     const allowedCompanyTypes = parsedVersion === 3 ? categoryIds : LEGACY_COMPANY_TYPES;
 
