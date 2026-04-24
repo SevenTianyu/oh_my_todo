@@ -1,6 +1,6 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CategoryManager } from "./CategoryManager";
 import type { CompanyCategory } from "../types/interview";
 
@@ -11,7 +11,11 @@ const categories: CompanyCategory[] = [
 ];
 
 describe("CategoryManager", () => {
-  it("adds a trimmed category", async () => {
+  beforeEach(() => {
+    document.documentElement.lang = "zh-CN";
+  });
+
+  it("forwards the raw new category name to mutation", async () => {
     const user = userEvent.setup();
     const onCreate = vi.fn(() => ({ ok: true as const }));
 
@@ -32,6 +36,85 @@ describe("CategoryManager", () => {
     await user.click(screen.getByRole("button", { name: "新增分类" }));
 
     expect(onCreate).toHaveBeenCalledWith(" 中厂 ");
+  });
+
+  it("preserves dirty draft names when category order changes", () => {
+    const { rerender } = render(
+      <CategoryManager
+        open
+        companyCategories={categories}
+        categoryUsage={{ startup: 1, "big-tech": 1, foreign: 0 }}
+        onCreateCategory={() => ({ ok: true as const })}
+        onRenameCategory={() => ({ ok: true as const })}
+        onMoveCategory={() => {}}
+        onDeleteCategory={() => ({ ok: true as const })}
+        onClose={() => {}}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("分类名称 外企"), { target: { value: "外资公司" } });
+
+    rerender(
+      <CategoryManager
+        open
+        companyCategories={[
+          { id: "foreign", name: "外企", order: 0 },
+          { id: "startup", name: "创业公司", order: 1 },
+          { id: "big-tech", name: "大厂", order: 2 }
+        ]}
+        categoryUsage={{ startup: 1, "big-tech": 1, foreign: 0 }}
+        onCreateCategory={() => ({ ok: true as const })}
+        onRenameCategory={() => ({ ok: true as const })}
+        onMoveCategory={() => {}}
+        onDeleteCategory={() => ({ ok: true as const })}
+        onClose={() => {}}
+      />
+    );
+
+    expect(screen.getByLabelText("分类名称 外企")).toHaveValue("外资公司");
+  });
+
+  it("focuses the dialog, closes on Escape, and restores focus after close", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    const launchButton = document.createElement("button");
+    document.body.append(launchButton);
+    launchButton.focus();
+
+    const { rerender, unmount } = render(
+      <CategoryManager
+        open
+        companyCategories={categories}
+        categoryUsage={{ startup: 1, "big-tech": 1, foreign: 0 }}
+        onCreateCategory={() => ({ ok: true as const })}
+        onRenameCategory={() => ({ ok: true as const })}
+        onMoveCategory={() => {}}
+        onDeleteCategory={() => ({ ok: true as const })}
+        onClose={onClose}
+      />
+    );
+
+    expect(screen.getByRole("dialog", { name: "管理分类" })).toHaveFocus();
+
+    await user.keyboard("{Escape}");
+    expect(onClose).toHaveBeenCalledOnce();
+
+    rerender(
+      <CategoryManager
+        open={false}
+        companyCategories={categories}
+        categoryUsage={{ startup: 1, "big-tech": 1, foreign: 0 }}
+        onCreateCategory={() => ({ ok: true as const })}
+        onRenameCategory={() => ({ ok: true as const })}
+        onMoveCategory={() => {}}
+        onDeleteCategory={() => ({ ok: true as const })}
+        onClose={onClose}
+      />
+    );
+
+    expect(launchButton).toHaveFocus();
+    unmount();
+    launchButton.remove();
   });
 
   it("shows a duplicate-name error from create", async () => {

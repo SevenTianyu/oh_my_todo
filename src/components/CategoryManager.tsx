@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { resolveAppLocale, type AppLocale } from "../lib/locale";
 import type { CategoryMutationError } from "../lib/mutations";
 import type { CompanyCategory } from "../types/interview";
@@ -78,13 +78,44 @@ export function CategoryManager({
     () => [...companyCategories].sort((left, right) => left.order - right.order),
     [companyCategories]
   );
+  const dialogRef = useRef<HTMLElement | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [draftNames, setDraftNames] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setDraftNames(Object.fromEntries(sortedCategories.map((category) => [category.id, category.name])));
+    setDraftNames((current) =>
+      Object.fromEntries(
+        sortedCategories.map((category) => [category.id, current[category.id] ?? category.name])
+      )
+    );
   }, [sortedCategories]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previousActiveElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    dialogRef.current?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+
+      if (previousActiveElement && document.contains(previousActiveElement)) {
+        previousActiveElement.focus();
+      }
+    };
+  }, [onClose, open]);
 
   if (!open) return null;
 
@@ -100,7 +131,14 @@ export function CategoryManager({
 
   return (
     <div className="category-manager__backdrop" role="presentation">
-      <section className="category-manager" role="dialog" aria-modal="true" aria-label={copy.title}>
+      <section
+        ref={dialogRef}
+        className="category-manager"
+        role="dialog"
+        aria-modal="true"
+        aria-label={copy.title}
+        tabIndex={-1}
+      >
         <div className="category-manager__header">
           <div>
             <h2>{copy.title}</h2>
