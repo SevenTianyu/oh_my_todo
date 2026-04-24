@@ -262,6 +262,22 @@ describe("storage", () => {
     expect(JSON.parse(content).companies[0].processes[0]).not.toHaveProperty("stage");
   });
 
+  it("serializes v2-shaped snapshots as v3 with default company categories", () => {
+    const content = serializeWorkbenchSnapshot({
+      version: 2,
+      grouping: "stage",
+      companies: legacyCompanies as never
+    });
+
+    expect(JSON.parse(content)).toEqual({
+      version: 3,
+      grouping: "stage",
+      companyCategories: defaultCompanyCategories,
+      companies: legacyCompaniesWithNegotiation
+    });
+    expect(JSON.parse(content).companies[0].processes[0]).not.toHaveProperty("stage");
+  });
+
   it("round-trips v3 snapshots with custom company categories", () => {
     const snapshot = {
       version: 3 as const,

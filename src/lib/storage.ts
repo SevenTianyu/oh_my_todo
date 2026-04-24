@@ -177,9 +177,12 @@ function normalizeCompanyForExport(company: CompanyRecord): CompanyRecord {
   };
 }
 
-function normalizeSnapshotForExport(snapshot: PersistableWorkbenchSnapshot): PersistableWorkbenchSnapshot {
+function normalizeSnapshotForExport(snapshot: PersistableWorkbenchSnapshot): WorkbenchSnapshot {
   return {
-    ...snapshot,
+    version: 3,
+    grouping: snapshot.grouping,
+    companyCategories:
+      snapshot.version === 3 ? snapshot.companyCategories : DEFAULT_COMPANY_CATEGORIES,
     companies: snapshot.companies.map(normalizeCompanyForExport)
   };
 }
