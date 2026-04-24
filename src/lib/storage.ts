@@ -114,6 +114,28 @@ function readOptionalString(record: RawRecord, key: string): string | null {
   return typeof value === "string" ? value : null;
 }
 
+function readOptionalNullableString(
+  record: RawRecord,
+  key: string,
+  path: string
+): string | null | undefined {
+  if (!(key in record)) {
+    return undefined;
+  }
+
+  const value = record[key];
+
+  if (typeof value === "string" || value === null) {
+    return value;
+  }
+
+  throw {
+    code: "invalid_shape",
+    message: `Expected ${getPath(path, key)} to be a string or null`,
+    path: getPath(path, key)
+  } satisfies WorkbenchImportError;
+}
+
 function createEmptyNegotiation(): CompensationNegotiation {
   return {
     status: "inactive",
@@ -321,11 +343,16 @@ function readProcess(value: unknown, path: string): InterviewProcess {
     } satisfies WorkbenchImportError;
   }
 
+  const archiveNote = readOptionalNullableString(value, "archiveNote", path);
+  const archivedAt = readOptionalNullableString(value, "archivedAt", path);
+
   return {
     id: readString(value, "id", path),
     roleName: readString(value, "roleName", path),
     nextStep: readString(value, "nextStep", path),
     status: readEnum(value, "status", path, PROCESS_STATUSES),
+    ...(typeof archiveNote !== "undefined" ? { archiveNote } : {}),
+    ...(typeof archivedAt !== "undefined" ? { archivedAt } : {}),
     rounds: readArray(value, "rounds", path).map((round, index) =>
       readRound(round, `${getPath(path, "rounds")}[${index}]`)
     )

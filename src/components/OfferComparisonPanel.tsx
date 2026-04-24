@@ -1,5 +1,5 @@
 import type { OfferComparisonRow } from "../lib/selectors";
-import { formatCashDisplayInWan } from "../lib/negotiationUnits";
+import { formatLocalizedCashDisplay, formatLocalizedCashWithMonths, resolveAppLocale } from "../lib/locale";
 
 interface OfferComparisonPanelProps {
   rows: OfferComparisonRow[];
@@ -7,18 +7,9 @@ interface OfferComparisonPanelProps {
   onScopeChange: (scope: "active" | "all") => void;
 }
 
-function formatCurrency(value: number | null) {
-  return formatCashDisplayInWan(value);
-}
-
-function formatSalaryRange(row: OfferComparisonRow) {
+function formatSalaryRange(row: OfferComparisonRow, locale: "zh-CN" | "en") {
   const { baseMonthlySalary, salaryMonths } = row.latestSnapshot;
-
-  if (baseMonthlySalary === null || salaryMonths === null) {
-    return "待补充";
-  }
-
-  return `${formatCurrency(baseMonthlySalary)} × ${salaryMonths} 薪`;
+  return formatLocalizedCashWithMonths(baseMonthlySalary, salaryMonths, locale);
 }
 
 export function OfferComparisonPanel({
@@ -26,6 +17,38 @@ export function OfferComparisonPanel({
   scope,
   onScopeChange
 }: OfferComparisonPanelProps) {
+  const locale = resolveAppLocale();
+  const copy =
+    locale === "en"
+      ? {
+          eyebrow: "Salary Comparison",
+          filtersAria: "Negotiation scope switcher",
+          activeScope: "Active Negotiations",
+          allScope: "All Saved Packages",
+          company: "Company",
+          role: "Source Role",
+          monthly: "Monthly × Months",
+          firstYear: "First-year Total",
+          longTerm: "Long-term Annualized",
+          deadline: "Deadline",
+          empty: "No comparable offer snapshot in this scope yet.",
+          tbd: "TBD"
+        }
+      : {
+          eyebrow: "薪资对比",
+          filtersAria: "谈薪范围切换",
+          activeScope: "当前谈薪公司",
+          allScope: "全部有薪资记录的公司",
+          company: "公司",
+          role: "来源岗位",
+          monthly: "月薪 × 月数",
+          firstYear: "首年总包",
+          longTerm: "长期年化总包",
+          deadline: "截止时间",
+          empty: "当前范围内还没有可对比的报价快照。",
+          tbd: "待补充"
+        };
+
   function getFilterButtonClassName(nextScope: "active" | "all") {
     const isActive = scope === nextScope;
 
@@ -40,17 +63,16 @@ export function OfferComparisonPanel({
     <section className="panel offer-panel">
       <div className="section-heading">
         <div>
-          <p className="section-heading__eyebrow">Comparison Sheet</p>
-          <h2>Offer 对比</h2>
+          <p className="section-heading__eyebrow">{copy.eyebrow}</p>
         </div>
-        <div className="offer-panel__filters" aria-label="谈薪范围切换">
+        <div className="offer-panel__filters" aria-label={copy.filtersAria}>
           <button
             className={getFilterButtonClassName("active")}
             type="button"
             aria-pressed={scope === "active"}
             onClick={() => onScopeChange("active")}
           >
-            当前谈薪公司
+            {copy.activeScope}
           </button>
           <button
             className={getFilterButtonClassName("all")}
@@ -58,7 +80,7 @@ export function OfferComparisonPanel({
             aria-pressed={scope === "all"}
             onClick={() => onScopeChange("all")}
           >
-            全部有薪资记录的公司
+            {copy.allScope}
           </button>
         </div>
       </div>
@@ -73,12 +95,12 @@ export function OfferComparisonPanel({
         </colgroup>
         <thead>
           <tr>
-            <th>公司</th>
-            <th>来源岗位</th>
-            <th>月薪 × 月数</th>
-            <th>首年总包</th>
-            <th>长期年化总包</th>
-            <th>截止时间</th>
+            <th>{copy.company}</th>
+            <th>{copy.role}</th>
+            <th>{copy.monthly}</th>
+            <th>{copy.firstYear}</th>
+            <th>{copy.longTerm}</th>
+            <th>{copy.deadline}</th>
           </tr>
         </thead>
         <tbody>
@@ -87,15 +109,15 @@ export function OfferComparisonPanel({
               <tr key={`${row.companyId}-${row.latestVersion}`}>
                 <td>{row.companyName}</td>
                 <td>{row.sourceRoleName}</td>
-                <td>{formatSalaryRange(row)}</td>
-                <td>{formatCurrency(row.metrics.firstYearTotal)}</td>
-                <td>{formatCurrency(row.metrics.longTermAnnualizedTotal)}</td>
-                <td>{row.latestSnapshot.deadline ?? "待补充"}</td>
+                <td>{formatSalaryRange(row, locale)}</td>
+                <td>{formatLocalizedCashDisplay(row.metrics.firstYearTotal, locale)}</td>
+                <td>{formatLocalizedCashDisplay(row.metrics.longTermAnnualizedTotal, locale)}</td>
+                <td>{row.latestSnapshot.deadline ?? copy.tbd}</td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={6}>当前范围内还没有可对比的 offer 快照。</td>
+              <td colSpan={6}>{copy.empty}</td>
             </tr>
           )}
         </tbody>

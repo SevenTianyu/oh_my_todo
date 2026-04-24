@@ -8,20 +8,8 @@ import type {
   RoundRecord
 } from "../types/interview";
 import { getLatestNegotiationSnapshot } from "../lib/compensation";
+import { getCompanyTypeLabel, getRoundStatusLabel, resolveAppLocale, type AppLocale } from "../lib/locale";
 import { NegotiationSection } from "./NegotiationSection";
-
-const COMPANY_TYPE_LABELS = {
-  startup: "创业公司",
-  "big-tech": "大厂"
-} as const;
-
-const ROUND_STATUS_LABELS = {
-  pending: "待安排",
-  scheduled: "已排期",
-  completed: "已完成",
-  "waiting-result": "等结果",
-  closed: "已结束"
-} as const;
 
 type CompanySummaryPatch = Partial<
   Pick<CompanyRecord, "name" | "companyType" | "overallImpression">
@@ -31,7 +19,7 @@ interface CompanyCardProps {
   company: CompanyRecord;
   onSaveSummary: (companyId: string, patch: CompanySummaryPatch) => void;
   onAddRound: (companyId: string, processId: string) => void;
-  onArchiveProcess: (companyId: string, processId: string) => void;
+  onArchiveProcess: (companyId: string, processId: string, archiveNote: string) => void;
   onUpdateProcess: (
     companyId: string,
     processId: string,
@@ -54,6 +42,83 @@ interface CompanyCardProps {
     companyId: string,
     status: Extract<NegotiationStatus, "accepted" | "declined" | "terminated">
   ) => void;
+}
+
+function getCompanyCardCopy(locale: AppLocale) {
+  return locale === "en"
+    ? {
+        negotiationFallbackRole: "Negotiation Record",
+        overallJudgment: "Overall Judgment",
+        companyJudgmentTitle: "Company Judgment",
+        interviewScheduleTitle: "Interview Schedule",
+        expand: "Expand",
+        collapse: "Collapse",
+        expandCompanyJudgmentAria: "Expand Company Judgment",
+        collapseCompanyJudgmentAria: "Collapse Company Judgment",
+        expandInterviewScheduleAria: "Expand Interview Schedule",
+        collapseInterviewScheduleAria: "Collapse Interview Schedule",
+        companyName: "Company Name",
+        companyType: "Company Type",
+        overallImpression: "Overall Impression",
+        saveCompanyJudgment: "Save Company Judgment",
+        saveInterviewSchedule: "Save Interview Schedule",
+        editRoleName: (roleName: string) => `Edit role name ${roleName}`,
+        cancelRoleName: "Cancel role name edit",
+        saveRoleName: "Save role name",
+        roleName: "Role Name",
+        nextStep: (value: string) => `Next: ${value}`,
+        addRound: "Add Round",
+        archiveProcess: "Archive Process",
+        archiveDialogTitle: "Archive Process Note",
+        archiveDialogDescription:
+          "Write a brief note so the archived card remembers why this process was closed out.",
+        archiveNoteLabel: "Archive Note",
+        archiveNotePlaceholder: "For example: Pausing in favor of a better-matched path.",
+        cancelArchiveProcess: "Cancel",
+        confirmArchiveProcess: "Confirm Archive",
+        editRoundName: (roundName: string) => `Edit interview name ${roundName}`,
+        cancelRoundName: "Cancel interview name edit",
+        saveRoundName: "Save interview name",
+        roundName: "Interview Name",
+        timeLabel: (companyName: string, roundName: string) => `${companyName}-${roundName}-Time`,
+        notesLabel: (companyName: string, roundName: string) => `${companyName}-${roundName}-Notes`
+      }
+    : {
+        negotiationFallbackRole: "谈薪档案",
+        overallJudgment: "整体判断",
+        companyJudgmentTitle: "公司判断",
+        interviewScheduleTitle: "面试安排",
+        expand: "展开",
+        collapse: "收起",
+        expandCompanyJudgmentAria: "展开公司判断",
+        collapseCompanyJudgmentAria: "收起公司判断",
+        expandInterviewScheduleAria: "展开面试安排",
+        collapseInterviewScheduleAria: "收起面试安排",
+        companyName: "公司名称",
+        companyType: "公司类型",
+        overallImpression: "公司整体印象",
+        saveCompanyJudgment: "保存公司判断",
+        saveInterviewSchedule: "保存面试安排",
+        editRoleName: (roleName: string) => `编辑岗位名称 ${roleName}`,
+        cancelRoleName: "取消岗位名称修改",
+        saveRoleName: "保存岗位名称",
+        roleName: "岗位名称",
+        nextStep: (value: string) => `下一步：${value}`,
+        addRound: "新增轮次",
+        archiveProcess: "归档流程",
+        archiveDialogTitle: "归档流程说明",
+        archiveDialogDescription: "写一句简短说明，记录为什么把这个流程归档到底部历史记录里。",
+        archiveNoteLabel: "归档说明",
+        archiveNotePlaceholder: "例如：优先推进其他更匹配的机会",
+        cancelArchiveProcess: "取消",
+        confirmArchiveProcess: "确认归档",
+        editRoundName: (roundName: string) => `编辑面试名称 ${roundName}`,
+        cancelRoundName: "取消面试名称修改",
+        saveRoundName: "保存面试名称",
+        roundName: "面试名称",
+        timeLabel: (companyName: string, roundName: string) => `${companyName}-${roundName}-时间`,
+        notesLabel: (companyName: string, roundName: string) => `${companyName}-${roundName}-备注`
+      };
 }
 
 function toDateTimeLocalValue(value: string | null) {
@@ -100,25 +165,26 @@ function AutosizeTextarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   );
 }
 
-function getInterviewImpressionLines(company: CompanyRecord) {
+function getInterviewImpressionLines(company: CompanyRecord, locale: AppLocale) {
   return company.processes.flatMap((process) =>
     process.rounds.flatMap((round) => {
       const notes = round.notes.trim();
       if (!notes) return [];
 
       const scheduledDate = round.scheduledAt?.match(/^(\d{4}-\d{2}-\d{2})/)?.[1];
-      return [scheduledDate ? `${scheduledDate} ${round.name}：${notes}` : `${round.name}：${notes}`];
+      const separator = locale === "en" ? ": " : "：";
+      return [scheduledDate ? `${scheduledDate} ${round.name}${separator}${notes}` : `${round.name}${separator}${notes}`];
     })
   );
 }
 
-function getCompanyImpressionPreview(company: CompanyRecord) {
-  return [company.overallImpression.trim(), ...getInterviewImpressionLines(company)]
+function getCompanyImpressionPreview(company: CompanyRecord, locale: AppLocale) {
+  return [company.overallImpression.trim(), ...getInterviewImpressionLines(company, locale)]
     .filter(Boolean)
     .join("\n");
 }
 
-function getCompanyMastheadRole(company: CompanyRecord) {
+function getCompanyMastheadRole(company: CompanyRecord, copy: ReturnType<typeof getCompanyCardCopy>) {
   const activeProcesses = company.processes.filter((process) => process.status === "active");
   if (activeProcesses.length > 0) {
     return activeProcesses.map((process) => process.roleName).join(" · ");
@@ -129,39 +195,23 @@ function getCompanyMastheadRole(company: CompanyRecord) {
     (process) => process.id === company.negotiation.sourceProcessId
   );
 
-  return latestSnapshot?.title || sourceProcess?.roleName || "谈薪档案";
-}
-
-function getCompanyMastheadStatus(company: CompanyRecord) {
-  const activeProcesses = company.processes.filter((process) => process.status === "active");
-  if (activeProcesses.length > 0) {
-    return `${activeProcesses.length} 个活跃流程`;
-  }
-
-  switch (company.negotiation.status) {
-    case "active":
-      return "谈薪进行中";
-    case "accepted":
-      return "谈薪已接受";
-    case "declined":
-      return "谈薪已拒绝";
-    case "terminated":
-      return "谈薪已终止";
-    default:
-      return "暂无活跃流程";
-  }
+  return latestSnapshot?.title || sourceProcess?.roleName || copy.negotiationFallbackRole;
 }
 
 function RoundEditor({
   round,
   company,
   process,
-  onUpdateRound
+  onUpdateRound,
+  locale,
+  copy
 }: {
   round: RoundRecord;
   company: CompanyRecord;
   process: InterviewProcess;
   onUpdateRound: CompanyCardProps["onUpdateRound"];
+  locale: AppLocale;
+  copy: ReturnType<typeof getCompanyCardCopy>;
 }) {
   const [isEditingRoundName, setIsEditingRoundName] = useState(false);
   const [roundNameDraft, setRoundNameDraft] = useState(round.name);
@@ -177,13 +227,13 @@ function RoundEditor({
         {isEditingRoundName ? (
           <div className="company-card__round-title-editor">
             <input
-              aria-label="面试名称"
+              aria-label={copy.roundName}
               className="field field--input company-card__text company-card__round-title-input"
               value={roundNameDraft}
               onChange={(event) => setRoundNameDraft(event.target.value)}
             />
             <button
-              aria-label="取消面试名称修改"
+              aria-label={copy.cancelRoundName}
               className="button button--ghost company-card__icon-button"
               type="button"
               onClick={() => {
@@ -194,7 +244,7 @@ function RoundEditor({
               ×
             </button>
             <button
-              aria-label="保存面试名称"
+              aria-label={copy.saveRoundName}
               className="button button--secondary company-card__icon-button"
               type="button"
               onClick={() => {
@@ -214,7 +264,7 @@ function RoundEditor({
           </div>
         ) : (
           <button
-            aria-label={`编辑面试名称 ${round.name}`}
+            aria-label={copy.editRoundName(round.name)}
             className="company-card__round-title-button"
             type="button"
             onClick={() => setIsEditingRoundName(true)}
@@ -223,12 +273,12 @@ function RoundEditor({
           </button>
         )}
         <span className={`badge badge--round badge--round-${round.status}`}>
-          {ROUND_STATUS_LABELS[round.status]}
+          {getRoundStatusLabel(locale, round.status)}
         </span>
       </div>
       <input
         className="field field--input company-card__datetime"
-        aria-label={`${company.name}-${round.name}-时间`}
+        aria-label={copy.timeLabel(company.name, round.name)}
         type="datetime-local"
         value={toDateTimeLocalValue(round.scheduledAt)}
         onChange={(event) =>
@@ -237,7 +287,7 @@ function RoundEditor({
       />
       <AutosizeTextarea
         className="field field--textarea company-card__notes"
-        aria-label={`${company.name}-${round.name}-备注`}
+        aria-label={copy.notesLabel(company.name, round.name)}
         value={round.notes}
         onChange={(event) =>
           onUpdateRound(company.id, process.id, round.id, { notes: event.target.value })
@@ -253,7 +303,9 @@ function ActiveProcess({
   onAddRound,
   onArchiveProcess,
   onUpdateProcess,
-  onUpdateRound
+  onUpdateRound,
+  locale,
+  copy
 }: {
   process: InterviewProcess;
   company: CompanyRecord;
@@ -261,9 +313,13 @@ function ActiveProcess({
   onArchiveProcess: CompanyCardProps["onArchiveProcess"];
   onUpdateProcess: CompanyCardProps["onUpdateProcess"];
   onUpdateRound: CompanyCardProps["onUpdateRound"];
+  locale: AppLocale;
+  copy: ReturnType<typeof getCompanyCardCopy>;
 }) {
   const [isEditingRoleName, setIsEditingRoleName] = useState(false);
   const [roleNameDraft, setRoleNameDraft] = useState(process.roleName);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+  const [archiveNoteDraft, setArchiveNoteDraft] = useState("");
 
   useEffect(() => {
     setRoleNameDraft(process.roleName);
@@ -277,13 +333,13 @@ function ActiveProcess({
           {isEditingRoleName ? (
             <div className="company-card__process-title-editor">
               <input
-                aria-label="岗位名称"
+                aria-label={copy.roleName}
                 className="field field--input company-card__text company-card__process-title-input"
                 value={roleNameDraft}
                 onChange={(event) => setRoleNameDraft(event.target.value)}
               />
               <button
-                aria-label="取消岗位名称修改"
+                aria-label={copy.cancelRoleName}
                 className="button button--ghost company-card__icon-button"
                 type="button"
                 onClick={() => {
@@ -294,7 +350,7 @@ function ActiveProcess({
                 ×
               </button>
               <button
-                aria-label="保存岗位名称"
+                aria-label={copy.saveRoleName}
                 className="button button--secondary company-card__icon-button"
                 type="button"
                 onClick={() => {
@@ -314,7 +370,7 @@ function ActiveProcess({
             </div>
           ) : (
             <button
-              aria-label={`编辑岗位名称 ${process.roleName}`}
+              aria-label={copy.editRoleName(process.roleName)}
               className="company-card__process-title-button"
               type="button"
               onClick={() => setIsEditingRoleName(true)}
@@ -323,7 +379,7 @@ function ActiveProcess({
             </button>
           )}
           <div className="company-card__process-meta">
-            <span className="company-card__process-next">下一步：{process.nextStep}</span>
+            <span className="company-card__process-next">{copy.nextStep(process.nextStep)}</span>
           </div>
         </div>
 
@@ -333,14 +389,17 @@ function ActiveProcess({
             type="button"
             onClick={() => onAddRound(company.id, process.id)}
           >
-            新增轮次
+            {copy.addRound}
           </button>
           <button
             className="button button--ghost"
             type="button"
-            onClick={() => onArchiveProcess(company.id, process.id)}
+            onClick={() => {
+              setArchiveNoteDraft(process.archiveNote ?? "");
+              setArchiveDialogOpen(true);
+            }}
           >
-            归档流程
+            {copy.archiveProcess}
           </button>
         </div>
       </div>
@@ -352,13 +411,69 @@ function ActiveProcess({
           company={company}
           process={process}
           onUpdateRound={onUpdateRound}
+          locale={locale}
+          copy={copy}
         />
       ))}
+
+      {archiveDialogOpen ? (
+        <div className="company-card__dialog-backdrop" role="presentation">
+          <div
+            aria-label={copy.archiveDialogTitle}
+            aria-modal="true"
+            className="company-card__dialog"
+            role="dialog"
+          >
+            <div className="company-card__dialog-copy">
+              <h5 className="company-card__dialog-title">{copy.archiveDialogTitle}</h5>
+              <p className="company-card__dialog-description">{copy.archiveDialogDescription}</p>
+            </div>
+
+            <label className="company-card__negotiation-field">
+              <span>{copy.archiveNoteLabel}</span>
+              <AutosizeTextarea
+                aria-label={copy.archiveNoteLabel}
+                className="field field--textarea company-card__notes"
+                placeholder={copy.archiveNotePlaceholder}
+                value={archiveNoteDraft}
+                onChange={(event) => setArchiveNoteDraft(event.target.value)}
+              />
+            </label>
+
+            <div className="company-card__dialog-actions">
+              <button
+                className="button button--ghost"
+                type="button"
+                onClick={() => {
+                  setArchiveDialogOpen(false);
+                  setArchiveNoteDraft(process.archiveNote ?? "");
+                }}
+              >
+                {copy.cancelArchiveProcess}
+              </button>
+              <button
+                className="button button--secondary"
+                type="button"
+                disabled={!archiveNoteDraft.trim()}
+                onClick={() => {
+                  onArchiveProcess(company.id, process.id, archiveNoteDraft.trim());
+                  setArchiveDialogOpen(false);
+                  setArchiveNoteDraft("");
+                }}
+              >
+                {copy.confirmArchiveProcess}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
 
 export function CompanyCard(props: CompanyCardProps) {
+  const locale = resolveAppLocale();
+  const copy = getCompanyCardCopy(locale);
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [interviewExpanded, setInterviewExpanded] = useState(false);
   const [summaryDraft, setSummaryDraft] = useState({
@@ -379,45 +494,36 @@ export function CompanyCard(props: CompanyCardProps) {
     props.company.companyType,
     props.company.overallImpression
   ]);
-  const companyCatalog = `Dossier / ${COMPANY_TYPE_LABELS[props.company.companyType]}`;
-  const mastheadRole = getCompanyMastheadRole(props.company);
-  const mastheadStatus = getCompanyMastheadStatus(props.company);
+  const mastheadRole = getCompanyMastheadRole(props.company, copy);
 
   return (
     <article className="company-card">
       <header className="company-card__masthead">
         <div className="company-card__mastcopy">
-          <p className="company-card__catalog">{companyCatalog}</p>
           <h3 className="company-card__name">{props.company.name}</h3>
           <p className="company-card__role">{mastheadRole}</p>
           <div className="company-card__summary-lines">
             <div className="company-card__summary-item">
-              <span>整体判断</span>
-              <p>{getCompanyImpressionPreview(props.company)}</p>
+              <span>{copy.overallJudgment}</span>
+              <p>{getCompanyImpressionPreview(props.company, locale)}</p>
             </div>
           </div>
-        </div>
-        <div className="company-card__mastrail">
-          <span className={`badge badge--company-type badge--company-type-${props.company.companyType}`}>
-            {COMPANY_TYPE_LABELS[props.company.companyType]}
-          </span>
-          <p className="company-card__mastrail-note">
-            {mastheadStatus}
-          </p>
         </div>
       </header>
 
       <div className="company-card__details">
         <section className="company-card__section">
           <div className="company-card__section-header">
-            <h4 className="company-card__section-title">Company Judgment</h4>
+            <h4 className="company-card__section-title">{copy.companyJudgmentTitle}</h4>
             <button
               className="button button--ghost"
               type="button"
-              aria-label={`${summaryExpanded ? "收起" : "展开"}公司判断`}
+              aria-label={
+                summaryExpanded ? copy.collapseCompanyJudgmentAria : copy.expandCompanyJudgmentAria
+              }
               onClick={() => setSummaryExpanded((value) => !value)}
             >
-              {summaryExpanded ? "收起" : "展开"}
+              {summaryExpanded ? copy.collapse : copy.expand}
             </button>
           </div>
 
@@ -425,12 +531,12 @@ export function CompanyCard(props: CompanyCardProps) {
             <>
               <div className="company-card__summary-row">
                 <label className="company-card__field-label" htmlFor={`company-name-${props.company.id}`}>
-                  公司名称
+                  {copy.companyName}
                 </label>
                 <input
                   className="field field--input company-card__text"
                   id={`company-name-${props.company.id}`}
-                  aria-label="公司名称"
+                  aria-label={copy.companyName}
                   value={summaryDraft.name}
                   onChange={(event) =>
                     setSummaryDraft((current) => ({ ...current, name: event.target.value }))
@@ -440,12 +546,12 @@ export function CompanyCard(props: CompanyCardProps) {
 
               <div className="company-card__summary-row">
                 <label className="company-card__field-label" htmlFor={`company-type-${props.company.id}`}>
-                  公司类型
+                  {copy.companyType}
                 </label>
                 <select
                   className="field company-card__text"
                   id={`company-type-${props.company.id}`}
-                  aria-label="公司类型"
+                  aria-label={copy.companyType}
                   value={summaryDraft.companyType}
                   onChange={(event) =>
                     setSummaryDraft((current) => ({
@@ -454,19 +560,19 @@ export function CompanyCard(props: CompanyCardProps) {
                     }))
                   }
                 >
-                  <option value="startup">创业公司</option>
-                  <option value="big-tech">大厂</option>
+                  <option value="startup">{getCompanyTypeLabel(locale, "startup")}</option>
+                  <option value="big-tech">{getCompanyTypeLabel(locale, "big-tech")}</option>
                 </select>
               </div>
 
               <div className="company-card__summary-row">
                 <label className="company-card__field-label" htmlFor={`company-impression-${props.company.id}`}>
-                  公司整体印象
+                  {copy.overallImpression}
                 </label>
                 <AutosizeTextarea
                   className="field field--textarea company-card__notes"
                   id={`company-impression-${props.company.id}`}
-                  aria-label="公司整体印象"
+                  aria-label={copy.overallImpression}
                   value={summaryDraft.overallImpression}
                   onChange={(event) =>
                     setSummaryDraft((current) => ({
@@ -488,7 +594,7 @@ export function CompanyCard(props: CompanyCardProps) {
                     setSummaryExpanded(false);
                   }}
                 >
-                  保存公司判断
+                  {copy.saveCompanyJudgment}
                 </button>
               </div>
             </>
@@ -497,14 +603,16 @@ export function CompanyCard(props: CompanyCardProps) {
 
         <section className="company-card__section">
           <div className="company-card__section-header">
-            <h4 className="company-card__section-title">Interview Schedule</h4>
+            <h4 className="company-card__section-title">{copy.interviewScheduleTitle}</h4>
             <button
               className="button button--ghost"
               type="button"
-              aria-label={`${interviewExpanded ? "收起" : "展开"}面试安排`}
+              aria-label={
+                interviewExpanded ? copy.collapseInterviewScheduleAria : copy.expandInterviewScheduleAria
+              }
               onClick={() => setInterviewExpanded((value) => !value)}
             >
-              {interviewExpanded ? "收起" : "展开"}
+              {interviewExpanded ? copy.collapse : copy.expand}
             </button>
           </div>
 
@@ -521,6 +629,8 @@ export function CompanyCard(props: CompanyCardProps) {
                     onArchiveProcess={props.onArchiveProcess}
                     onUpdateProcess={props.onUpdateProcess}
                     onUpdateRound={props.onUpdateRound}
+                    locale={locale}
+                    copy={copy}
                   />
                 ))}
 
@@ -530,7 +640,7 @@ export function CompanyCard(props: CompanyCardProps) {
                   type="button"
                   onClick={() => setInterviewExpanded(false)}
                 >
-                  保存面试安排
+                  {copy.saveInterviewSchedule}
                 </button>
               </div>
             </>
@@ -538,9 +648,6 @@ export function CompanyCard(props: CompanyCardProps) {
         </section>
 
         <div className="company-card__negotiation-shell">
-          <p className="company-card__section-kicker" aria-hidden="true">
-            Negotiation
-          </p>
           <NegotiationSection
             company={props.company}
             suggestionProcessId={props.negotiationSuggestionProcessId}

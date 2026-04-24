@@ -1,10 +1,14 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CompanyCard } from "./CompanyCard";
 import { sampleCompanies } from "../lib/sampleData";
 
 describe("CompanyCard", () => {
+  beforeEach(() => {
+    document.documentElement.lang = "zh-CN";
+  });
+
   it("renders the company card as a dossier sheet with summary-first hierarchy", () => {
     const company = sampleCompanies[0];
     const { container } = render(
@@ -21,6 +25,63 @@ describe("CompanyCard", () => {
     expect(container.querySelector(".company-card__masthead")).not.toBeNull();
     expect(container).toHaveTextContent("整体判断");
     expect(container).toHaveTextContent("团队强，方向贴合，但节奏偏快。");
+    expect(container).not.toHaveTextContent("判断档案 / 创业公司");
+    expect(container).not.toHaveTextContent("1 个活跃流程");
+  });
+
+  it("renders fixed company sheet controls in English when the document language is English", async () => {
+    document.documentElement.lang = "en";
+    const user = userEvent.setup();
+    const company = sampleCompanies[0];
+    render(
+      <CompanyCard
+        company={company}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+        onStartNegotiation={() => {}}
+      />
+    );
+
+    expect(screen.getByText("Overall Judgment")).toBeInTheDocument();
+    expect(screen.queryByText("Dossier / Startup")).not.toBeInTheDocument();
+    expect(screen.queryByText("1 active process")).not.toBeInTheDocument();
+    expect(screen.queryByText("Startup")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Expand Company Judgment" }));
+    await user.click(screen.getByRole("button", { name: "Expand Interview Schedule" }));
+    await user.click(screen.getByRole("button", { name: "Expand Negotiation" }));
+
+    expect(screen.getByText("Company Name")).toBeInTheDocument();
+    expect(screen.getByText("Company Type")).toBeInTheDocument();
+    expect(screen.getByText("Overall Impression")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save Company Judgment" })).toBeInTheDocument();
+    expect(screen.getByText("Next: 一面")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add Round" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Archive Process" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Enter Negotiation" })).toBeInTheDocument();
+    expect(screen.queryByText("公司名称")).not.toBeInTheDocument();
+    expect(screen.queryByText("新增轮次")).not.toBeInTheDocument();
+  });
+
+  it("renders negotiation as a single aligned section title", () => {
+    const company = sampleCompanies[0];
+    render(
+      <CompanyCard
+        company={company}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={() => {}}
+        onUpdateRound={() => {}}
+      />
+    );
+
+    const card = screen.getByRole("heading", { name: "ACME" }).closest("article");
+    expect(card).not.toBeNull();
+    expect(within(card!).getAllByText("谈薪")).toHaveLength(1);
   });
 
   it("falls back to negotiation context when the source process is archived", () => {
@@ -37,12 +98,10 @@ describe("CompanyCard", () => {
     );
 
     const mastheadRole = container.querySelector(".company-card__role");
-    const mastheadStatus = container.querySelector(".company-card__mastrail-note");
-
     expect(container).not.toHaveTextContent("暂无活跃流程");
     expect(container).not.toHaveTextContent("当前没有活跃流程");
     expect(mastheadRole).toHaveTextContent("Staff PM");
-    expect(mastheadStatus).toHaveTextContent("谈薪进行中");
+    expect(container.querySelector(".company-card__mastrail")).toBeNull();
   });
 
   it("renders a unified overall impression preview with interview notes appended line-by-line", () => {
@@ -316,6 +375,41 @@ describe("CompanyCard", () => {
     expect(screen.queryByLabelText("岗位名称")).not.toBeInTheDocument();
   });
 
+  it("collects a brief archive note before archiving a process", async () => {
+    const user = userEvent.setup();
+    const company = sampleCompanies[0];
+    const onArchiveProcess = vi.fn();
+    render(
+      <CompanyCard
+        company={company}
+        onSaveSummary={() => {}}
+        onUpdateProcess={() => {}}
+        onAddRound={() => {}}
+        onArchiveProcess={onArchiveProcess}
+        onUpdateRound={() => {}}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "展开面试安排" }));
+    await user.click(screen.getByRole("button", { name: "归档流程" }));
+
+    const dialog = screen.getByRole("dialog", { name: "归档流程说明" });
+    const confirmButton = within(dialog).getByRole("button", { name: "确认归档" });
+    expect(confirmButton).toBeDisabled();
+
+    await user.type(within(dialog).getByLabelText("归档说明"), "优先推进其他更匹配的机会");
+    expect(confirmButton).not.toBeDisabled();
+
+    await user.click(confirmButton);
+
+    expect(onArchiveProcess).toHaveBeenCalledWith(
+      "acme",
+      "acme-pm",
+      "优先推进其他更匹配的机会"
+    );
+    expect(screen.queryByRole("dialog", { name: "归档流程说明" })).not.toBeInTheDocument();
+  });
+
   it("edits a round name inline with cancel and save affordances", async () => {
     const user = userEvent.setup();
     const company = sampleCompanies[0];
@@ -440,7 +534,7 @@ describe("CompanyCard", () => {
 
     await user.click(screen.getByRole("button", { name: "展开谈薪" }));
     expect(
-      screen.getByText(/如果你已经开始和 HR 确认报价、总包或薪资空间，可以手动进入谈薪。/)
+      screen.getByText(/如果你已经开始和招聘方确认报价、总包或薪资空间，可以手动进入谈薪。/)
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "确认进入谈薪" }));

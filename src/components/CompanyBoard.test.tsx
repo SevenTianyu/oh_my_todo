@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CompanyBoard } from "./CompanyBoard";
 import { sampleCompanies } from "../lib/sampleData";
@@ -41,6 +41,9 @@ describe("CompanyBoard", () => {
 
     expect(container.querySelector(".group-panel__meta")).not.toBeNull();
     expect(container).toHaveTextContent("01");
+    expect(container).toHaveTextContent("份");
+    expect(container).not.toHaveTextContent("份活跃判断");
+    expect(screen.queryByText("判断档案")).not.toBeInTheDocument();
   });
 
   it("passes the negotiation callbacks into CompanyCard", () => {

@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { getLatestNegotiationSnapshot } from "../lib/compensation";
 import {
-  formatCashDisplayInWan,
   formatCashInputFromYuan,
   parseCashInputToYuan
 } from "../lib/negotiationUnits";
+import {
+  formatLocalizedCashWithMonths,
+  getTerminalNegotiationStatusLabel,
+  resolveAppLocale,
+  type AppLocale
+} from "../lib/locale";
 import type { CompanyRecord, NegotiationSnapshot, NegotiationStatus } from "../types/interview";
 
 interface NegotiationSectionProps {
@@ -40,14 +45,131 @@ interface NegotiationFormState {
   notes: string;
 }
 
-const TERMINAL_NEGOTIATION_LABELS: Record<
-  Extract<NegotiationStatus, "accepted" | "declined" | "terminated">,
-  string
-> = {
-  accepted: "已接受",
-  declined: "已拒绝",
-  terminated: "已终止"
-};
+function getNegotiationCopy(locale: AppLocale) {
+  return locale === "en"
+    ? {
+        title: "Negotiation",
+        expandAria: "Expand Negotiation",
+        collapseAria: "Collapse Negotiation",
+        expand: "Expand",
+        collapse: "Collapse",
+        suggestedEntry:
+          "Suggested: this process is already close to offer discussion and can move into negotiation.",
+        manualEntry:
+          "If you have started confirming quote, total package, or salary room with HR, you can enter negotiation manually.",
+        enterNegotiation: "Enter Negotiation",
+        latestSnapshot: "Latest Snapshot",
+        currentStatus: "Current Status",
+        negotiationEnded: "Negotiation is closed, and the history remains below.",
+        formNote:
+          "Cash fields are entered in units of 10k CNY. For example, enter 5.2 to represent CNY 52K per month. Equity fields use quantity multiplied by per-share value.",
+        titleLabel: "Negotiation Title",
+        levelLabel: "Level",
+        cityLabel: "City",
+        workModeLabel: "Work Mode",
+        baseMonthlySalaryLabel: "Base Monthly Salary (10k CNY)",
+        baseMonthlySalaryAria: "Base Monthly Salary",
+        baseMonthlySalaryPlaceholder: "e.g. 5.2",
+        salaryMonthsLabel: "Salary Months",
+        salaryMonthsAria: "Salary Months",
+        salaryMonthsPlaceholder: "e.g. 15",
+        annualBonusLabel: "Annual Cash Bonus (10k CNY)",
+        annualBonusAria: "Annual Cash Bonus",
+        annualBonusPlaceholder: "e.g. 8",
+        signOnBonusLabel: "Sign-on Bonus (10k CNY)",
+        signOnBonusAria: "Sign-on Bonus",
+        signOnBonusPlaceholder: "e.g. 3",
+        relocationBonusLabel: "Relocation Bonus (10k CNY)",
+        relocationBonusAria: "Relocation Bonus",
+        relocationBonusPlaceholder: "e.g. 1",
+        equitySharesLabel: "Equity Shares",
+        equitySharesAria: "Equity Shares",
+        equityPerShareValueLabel: "Per-share Value",
+        equityPerShareValueAria: "Per-share Value",
+        equityPerShareValuePlaceholder: "e.g. 18",
+        equityVestingYearsLabel: "Vesting Years",
+        equityVestingYearsAria: "Vesting Years",
+        deadlineLabel: "Deadline",
+        deadlineAria: "Deadline",
+        hrSignalLabel: "HR Signal",
+        hrSignalAria: "HR Signal",
+        notesLabel: "Notes",
+        notesAria: "Notes",
+        saveSnapshot: "Save Negotiation Snapshot",
+        markAccepted: "Mark as Accepted",
+        markDeclined: "Mark as Declined",
+        terminate: "Terminate Negotiation",
+        linkedRole: (roleName: string) => `Linked Role: ${roleName}`,
+        fallbackTitle: "Negotiation Snapshot",
+        deleteConfirm: (version: number) =>
+          `Delete negotiation round ${version}? This action cannot be undone.`,
+        historyTitle: (version: number) => `Negotiation Round ${version}`,
+        deleteSnapshotAria: (version: number) => `Delete negotiation round ${version}`,
+        delete: "Delete",
+        empty: "No negotiation snapshot saved yet.",
+        tbd: "TBD"
+      }
+    : {
+        title: "谈薪",
+        expandAria: "展开谈薪",
+        collapseAria: "收起谈薪",
+        expand: "展开",
+        collapse: "收起",
+        suggestedEntry: "系统建议：这个流程已经接近报价沟通，可以进入谈薪。",
+        manualEntry: "如果你已经开始和招聘方确认报价、总包或薪资空间，可以手动进入谈薪。",
+        enterNegotiation: "确认进入谈薪",
+        latestSnapshot: "最新快照",
+        currentStatus: "当前状态",
+        negotiationEnded: "谈薪已经结束，历史快照仍然保留在下方。",
+        formNote:
+          "现金字段统一按万元填写，例如月基本工资填 2.3 表示 2.3 万/月；股票/期权统一按数量乘每股估值填写，期权请先自行折算成每股估值。",
+        titleLabel: "谈薪标题",
+        levelLabel: "级别",
+        cityLabel: "城市",
+        workModeLabel: "办公模式",
+        baseMonthlySalaryLabel: "月基本工资（万元）",
+        baseMonthlySalaryAria: "月基本工资",
+        baseMonthlySalaryPlaceholder: "例如 2.3",
+        salaryMonthsLabel: "薪资月数（薪）",
+        salaryMonthsAria: "薪资月数",
+        salaryMonthsPlaceholder: "例如 15.5",
+        annualBonusLabel: "年终现金奖金（万元）",
+        annualBonusAria: "年终现金奖金",
+        annualBonusPlaceholder: "例如 8",
+        signOnBonusLabel: "签字费（万元）",
+        signOnBonusAria: "签字费",
+        signOnBonusPlaceholder: "例如 3",
+        relocationBonusLabel: "搬家补贴（万元）",
+        relocationBonusAria: "搬家补贴",
+        relocationBonusPlaceholder: "例如 1",
+        equitySharesLabel: "股票数量（股）",
+        equitySharesAria: "股票数量",
+        equityPerShareValueLabel: "每股估值（每股）",
+        equityPerShareValueAria: "每股估值",
+        equityPerShareValuePlaceholder: "例如 18",
+        equityVestingYearsLabel: "归属年限（年）",
+        equityVestingYearsAria: "归属年限",
+        deadlineLabel: "截止日期",
+        deadlineAria: "截止日期",
+        hrSignalLabel: "招聘方反馈",
+        hrSignalAria: "招聘方反馈",
+        notesLabel: "备注",
+        notesAria: "备注",
+        saveSnapshot: "保存谈薪快照",
+        markAccepted: "标记为接受",
+        markDeclined: "标记为拒绝",
+        terminate: "终止谈薪",
+        linkedRole: (roleName: string) => `关联岗位：${roleName}`,
+        fallbackTitle: "谈薪版本",
+        deleteConfirm: (version: number) =>
+          `确认删除第 ${version} 轮谈薪吗？此操作不可撤销。`,
+        historyTitle: (version: number) => `第 ${version} 轮谈薪`,
+        deleteSnapshotAria: (version: number) => `删除第 ${version} 轮谈薪`,
+        delete: "删除",
+        empty: "还没有保存谈薪快照。",
+        tbd: "待补充"
+      };
+}
 
 function toInputValue(value: number | null) {
   return value === null ? "" : String(value);
@@ -122,6 +244,8 @@ export function NegotiationSection({
   onDeleteNegotiationSnapshot,
   onFinishNegotiation
 }: NegotiationSectionProps) {
+  const locale = resolveAppLocale();
+  const copy = getNegotiationCopy(locale);
   const [expanded, setExpanded] = useState(false);
   const latestSnapshot = getLatestNegotiationSnapshot(company.negotiation);
   const snapshots = [...company.negotiation.snapshots].sort((left, right) => right.version - left.version);
@@ -166,7 +290,7 @@ export function NegotiationSection({
     }
 
     onSaveNegotiationSnapshot(company.id, {
-      title: formState.title.trim() || sourceProcess?.roleName || "谈薪版本",
+      title: formState.title.trim() || sourceProcess?.roleName || copy.fallbackTitle,
       level: formState.level.trim(),
       city: formState.city.trim(),
       workMode: formState.workMode.trim(),
@@ -189,7 +313,7 @@ export function NegotiationSection({
       return;
     }
 
-    if (!window.confirm(`确认删除第 ${snapshot.version} 轮谈薪吗？此操作不可撤销。`)) {
+    if (!window.confirm(copy.deleteConfirm(snapshot.version))) {
       return;
     }
 
@@ -199,14 +323,14 @@ export function NegotiationSection({
   return (
     <section className="company-card__section">
       <div className="company-card__section-header">
-        <h4 className="company-card__section-title">谈薪</h4>
+        <h4 className="company-card__section-title">{copy.title}</h4>
         <button
           className="button button--ghost"
           type="button"
-          aria-label={`${expanded ? "收起" : "展开"}谈薪`}
+          aria-label={expanded ? copy.collapseAria : copy.expandAria}
           onClick={() => setExpanded((value) => !value)}
         >
-          {expanded ? "收起" : "展开"}
+          {expanded ? copy.collapse : copy.expand}
         </button>
       </div>
 
@@ -216,15 +340,15 @@ export function NegotiationSection({
             <div className="company-card__negotiation-suggestion">
               <p>
                 {suggestionProcessId
-                  ? "系统建议：这个流程已经接近 offer 沟通，可以进入谈薪。"
-                  : "如果你已经开始和 HR 确认报价、总包或薪资空间，可以手动进入谈薪。"}
+                  ? copy.suggestedEntry
+                  : copy.manualEntry}
               </p>
               <button
                 className="button button--primary"
                 type="button"
                 onClick={() => onStartNegotiation(company.id, activationProcessId)}
               >
-                确认进入谈薪
+                {copy.enterNegotiation}
               </button>
             </div>
           ) : null}
@@ -232,128 +356,125 @@ export function NegotiationSection({
           {latestSnapshot ? (
             <div className="company-card__negotiation-summary">
               <div>
-                <span className="company-card__negotiation-eyebrow">最新快照</span>
+                <span className="company-card__negotiation-eyebrow">{copy.latestSnapshot}</span>
                 <strong>{latestSnapshot.title}</strong>
               </div>
-              {sourceProcess ? <p>关联岗位：{sourceProcess.roleName}</p> : null}
-              <p>
-                {formatCashDisplayInWan(latestSnapshot.baseMonthlySalary)} ×{" "}
-                {latestSnapshot.salaryMonths ?? "待补充"} 薪
-              </p>
+              {sourceProcess ? <p>{copy.linkedRole(sourceProcess.roleName)}</p> : null}
+              <p>{formatLocalizedCashWithMonths(latestSnapshot.baseMonthlySalary, latestSnapshot.salaryMonths, locale)}</p>
             </div>
           ) : null}
 
           {terminalStatus ? (
             <div className="company-card__negotiation-summary">
               <div>
-                <span className="company-card__negotiation-eyebrow">当前状态</span>
-                <strong>{TERMINAL_NEGOTIATION_LABELS[terminalStatus]}</strong>
+                <span className="company-card__negotiation-eyebrow">{copy.currentStatus}</span>
+                <strong>{getTerminalNegotiationStatusLabel(locale, terminalStatus)}</strong>
               </div>
-              <p>谈薪已经结束，历史快照仍然保留在下方。</p>
+              <p>{copy.negotiationEnded}</p>
             </div>
           ) : null}
 
           {canEditNegotiation ? (
             <div className="company-card__negotiation-form">
               <p className="company-card__negotiation-form-note">
-                现金字段统一按万元填写，例如月基本工资填 2.3 表示 2.3 万/月；股票/期权统一按数量乘每股估值填写，期权请先自行折算成每股估值。
+                {copy.formNote}
               </p>
               <div className="company-card__negotiation-form-grid">
                 <label className="company-card__negotiation-field">
-                  <span>谈薪标题</span>
+                  <span>{copy.titleLabel}</span>
                   <input
-                    aria-label="谈薪标题"
+                    aria-label={copy.titleLabel}
                     className="field field--input"
                     value={formState.title}
                     onChange={(event) => updateField("title", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>级别</span>
+                  <span>{copy.levelLabel}</span>
                   <input
-                    aria-label="级别"
+                    aria-label={copy.levelLabel}
                     className="field field--input"
                     value={formState.level}
                     onChange={(event) => updateField("level", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>城市</span>
+                  <span>{copy.cityLabel}</span>
                   <input
-                    aria-label="城市"
+                    aria-label={copy.cityLabel}
                     className="field field--input"
                     value={formState.city}
                     onChange={(event) => updateField("city", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>办公模式</span>
+                  <span>{copy.workModeLabel}</span>
                   <input
-                    aria-label="办公模式"
+                    aria-label={copy.workModeLabel}
                     className="field field--input"
                     value={formState.workMode}
                     onChange={(event) => updateField("workMode", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>月基本工资（万元）</span>
+                  <span>{copy.baseMonthlySalaryLabel}</span>
                   <input
-                    aria-label="月基本工资"
+                    aria-label={copy.baseMonthlySalaryAria}
                     className="field field--input"
                     inputMode="decimal"
-                    placeholder="例如 2.3"
+                    placeholder={copy.baseMonthlySalaryPlaceholder}
                     value={formState.baseMonthlySalary}
                     onChange={(event) => updateField("baseMonthlySalary", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>薪资月数（薪）</span>
+                  <span>{copy.salaryMonthsLabel}</span>
                   <input
-                    aria-label="薪资月数"
+                    aria-label={copy.salaryMonthsAria}
                     className="field field--input"
                     inputMode="decimal"
-                    placeholder="例如 15.5"
+                    placeholder={copy.salaryMonthsPlaceholder}
                     value={formState.salaryMonths}
                     onChange={(event) => updateField("salaryMonths", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>年终现金奖金（万元）</span>
+                  <span>{copy.annualBonusLabel}</span>
                   <input
-                    aria-label="年终现金奖金"
+                    aria-label={copy.annualBonusAria}
                     className="field field--input"
                     inputMode="decimal"
-                    placeholder="例如 8"
+                    placeholder={copy.annualBonusPlaceholder}
                     value={formState.annualBonusCash}
                     onChange={(event) => updateField("annualBonusCash", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>签字费（万元）</span>
+                  <span>{copy.signOnBonusLabel}</span>
                   <input
-                    aria-label="签字费"
+                    aria-label={copy.signOnBonusAria}
                     className="field field--input"
                     inputMode="decimal"
-                    placeholder="例如 3"
+                    placeholder={copy.signOnBonusPlaceholder}
                     value={formState.signOnBonus}
                     onChange={(event) => updateField("signOnBonus", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>搬家补贴（万元）</span>
+                  <span>{copy.relocationBonusLabel}</span>
                   <input
-                    aria-label="搬家补贴"
+                    aria-label={copy.relocationBonusAria}
                     className="field field--input"
                     inputMode="decimal"
-                    placeholder="例如 1"
+                    placeholder={copy.relocationBonusPlaceholder}
                     value={formState.relocationBonus}
                     onChange={(event) => updateField("relocationBonus", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>股票数量（股）</span>
+                  <span>{copy.equitySharesLabel}</span>
                   <input
-                    aria-label="股票数量"
+                    aria-label={copy.equitySharesAria}
                     className="field field--input"
                     inputMode="numeric"
                     value={formState.equityShares}
@@ -361,20 +482,20 @@ export function NegotiationSection({
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>每股估值（每股）</span>
+                  <span>{copy.equityPerShareValueLabel}</span>
                   <input
-                    aria-label="每股估值"
+                    aria-label={copy.equityPerShareValueAria}
                     className="field field--input"
                     inputMode="decimal"
-                    placeholder="例如 18"
+                    placeholder={copy.equityPerShareValuePlaceholder}
                     value={formState.equityPerShareValue}
                     onChange={(event) => updateField("equityPerShareValue", event.target.value)}
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>归属年限（年）</span>
+                  <span>{copy.equityVestingYearsLabel}</span>
                   <input
-                    aria-label="归属年限"
+                    aria-label={copy.equityVestingYearsAria}
                     className="field field--input"
                     inputMode="decimal"
                     value={formState.equityVestingYears}
@@ -382,9 +503,9 @@ export function NegotiationSection({
                   />
                 </label>
                 <label className="company-card__negotiation-field">
-                  <span>截止日期</span>
+                  <span>{copy.deadlineLabel}</span>
                   <input
-                    aria-label="截止日期"
+                    aria-label={copy.deadlineAria}
                     className="field field--input"
                     type="date"
                     value={formState.deadline}
@@ -394,18 +515,18 @@ export function NegotiationSection({
               </div>
 
               <label className="company-card__negotiation-field">
-                <span>HR 信号</span>
+                <span>{copy.hrSignalLabel}</span>
                 <input
-                  aria-label="HR 信号"
+                  aria-label={copy.hrSignalAria}
                   className="field field--input"
                   value={formState.hrSignal}
                   onChange={(event) => updateField("hrSignal", event.target.value)}
                 />
               </label>
               <label className="company-card__negotiation-field">
-                <span>备注</span>
+                <span>{copy.notesLabel}</span>
                 <textarea
-                  aria-label="备注"
+                  aria-label={copy.notesAria}
                   className="field field--textarea"
                   rows={3}
                   value={formState.notes}
@@ -415,7 +536,7 @@ export function NegotiationSection({
 
               <div className="company-card__negotiation-actions">
                 <button className="button button--primary" type="button" onClick={handleSaveSnapshot}>
-                  保存谈薪快照
+                  {copy.saveSnapshot}
                 </button>
                 {onFinishNegotiation ? (
                   <>
@@ -424,21 +545,21 @@ export function NegotiationSection({
                       type="button"
                       onClick={() => onFinishNegotiation(company.id, "accepted")}
                     >
-                      标记为接受
+                      {copy.markAccepted}
                     </button>
                     <button
                       className="button button--ghost"
                       type="button"
                       onClick={() => onFinishNegotiation(company.id, "declined")}
                     >
-                      标记为拒绝
+                      {copy.markDeclined}
                     </button>
                     <button
                       className="button button--ghost"
                       type="button"
                       onClick={() => onFinishNegotiation(company.id, "terminated")}
                     >
-                      终止谈薪
+                      {copy.terminate}
                     </button>
                   </>
                 ) : null}
@@ -452,29 +573,26 @@ export function NegotiationSection({
                 <article className="company-card__negotiation-item" key={snapshot.id}>
                   <div className="company-card__negotiation-item-header">
                     <div className="company-card__negotiation-item-copy">
-                      <strong>{`第 ${snapshot.version} 轮谈薪`}</strong>
+                      <strong>{copy.historyTitle(snapshot.version)}</strong>
                       <span>{snapshot.title}</span>
                     </div>
                     {canDeleteNegotiationSnapshots ? (
                       <button
                         className="button button--ghost button--danger company-card__negotiation-delete"
                         type="button"
-                        aria-label={`删除第 ${snapshot.version} 轮谈薪`}
+                        aria-label={copy.deleteSnapshotAria(snapshot.version)}
                         onClick={() => handleDeleteSnapshot(snapshot)}
                       >
-                        删除
+                        {copy.delete}
                       </button>
                     ) : null}
                   </div>
-                  <p>
-                    {formatCashDisplayInWan(snapshot.baseMonthlySalary)} ×{" "}
-                    {snapshot.salaryMonths ?? "待补充"} 薪
-                  </p>
+                  <p>{formatLocalizedCashWithMonths(snapshot.baseMonthlySalary, snapshot.salaryMonths, locale)}</p>
                 </article>
               ))}
             </div>
           ) : (
-            <p className="company-card__negotiation-empty">还没有保存谈薪快照。</p>
+            <p className="company-card__negotiation-empty">{copy.empty}</p>
           )}
         </div>
       ) : null}

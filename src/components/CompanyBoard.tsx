@@ -1,4 +1,5 @@
 import { CompanyCard } from "./CompanyCard";
+import { resolveAppLocale } from "../lib/locale";
 import type {
   CompanyGroup,
   CompanyRecord,
@@ -14,7 +15,7 @@ interface CompanyBoardProps {
   groups: CompanyGroup[];
   onSaveSummary: (companyId: string, patch: CompanySummaryPatch) => void;
   onAddRound: (companyId: string, processId: string) => void;
-  onArchiveProcess: (companyId: string, processId: string) => void;
+  onArchiveProcess: (companyId: string, processId: string, archiveNote: string) => void;
   onUpdateProcess: (
     companyId: string,
     processId: string,
@@ -52,20 +53,27 @@ export function CompanyBoard({
   onDeleteNegotiationSnapshot,
   onFinishNegotiation
 }: CompanyBoardProps) {
+  const locale = resolveAppLocale();
+  const copy =
+    locale === "en"
+      ? {
+          caption: "dossiers"
+        }
+      : {
+          caption: "份"
+        };
+
   return (
     <section className="board-grid">
       {groups.map((group) => (
         <section className="panel panel--group" key={group.key}>
           <div className="group-panel__header">
-            <div>
-              <p className="group-panel__eyebrow">Dossier Lane</p>
-              <h3>{group.label}</h3>
-            </div>
+            <h3>{group.label}</h3>
             <div className="group-panel__meta">
               <span className="group-panel__count">
                 {String(group.companies.length).padStart(2, "0")}
               </span>
-              <span className="group-panel__caption">份活跃判断</span>
+              <span className="group-panel__caption">{copy.caption}</span>
             </div>
           </div>
           <div className="group-panel__stack">

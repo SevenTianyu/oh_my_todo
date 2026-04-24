@@ -77,10 +77,20 @@ describe("mutations", () => {
     expect(next[0].processes[0].rounds[0].id).toBeTruthy();
   });
 
-  it("archives only the targeted process", () => {
-    const next = archiveProcessById(sampleCompanies, "acme", "acme-pm");
+  it("archives only the targeted process and stores the archive note", () => {
+    const next = archiveProcessById(
+      sampleCompanies,
+      "acme",
+      "acme-pm",
+      "优先推进其他更匹配的机会",
+      "2026-04-23T20:00:00.000Z"
+    );
 
-    expect(next.find((company) => company.id === "acme")?.processes[0].status).toBe("archived");
+    expect(next.find((company) => company.id === "acme")?.processes[0]).toMatchObject({
+      status: "archived",
+      archiveNote: "优先推进其他更匹配的机会",
+      archivedAt: "2026-04-23T20:00:00.000Z"
+    });
   });
 
   it("updates process-level fields immutably", () => {

@@ -1,11 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { getCompanyTypeLabel, resolveAppLocale } from "../lib/locale";
 import type { CompanyType, NewCompanyDraft } from "../types/interview";
-
-const COMPANY_TYPE_OPTIONS: Array<{ value: CompanyType; label: string }> = [
-  { value: "startup", label: "创业公司" },
-  { value: "big-tech", label: "大厂" }
-];
 
 function createInitialDraft(): NewCompanyDraft {
   return {
@@ -21,7 +17,34 @@ interface NewCompanyFormProps {
 }
 
 export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
+  const locale = resolveAppLocale();
   const [draft, setDraft] = useState<NewCompanyDraft>(() => createInitialDraft());
+  const copy =
+    locale === "en"
+      ? {
+          eyebrow: "Quick Capture",
+          title: "Write the first dossier",
+          description: "Capture the minimum now, then add the real context later.",
+          companyName: "Company Name",
+          companyType: "Company Type",
+          roleName: "Role Name",
+          save: "Save to Workbench",
+          cancel: "Cancel"
+        }
+      : {
+          eyebrow: "快速录入",
+          title: "写下第一条新判断",
+          description: "只填最少字段，后面再补充真实上下文。",
+          companyName: "公司名称",
+          companyType: "公司类型",
+          roleName: "岗位名称",
+          save: "保存到工作台",
+          cancel: "取消"
+        };
+  const companyTypeOptions: Array<{ value: CompanyType; label: string }> = [
+    { value: "startup", label: getCompanyTypeLabel(locale, "startup") },
+    { value: "big-tech", label: getCompanyTypeLabel(locale, "big-tech") }
+  ];
 
   function updateDraft<K extends keyof NewCompanyDraft>(key: K, value: NewCompanyDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -48,17 +71,17 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
     <section className="panel composer-panel">
       <div className="composer-panel__header">
         <div>
-          <p className="panel__eyebrow">Quick Capture</p>
-          <h2>写下第一条新判断</h2>
+          <p className="panel__eyebrow">{copy.eyebrow}</p>
+          <h2>{copy.title}</h2>
         </div>
-        <p className="panel__description">只填最少字段，后面再补充真实上下文。</p>
+        <p className="panel__description">{copy.description}</p>
       </div>
 
       <form className="composer-form" onSubmit={handleSubmit}>
         <label className="composer-field">
-          <span>公司名称</span>
+          <span>{copy.companyName}</span>
           <input
-            aria-label="公司名称"
+            aria-label={copy.companyName}
             className="field composer-field__control"
             required
             type="text"
@@ -68,14 +91,14 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
         </label>
 
         <label className="composer-field">
-          <span>公司类型</span>
+          <span>{copy.companyType}</span>
           <select
-            aria-label="公司类型"
+            aria-label={copy.companyType}
             className="field composer-field__control"
             value={draft.companyType}
             onChange={(event) => updateDraft("companyType", event.target.value as CompanyType)}
           >
-            {COMPANY_TYPE_OPTIONS.map((option) => (
+            {companyTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -84,9 +107,9 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
         </label>
 
         <label className="composer-field">
-          <span>岗位名称</span>
+          <span>{copy.roleName}</span>
           <input
-            aria-label="岗位名称"
+            aria-label={copy.roleName}
             className="field composer-field__control"
             required
             type="text"
@@ -97,11 +120,11 @@ export function NewCompanyForm({ onSubmit, onCancel }: NewCompanyFormProps) {
 
         <div className="composer-form__actions">
           <button className="button button--primary" type="submit">
-            保存到工作台
+            {copy.save}
           </button>
           {onCancel ? (
             <button className="button button--ghost" type="button" onClick={onCancel}>
-              取消
+              {copy.cancel}
             </button>
           ) : null}
         </div>

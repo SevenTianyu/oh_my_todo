@@ -298,6 +298,32 @@ describe("storage", () => {
     });
   });
 
+  it("round-trips archived process notes through export and import", () => {
+    const snapshotWithArchiveNote = {
+      version: 2 as const,
+      grouping: "companyType" as const,
+      companies: [
+        {
+          ...sampleCompanies[4],
+          processes: [
+            {
+              ...sampleCompanies[4].processes[0],
+              archiveNote: "已接受结果，流程收口归档。",
+              archivedAt: "2026-04-14T09:05:00.000Z"
+            }
+          ]
+        }
+      ]
+    };
+
+    const result = parseWorkbenchSnapshotImport(serializeWorkbenchSnapshot(snapshotWithArchiveNote));
+
+    expect(result).toEqual({
+      ok: true,
+      snapshot: snapshotWithArchiveNote
+    });
+  });
+
   it("maps legacy strike and reference prices into a single per-share value when importing", () => {
     const result = parseWorkbenchSnapshotImport(
       JSON.stringify({

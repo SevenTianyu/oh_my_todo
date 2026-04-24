@@ -140,7 +140,7 @@ body {
 }
 
 .page__masthead h1 {
-  margin: 10px 0 14px;
+  margin: 0 0 14px;
   font-family: "Newsreader", serif;
   font-size: clamp(3rem, 5vw, 4.6rem);
   line-height: 0.92;
@@ -188,8 +188,7 @@ body {
 
 .section-heading,
 .panel__header,
-.group-panel__header,
-.archive-panel__summary {
+.group-panel__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -227,7 +226,12 @@ body {
 .group-panel__eyebrow,
 .archive-panel__eyebrow,
 .group-tabs__label {
+  margin: 0;
   font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: color-mix(in srgb, var(--accent-umber) 78%, var(--ink-soft));
 }
 
@@ -241,6 +245,25 @@ body {
 
 .panel--agenda {
   background: linear-gradient(180deg, rgba(252, 248, 241, 0.94), rgba(247, 241, 231, 0.98));
+}
+
+.panel--agenda .panel__eyebrow {
+  font-family: "Newsreader", serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-transform: none;
+  color: var(--ink-strong);
+}
+
+.stack-section--board > .section-heading .section-heading__eyebrow,
+.offer-panel > .section-heading .section-heading__eyebrow {
+  font-family: "Newsreader", serif;
+  font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-transform: none;
+  color: var(--ink-strong);
 }
 
 .agenda-list,
@@ -271,8 +294,7 @@ body {
 .agenda-item__meta,
 .company-card__process-meta,
 .company-card__round-heading,
-.company-card__badges,
-.archive-panel__summary {
+.company-card__badges {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -458,6 +480,56 @@ body {
   box-shadow: none;
 }
 
+.company-card__archive-summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.company-card__archive-summary::-webkit-details-marker {
+  display: none;
+}
+
+.company-card__archive-summary-copy {
+  display: grid;
+  gap: 14px;
+}
+
+.company-card__archive-preview {
+  display: grid;
+  gap: 6px;
+}
+
+.company-card__archive-preview span,
+.company-card__archive-process-note-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(93, 81, 71, 0.78);
+}
+
+.company-card__archive-preview p,
+.company-card__archive-process-note,
+.company-card__archive-round p,
+.company-card__archive-round-time,
+.company-card__dialog-description {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.company-card__archive-preview p {
+  white-space: pre-line;
+}
+
+.company-card__archive-body {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid color-mix(in srgb, var(--line-subtle) 88%, transparent);
+  display: grid;
+  gap: 22px;
+}
+
 .company-card__masthead {
   display: flex;
   justify-content: space-between;
@@ -471,23 +543,6 @@ body {
   display: grid;
   gap: 10px;
   min-width: 0;
-}
-
-.company-card__mastrail {
-  display: grid;
-  justify-items: end;
-  gap: 10px;
-  min-width: 10rem;
-}
-
-.company-card__catalog {
-  margin: 0;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--accent-umber);
 }
 
 .company-card__summary {
@@ -507,14 +562,6 @@ body {
   color: var(--text-secondary);
   font-size: 0.96rem;
   line-height: 1.5;
-}
-
-.company-card__mastrail-note {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.86rem;
-  line-height: 1.45;
-  text-align: right;
 }
 
 .company-card__summary-lines {
@@ -548,11 +595,6 @@ body {
   gap: 22px;
 }
 
-.company-card__negotiation-shell {
-  display: grid;
-  gap: 12px;
-}
-
 .company-card__section {
   display: grid;
   gap: 18px;
@@ -568,16 +610,6 @@ body {
 .company-card__section-title {
   margin: 0;
   font-size: 1rem;
-}
-
-.company-card__section-kicker {
-  margin: 0;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--accent-umber) 74%, var(--ink-soft));
 }
 
 .company-card__details-actions {
@@ -712,6 +744,17 @@ body {
   border-top: 1px solid var(--line-subtle);
 }
 
+.company-card__process--archived {
+  padding: 18px;
+  border: 1px solid var(--line-subtle);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 251, 245, 0.96), rgba(239, 230, 214, 0.84));
+}
+
+.company-card__process--archived .company-card__process-header {
+  padding-bottom: 4px;
+}
+
 .company-card__process-header {
   display: flex;
   justify-content: space-between;
@@ -783,6 +826,19 @@ body {
   font-size: 0.92rem;
 }
 
+.company-card__archive-process-note {
+  white-space: pre-line;
+}
+
+.company-card__archive-round {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--line-subtle);
+  border-radius: 18px;
+  background: rgba(255, 251, 245, 0.8);
+}
+
 .field {
   width: 100%;
   box-sizing: border-box;
@@ -815,10 +871,51 @@ body {
   justify-self: start;
 }
 
+.company-card__dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(43, 36, 31, 0.24);
+  backdrop-filter: blur(4px);
+}
+
+.company-card__dialog {
+  width: min(100%, 540px);
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 251, 245, 0.98), rgba(239, 230, 214, 0.96));
+  box-shadow: 0 22px 48px rgba(43, 36, 31, 0.16);
+}
+
+.company-card__dialog-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.company-card__dialog-title {
+  margin: 0;
+  font-family: "Newsreader", serif;
+  font-size: 1.4rem;
+  letter-spacing: -0.04em;
+}
+
+.company-card__dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .field:focus-visible,
 .group-tabs__button:focus-visible,
 .button:focus-visible,
-.archive-panel__summary:focus-visible {
+.archive-panel__summary:focus-visible,
+.company-card__archive-summary:focus-visible {
   outline: none;
   border-color: rgba(95, 107, 92, 0.42);
   box-shadow:
@@ -838,6 +935,44 @@ body {
 
 .button--primary:hover {
   background: linear-gradient(180deg, #798773 0%, #64705f 100%);
+}
+
+.page__masthead-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.page__language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 14px;
+  border: 1px solid var(--line-subtle);
+  border-radius: 18px;
+  background: rgba(255, 251, 245, 0.74);
+}
+
+.page__language-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.page__language-buttons {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.page__language-button {
+  min-height: 38px;
+  min-width: 3.4rem;
+  padding: 0 14px;
+  border-radius: 12px;
 }
 
 .page__masthead-actions {
@@ -950,8 +1085,7 @@ body {
   border: 0;
 }
 
-.badge,
-.archive-panel__hint {
+.badge {
   display: inline-flex;
   align-items: center;
   min-height: 28px;
@@ -965,15 +1099,6 @@ body {
   border: 1px solid var(--line-subtle);
   background: rgba(95, 107, 92, 0.08);
   color: var(--text-primary);
-}
-
-.badge--company-type-startup {
-  background: rgba(95, 107, 92, 0.12);
-  color: var(--accent-olive);
-}
-
-.badge--company-type-big-tech {
-  background: rgba(47, 36, 29, 0.08);
 }
 
 .badge--stage {
@@ -1005,12 +1130,6 @@ body {
 .panel--group {
   display: grid;
   gap: 18px;
-}
-
-.archive-panel__hint {
-  border: 1px solid var(--line-subtle);
-  background: rgba(95, 107, 92, 0.08);
-  color: var(--text-secondary);
 }
 
 .group-panel__stack,
@@ -1099,24 +1218,6 @@ body {
   box-shadow: var(--shadow-panel);
 }
 
-.archive-panel__summary {
-  list-style: none;
-  cursor: pointer;
-}
-
-.archive-panel__summary::-webkit-details-marker {
-  display: none;
-}
-
-.archive-panel__title {
-  display: block;
-  margin-top: 8px;
-  font-family: "Newsreader", serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
 .company-card__datetime::-webkit-calendar-picker-indicator {
   cursor: pointer;
   opacity: 0.72;
@@ -1187,11 +1288,11 @@ body {
   .section-heading,
   .panel__header,
   .group-panel__header,
-  .archive-panel__summary,
   .company-card__masthead,
   .company-card__process-header,
   .group-tabs__shell,
-  .composer-panel__header {
+  .composer-panel__header,
+  .page__masthead-toolbar {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -1226,6 +1327,17 @@ body {
   .group-tabs__button {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .page__language-switcher,
+  .page__language-buttons,
+  .page__masthead-actions {
+    width: 100%;
+  }
+
+  .page__language-switcher {
+    justify-content: space-between;
+    box-sizing: border-box;
   }
 
   .agenda-item__time {

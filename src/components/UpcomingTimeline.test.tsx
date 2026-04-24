@@ -37,7 +37,8 @@ describe("UpcomingTimeline", () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: "未来 7 天安排" })).toBeInTheDocument();
+    expect(screen.getByText("未来 7 天安排")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "未来 7 天安排" })).not.toBeInTheDocument();
     expect(screen.getByText("Anthropic")).toBeInTheDocument();
     expect(screen.getByText("Hiring Manager")).toBeInTheDocument();
     expect(screen.getByText("PM")).toBeInTheDocument();

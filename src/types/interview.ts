@@ -17,6 +17,8 @@ export interface InterviewProcess {
   roleName: string;
   nextStep: string;
   status: ProcessStatus;
+  archiveNote?: string | null;
+  archivedAt?: string | null;
   rounds: RoundRecord[];
 }
 

@@ -11,6 +11,7 @@ afterEach(() => {
 
 beforeEach(() => {
   window.localStorage.clear();
+  document.documentElement.lang = "zh-CN";
 });
 
 function seedWorkbench() {
@@ -28,7 +29,7 @@ describe("App", () => {
     expect(screen.getByText("先写下公司，再逐步补上时间、判断和谈薪记录。")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "从第一家公司开始建立判断台" })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "新建第一个公司" })).toHaveLength(2);
-    expect(screen.getAllByRole("button", { name: "导入 JSON" })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: "导入数据" })).toHaveLength(2);
   });
 
   it("renders the workbench shell and the default company-type groups", () => {
@@ -36,10 +37,11 @@ describe("App", () => {
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "面试工作台" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "未来 7 天安排" })).toBeInTheDocument();
+    expect(screen.getByText("未来 7 天安排")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "创业公司" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "大厂" })).toBeInTheDocument();
-    expect(screen.getByText("历史判断档案（1）")).toBeInTheDocument();
+    expect(screen.getAllByText("归档（1）")).toHaveLength(1);
+    expect(screen.queryByText("历史判断档案（1）")).not.toBeInTheDocument();
     expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
     expect(screen.getByLabelText("分组切换")).toBeInTheDocument();
   });
@@ -49,11 +51,11 @@ describe("App", () => {
     render(<App />);
 
     const masthead = screen.getByLabelText("工作台首页");
-    expect(within(masthead).getByText("Private Interview Desk")).toBeInTheDocument();
+    expect(within(masthead).queryByText("个人面试工作台")).not.toBeInTheDocument();
     expect(
-      within(masthead).getByText("把时间、判断和谈薪记录留在同一张私人工作台上。")
+      within(masthead).getByText("把时间、判断和谈薪记录留在同一张个人工作台上。")
     ).toBeInTheDocument();
-    expect(within(masthead).getByText("本地优先 / 无登录 / JSON 可迁移")).toBeInTheDocument();
+    expect(within(masthead).getByText("本地优先 / 无登录 / 可导入导出")).toBeInTheDocument();
     expect(within(masthead).getByRole("button", { name: "新建公司" })).toBeInTheDocument();
   });
 
@@ -76,7 +78,8 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "按流程阶段分组" }));
 
     expect(screen.getByRole("heading", { name: "谈薪中" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Offer 对比" })).toBeInTheDocument();
+    expect(screen.getByText("薪资对比")).toBeInTheDocument();
+    expect(screen.queryByText("报价对比")).not.toBeInTheDocument();
   });
 
   it("explains the workbench as company judgment, interviews, and compensation comparison", () => {
@@ -100,7 +103,7 @@ describe("App", () => {
 
     expect(within(novaCard!).getByRole("button", { name: "确认进入谈薪" })).toBeInTheDocument();
     expect(
-      within(novaCard!).getByText(/如果你已经开始和 HR 确认报价、总包或薪资空间，可以手动进入谈薪。/)
+      within(novaCard!).getByText(/如果你已经开始和招聘方确认报价、总包或薪资空间，可以手动进入谈薪。/)
     ).toBeInTheDocument();
   });
 
@@ -190,7 +193,7 @@ describe("App", () => {
 
     render(<App />);
 
-    const timeline = screen.getByRole("heading", { name: "未来 7 天安排" }).closest("section");
+    const timeline = screen.getByText("未来 7 天安排").closest("section");
     expect(within(timeline!).queryByText("Nova AI")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "展开 Nova AI" })).not.toBeInTheDocument();
     fireEvent.click(screen.getAllByRole("button", { name: "展开面试安排" })[1]);
@@ -210,7 +213,7 @@ describe("App", () => {
 
     render(<App />);
 
-    const timeline = screen.getByRole("heading", { name: "未来 7 天安排" }).closest("section");
+    const timeline = screen.getByText("未来 7 天安排").closest("section");
 
     expect(within(timeline!).queryByText("ACME")).not.toBeInTheDocument();
     expect(within(timeline!).queryByText("字节跳动")).not.toBeInTheDocument();
@@ -221,29 +224,112 @@ describe("App", () => {
     render(<App />);
 
     expect(screen.getByLabelText("工作台首页")).toBeInTheDocument();
-    expect(screen.getByText("Private Interview Desk")).toBeInTheDocument();
+    expect(screen.queryByText("个人面试工作台")).not.toBeInTheDocument();
     expect(screen.getByLabelText("工作台概览")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "活跃流程工作区" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "历史判断区" })).toBeInTheDocument();
+    expect(screen.getByText("活跃流程工作区")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "活跃流程工作区" })).not.toBeInTheDocument();
+    expect(screen.getAllByText("归档（1）")).toHaveLength(1);
+    expect(screen.queryByRole("heading", { name: "历史判断区" })).not.toBeInTheDocument();
     expect(screen.getByText("工作台索引")).toBeInTheDocument();
   });
 
-  it("shows archived negotiation summary and snapshot history inside the archive UI", async () => {
+  it("renders fixed interface copy in English when the document language is English", async () => {
+    document.documentElement.lang = "en";
     seedWorkbench();
     const user = userEvent.setup();
     render(<App />);
+    const acmeCard = screen.getByRole("heading", { name: "ACME" }).closest("article");
 
-    await user.click(screen.getByText("历史判断档案（1）"));
+    expect(screen.getByLabelText("Workbench Home")).toBeInTheDocument();
+    expect(screen.queryByText("Personal Interview Desk")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Interview Workbench" })).toBeInTheDocument();
+    expect(screen.getAllByText("Next 7 Days")).toHaveLength(2);
+    expect(screen.queryByRole("heading", { name: "Next 7 Days" })).not.toBeInTheDocument();
+    expect(screen.getByText("Active Pipeline")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Active Pipeline" })).not.toBeInTheDocument();
+    expect(screen.getByText("Workbench Index")).toBeInTheDocument();
+    expect(screen.getByText("Salary Comparison")).toBeInTheDocument();
+    expect(screen.queryByText("Offer Comparison")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Archive (1)")).toHaveLength(1);
+    expect(screen.queryByRole("heading", { name: "Archive" })).not.toBeInTheDocument();
+    expect(acmeCard).not.toBeNull();
 
-    const archiveCard = screen.getByText("Google").closest("article");
+    await user.click(within(acmeCard!).getByRole("button", { name: "Expand Company Judgment" }));
+
+    expect(within(acmeCard!).getByRole("heading", { name: "Company Judgment" })).toBeInTheDocument();
+    expect(within(acmeCard!).getByRole("heading", { name: "Interview Schedule" })).toBeInTheDocument();
+    expect(within(acmeCard!).getByText("Company Name")).toBeInTheDocument();
+    expect(screen.queryByText("活跃流程工作区")).not.toBeInTheDocument();
+    expect(screen.queryByText("工作台索引")).not.toBeInTheDocument();
+  });
+
+  it("switches interface language from the masthead and keeps the choice across reloads", async () => {
+    seedWorkbench();
+    const user = userEvent.setup();
+    const view = render(<App />);
+
+    expect(screen.getByLabelText("语言切换")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "EN" }));
+
+    expect(document.documentElement.lang).toBe("en");
+    expect(screen.getByRole("heading", { name: "Interview Workbench" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Language switcher")).toBeInTheDocument();
+
+    view.unmount();
+    document.documentElement.lang = "zh-CN";
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "Interview Workbench" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Language switcher")).toBeInTheDocument();
+  });
+
+  it("shows archived negotiation summary and snapshot history inside the archive UI", () => {
+    seedWorkbench();
+    render(<App />);
+
+    expect(screen.getByText("已接受结果，流程收口归档。")).toBeInTheDocument();
+
+    const archiveCard = screen.getByText("Google").closest("details");
     expect(archiveCard).not.toBeNull();
-    expect(within(archiveCard!).getByText("谈薪结果")).toBeInTheDocument();
+    expect(archiveCard).not.toHaveAttribute("open");
+
+    fireEvent.click(screen.getByText("Google"));
+
+    expect(archiveCard).toHaveAttribute("open");
+    expect(screen.getAllByText("归档（1）")).toHaveLength(1);
+    expect(within(archiveCard!).getByRole("heading", { name: "谈薪结果" })).toBeInTheDocument();
     expect(within(archiveCard!).getByText("已接受")).toBeInTheDocument();
     expect(within(archiveCard!).getByText("关联岗位：PM")).toBeInTheDocument();
     expect(within(archiveCard!).getAllByText("4.2 万 × 15 薪")).toHaveLength(2);
     expect(within(archiveCard!).getByText("谈薪历史（1）")).toBeInTheDocument();
     expect(within(archiveCard!).getByText("版本 1")).toBeInTheDocument();
     expect(within(archiveCard!).getAllByText("最终包已接受")).toHaveLength(2);
+    expect(screen.queryByText("历史判断档案（1）")).not.toBeInTheDocument();
+    expect(screen.queryByText("保留已经走完的上下文")).not.toBeInTheDocument();
+  });
+
+  it("asks for an archive note before moving a process into the archive area", async () => {
+    seedWorkbench();
+    const user = userEvent.setup();
+    render(<App />);
+
+    const acmeCard = screen.getByRole("heading", { name: "ACME" }).closest("article");
+    expect(acmeCard).not.toBeNull();
+
+    await user.click(within(acmeCard!).getByRole("button", { name: "展开面试安排" }));
+    await user.click(within(acmeCard!).getByRole("button", { name: "归档流程" }));
+
+    const dialog = screen.getByRole("dialog", { name: "归档流程说明" });
+    const confirmButton = within(dialog).getByRole("button", { name: "确认归档" });
+    expect(confirmButton).toBeDisabled();
+
+    await user.type(within(dialog).getByLabelText("归档说明"), "优先推进其他更匹配的机会");
+    await user.click(confirmButton);
+
+    expect(screen.queryByRole("dialog", { name: "归档流程说明" })).not.toBeInTheDocument();
+    expect(screen.getByText("归档（2）")).toBeInTheDocument();
+    expect(screen.getByText("优先推进其他更匹配的机会")).toBeInTheDocument();
   });
 
   it("creates a first company from the empty-state form and persists it across reloads", async () => {
@@ -347,7 +433,7 @@ describe("App", () => {
       { type: "application/json" }
     );
 
-    await user.upload(screen.getByLabelText("导入工作台 JSON"), file);
+    await user.upload(screen.getByLabelText("导入工作台数据"), file);
 
     expect(await screen.findByText("Cursor")).toBeInTheDocument();
     expect(screen.getByText("导入成功，当前本地数据已替换。")).toBeInTheDocument();

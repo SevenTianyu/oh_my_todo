@@ -131,6 +131,8 @@ export const sampleCompanies: CompanyRecord[] = [
         roleName: "Staff PM",
         nextStep: "等待书面 offer",
         status: "archived",
+        archiveNote: "已进入谈薪阶段，面试流程先归档。",
+        archivedAt: "2026-04-18T17:00:00-07:00",
         rounds: [
           {
             id: "airtable-round-1",
@@ -183,6 +185,8 @@ export const sampleCompanies: CompanyRecord[] = [
         roleName: "PM",
         nextStep: "流程结束",
         status: "archived",
+        archiveNote: "已接受结果，流程收口归档。",
+        archivedAt: "2026-04-14T09:05:00.000Z",
         rounds: [
           {
             id: "google-round-1",

@@ -165,7 +165,9 @@ export function createCompanyWithProcess(
 export function archiveProcessById(
   companies: CompanyRecord[],
   companyId: string,
-  processId: string
+  processId: string,
+  archiveNote: string,
+  now: string = new Date().toISOString()
 ): CompanyRecord[] {
   return companies.map((company) => {
     if (company.id !== companyId) return company;
@@ -173,7 +175,14 @@ export function archiveProcessById(
     return {
       ...company,
       processes: company.processes.map((process) =>
-        process.id === processId ? { ...process, status: "archived" } : process
+        process.id === processId
+          ? {
+              ...process,
+              status: "archived",
+              archiveNote,
+              archivedAt: now
+            }
+          : process
       )
     };
   });

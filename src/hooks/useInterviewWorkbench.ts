@@ -102,10 +102,10 @@ export function useInterviewWorkbench() {
         ...current,
         companies: finishNegotiation(current.companies, companyId, status)
       })),
-    archiveProcessById: (companyId: string, processId: string) =>
+    archiveProcessById: (companyId: string, processId: string, archiveNote: string) =>
       setSnapshot((current) => ({
         ...current,
-        companies: archiveProcessById(current.companies, companyId, processId)
+        companies: archiveProcessById(current.companies, companyId, processId, archiveNote)
       })),
     updateProcessRecord: (
       companyId: string,
