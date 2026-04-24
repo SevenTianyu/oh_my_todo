@@ -46,6 +46,7 @@ export function useInterviewWorkbench() {
 
   const grouping = snapshot.grouping;
   const companies = snapshot.companies;
+  const companyCategories = snapshot.companyCategories;
 
   return {
     grouping,
@@ -55,7 +56,10 @@ export function useInterviewWorkbench() {
     setComparisonScope,
     setGrouping: (nextGrouping: GroupingMode) =>
       setSnapshot((current) => ({ ...current, grouping: nextGrouping })),
-    groupedCompanies: useMemo(() => getGroupedCompanies(companies, grouping), [companies, grouping]),
+    groupedCompanies: useMemo(
+      () => getGroupedCompanies(companies, grouping, companyCategories),
+      [companies, grouping, companyCategories]
+    ),
     archivedCompanies: useMemo(() => getArchivedCompanies(companies), [companies]),
     negotiationSuggestionProcessIds: useMemo(
       () => getNegotiationSuggestionProcessIds(companies),
