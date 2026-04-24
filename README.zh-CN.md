@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./public/readme/banner-desk-almanac.svg" alt="oh_my_todo 私人工作日志横幅" width="100%" />
+  <img src="./public/readme/banner-desk-almanac-zh.svg" alt="oh_my_todo 私人工作日志横幅" width="100%" />
 </p>
 
 <h1 align="center">oh_my_todo</h1>
@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <img src="./public/readme/workbench-desk-almanac.png" alt="重新设计后的面试工作台" width="920" />
+  <img src="./public/readme/workbench-desk-almanac-zh.png" alt="中文界面的面试工作台" width="920" />
 </p>
 
 ## 为什么需要这张桌面

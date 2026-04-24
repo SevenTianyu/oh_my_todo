@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./public/readme/banner-desk-almanac.svg" alt="oh_my_todo desk almanac banner" width="100%" />
+  <img src="./public/readme/banner-desk-almanac-en.svg" alt="oh_my_todo desk almanac banner" width="100%" />
 </p>
 
 <h1 align="center">oh_my_todo</h1>
@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <img src="./public/readme/workbench-desk-almanac.png" alt="Redesigned interview workbench" width="920" />
+  <img src="./public/readme/workbench-desk-almanac-en.png" alt="Redesigned interview workbench in English" width="920" />
 </p>
 
 ## Why this desk exists
