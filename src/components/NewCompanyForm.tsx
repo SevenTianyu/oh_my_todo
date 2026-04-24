@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { resolveAppLocale } from "../lib/locale";
 import type { CompanyCategory, NewCompanyDraft } from "../types/interview";
@@ -29,10 +29,16 @@ export function NewCompanyForm({
   onCancel
 }: NewCompanyFormProps) {
   const locale = resolveAppLocale();
-  const sortedCompanyCategories = [...companyCategories].sort(
-    (left, right) => left.order - right.order || left.name.localeCompare(right.name)
+  const sortedCompanyCategories = useMemo(
+    () =>
+      [...companyCategories].sort(
+        (left, right) => left.order - right.order || left.name.localeCompare(right.name)
+      ),
+    [companyCategories]
   );
-  const [draft, setDraft] = useState<NewCompanyDraft>(() => createInitialDraft(companyCategories));
+  const [draft, setDraft] = useState<NewCompanyDraft>(() =>
+    createInitialDraft(sortedCompanyCategories)
+  );
   const copy =
     locale === "en"
       ? {
@@ -84,7 +90,7 @@ export function NewCompanyForm({
     }
 
     onSubmit(normalizedDraft);
-    setDraft(createInitialDraft(companyCategories));
+    setDraft(createInitialDraft(sortedCompanyCategories));
   }
 
   return (

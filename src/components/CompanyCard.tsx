@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { TextareaHTMLAttributes } from "react";
 import type {
   CompanyCategory,
@@ -476,8 +476,12 @@ function ActiveProcess({
 export function CompanyCard(props: CompanyCardProps) {
   const locale = resolveAppLocale();
   const copy = getCompanyCardCopy(locale);
-  const sortedCompanyCategories = [...props.companyCategories].sort(
-    (left, right) => left.order - right.order || left.name.localeCompare(right.name)
+  const sortedCompanyCategories = useMemo(
+    () =>
+      [...props.companyCategories].sort(
+        (left, right) => left.order - right.order || left.name.localeCompare(right.name)
+      ),
+    [props.companyCategories]
   );
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [interviewExpanded, setInterviewExpanded] = useState(false);
