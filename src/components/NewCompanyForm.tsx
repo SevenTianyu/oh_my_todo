@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { resolveAppLocale } from "../lib/locale";
 import type { CompanyCategory, NewCompanyDraft } from "../types/interview";
@@ -29,6 +29,7 @@ export function NewCompanyForm({
   onCancel
 }: NewCompanyFormProps) {
   const locale = resolveAppLocale();
+  const companyTypeId = useId();
   const sortedCompanyCategories = useMemo(
     () =>
       [...companyCategories].sort(
@@ -116,11 +117,23 @@ export function NewCompanyForm({
           />
         </label>
 
-        <label className="composer-field">
-          <span>{copy.companyType}</span>
+        <div className="composer-field">
+          <div className="composer-field__label-row">
+            <label htmlFor={companyTypeId}>{copy.companyType}</label>
+            {onManageCategories ? (
+              <button
+                className="button button--ghost composer-field__manage-button"
+                type="button"
+                onClick={onManageCategories}
+              >
+                {copy.manageCategories}
+              </button>
+            ) : null}
+          </div>
           <select
             aria-label={copy.companyType}
             className="field composer-field__control"
+            id={companyTypeId}
             value={draft.companyType}
             onChange={(event) => updateDraft("companyType", event.target.value)}
           >
@@ -130,14 +143,7 @@ export function NewCompanyForm({
               </option>
             ))}
           </select>
-        </label>
-        {onManageCategories ? (
-          <div className="composer-field__inline-actions">
-            <button className="button button--ghost" type="button" onClick={onManageCategories}>
-              {copy.manageCategories}
-            </button>
-          </div>
-        ) : null}
+        </div>
 
         <label className="composer-field">
           <span>{copy.roleName}</span>

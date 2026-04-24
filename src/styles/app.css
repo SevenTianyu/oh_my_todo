@@ -1137,6 +1137,22 @@ body {
   font-weight: 600;
 }
 
+.composer-field__label-row {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.composer-field__manage-button {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
 .composer-field__control {
   min-height: 52px;
   padding: 0 16px;

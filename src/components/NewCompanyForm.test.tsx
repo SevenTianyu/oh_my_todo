@@ -48,6 +48,12 @@ describe("NewCompanyForm", () => {
       />
     );
 
+    const companyTypeField = screen.getByLabelText("公司类型").closest(".composer-field");
+    expect(companyTypeField).not.toBeNull();
+    expect(
+      within(companyTypeField as HTMLElement).getByRole("button", { name: "管理分类" })
+    ).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "管理分类" }));
 
     expect(onManageCategories).toHaveBeenCalledOnce();
