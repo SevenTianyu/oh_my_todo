@@ -82,6 +82,56 @@ describe("App", () => {
     expect(screen.queryByText("报价对比")).not.toBeInTheDocument();
   });
 
+  it("manages custom categories from the workbench UI", async () => {
+    seedWorkbench();
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "管理分类" }));
+    const dialog = screen.getByRole("dialog", { name: "管理分类" });
+
+    await user.type(within(dialog).getByLabelText("新分类名称"), "外企");
+    await user.click(within(dialog).getByRole("button", { name: "新增分类" }));
+    expect(within(dialog).getByDisplayValue("外企")).toBeInTheDocument();
+
+    await user.clear(within(dialog).getByLabelText("分类名称 创业公司"));
+    await user.type(within(dialog).getByLabelText("分类名称 创业公司"), "早期团队");
+    await user.click(within(dialog).getByRole("button", { name: "保存 创业公司" }));
+
+    expect(await screen.findByRole("heading", { name: "早期团队" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "创业公司" })).not.toBeInTheDocument();
+
+    const startupRow = within(dialog)
+      .getByDisplayValue("早期团队")
+      .closest(".category-manager__row") as HTMLElement;
+    expect(within(startupRow).getByRole("button", { name: "删除 早期团队" })).toBeDisabled();
+    expect(within(startupRow).getByText(/先把 .* 家公司移到其他分类/)).toBeInTheDocument();
+  });
+
+  it("uses custom categories when creating and editing companies", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getAllByRole("button", { name: "新建第一个公司" })[0]);
+    await user.click(screen.getByRole("button", { name: "管理分类" }));
+    await user.type(screen.getByLabelText("新分类名称"), "外企");
+    await user.click(screen.getByRole("button", { name: "新增分类" }));
+    await user.click(screen.getByRole("button", { name: "关闭" }));
+
+    await user.type(screen.getByLabelText("公司名称"), "Stripe");
+    const companyTypeSelect = screen.getByLabelText("公司类型") as HTMLSelectElement;
+    const foreignOption = [...companyTypeSelect.options].find(
+      (option) => option.textContent === "外企"
+    );
+    expect(foreignOption).toBeDefined();
+    await user.selectOptions(companyTypeSelect, foreignOption!.value);
+    await user.type(screen.getByLabelText("岗位名称"), "Product Lead");
+    await user.click(screen.getByRole("button", { name: "保存到工作台" }));
+
+    expect(screen.getByText("Stripe")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "外企" })).toBeInTheDocument();
+  });
+
   it("explains the workbench as company judgment, interviews, and compensation comparison", () => {
     seedWorkbench();
     render(<App />);
@@ -238,7 +288,6 @@ describe("App", () => {
     seedWorkbench();
     const user = userEvent.setup();
     render(<App />);
-    const acmeCard = screen.getByRole("heading", { name: "ACME" }).closest("article");
 
     expect(screen.getByLabelText("Workbench Home")).toBeInTheDocument();
     expect(screen.queryByText("Personal Interview Desk")).not.toBeInTheDocument();
@@ -252,6 +301,14 @@ describe("App", () => {
     expect(screen.queryByText("Offer Comparison")).not.toBeInTheDocument();
     expect(screen.getAllByText("Archive (1)")).toHaveLength(1);
     expect(screen.queryByRole("heading", { name: "Archive" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Group by stage" }));
+    expect(screen.getByRole("heading", { name: "Screening" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Interviewing" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Negotiating" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "筛选中" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "面试中" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "谈薪中" })).not.toBeInTheDocument();
+    const acmeCard = screen.getByRole("heading", { name: "ACME" }).closest("article");
     expect(acmeCard).not.toBeNull();
 
     await user.click(within(acmeCard!).getByRole("button", { name: "Expand Company Judgment" }));

@@ -1,8 +1,21 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CompanyCard } from "./CompanyCard";
+import { CompanyCard as CompanyCardComponent } from "./CompanyCard";
 import { sampleCompanies } from "../lib/sampleData";
+
+const defaultCompanyCategories = [
+  { id: "startup", name: "创业公司", order: 0 },
+  { id: "big-tech", name: "大厂", order: 1 }
+];
+
+function CompanyCard(
+  props: Omit<ComponentProps<typeof CompanyCardComponent>, "companyCategories"> &
+    Partial<Pick<ComponentProps<typeof CompanyCardComponent>, "companyCategories">>
+) {
+  return <CompanyCardComponent companyCategories={defaultCompanyCategories} {...props} />;
+}
 
 describe("CompanyCard", () => {
   beforeEach(() => {
@@ -282,9 +295,14 @@ describe("CompanyCard", () => {
     const user = userEvent.setup();
     const company = sampleCompanies[0];
     const onSaveSummary = vi.fn();
+    const companyCategories = [
+      { id: "startup", name: "早期团队", order: 0 },
+      { id: "foreign", name: "外企", order: 1 }
+    ];
     render(
       <CompanyCard
-        company={company}
+        company={{ ...company, companyType: "startup" }}
+        companyCategories={companyCategories}
         onSaveSummary={onSaveSummary}
         onUpdateProcess={() => {}}
         onAddRound={() => {}}
@@ -294,17 +312,19 @@ describe("CompanyCard", () => {
     );
 
     await user.click(screen.getByRole("button", { name: "展开公司判断" }));
+    expect(screen.getByRole("option", { name: "早期团队" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "外企" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "展开面试安排" })).toBeInTheDocument();
     await user.clear(screen.getByLabelText("公司名称"));
     await user.type(screen.getByLabelText("公司名称"), "Aha");
-    await user.selectOptions(screen.getByLabelText("公司类型"), "big-tech");
+    await user.selectOptions(screen.getByLabelText("公司类型"), "foreign");
     await user.clear(screen.getByLabelText("公司整体印象"));
     await user.type(screen.getByLabelText("公司整体印象"), "新的整体判断");
     await user.click(screen.getByRole("button", { name: "保存公司判断" }));
 
     expect(onSaveSummary).toHaveBeenCalledWith("acme", {
       name: "Aha",
-      companyType: "big-tech",
+      companyType: "foreign",
       overallImpression: "新的整体判断"
     });
     expect(screen.queryByRole("button", { name: `展开 ${company.name}` })).not.toBeInTheDocument();

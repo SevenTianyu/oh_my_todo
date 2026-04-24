@@ -13,6 +13,16 @@ import {
 } from "./selectors";
 
 const NOW = new Date("2026-04-17T09:00:00-07:00");
+const defaultCategories = [
+  { id: "startup", name: "创业公司", order: 0 },
+  { id: "big-tech", name: "大厂", order: 1 }
+];
+const customCategories = [
+  { id: "foreign", name: "外企", order: 0 },
+  { id: "startup", name: "早期团队", order: 1 },
+  { id: "empty", name: "空分类", order: 2 },
+  { id: "big-tech", name: "大厂", order: 3 }
+];
 const defaultNegotiation = {
   status: "inactive" as const,
   sourceProcessId: null,
@@ -144,7 +154,7 @@ describe("selectors", () => {
   });
 
   it("groups active companies by company type", () => {
-    const groups = getGroupedCompanies(sampleCompanies, "companyType");
+    const groups = getGroupedCompanies(sampleCompanies, "companyType", defaultCategories);
 
     expect(groups.map((group) => group.label)).toEqual(["创业公司", "大厂"]);
     expect(groups[0].companies.map((company) => company.name)).toEqual([
@@ -153,6 +163,27 @@ describe("selectors", () => {
       "Airtable"
     ]);
     expect(groups[1].companies.map((company) => company.name)).toEqual(["字节跳动"]);
+  });
+
+  it("groups active companies by custom company categories", () => {
+    const groups = getGroupedCompanies(
+      [
+        { ...sampleCompanies[0], companyType: "foreign" },
+        ...sampleCompanies.slice(1)
+      ],
+      "companyType",
+      customCategories
+    );
+
+    expect(groups.map((group) => group.label)).toEqual(["外企", "早期团队", "大厂"]);
+    expect(groups.map((group) => group.key)).toEqual(["foreign", "startup", "big-tech"]);
+    expect(groups.flatMap((group) => group.companies.map((company) => company.name))).toContain("ACME");
+  });
+
+  it("keeps derived stage grouping independent from category configuration", () => {
+    const groups = getGroupedCompanies(sampleCompanies, "stage", customCategories);
+
+    expect(groups.map((group) => group.label)).toEqual(["筛选中", "面试中", "谈薪中"]);
   });
 
   it("groups stage using derived progress only", () => {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import "./styles/app.css";
 import { ArchiveSection } from "./components/ArchiveSection";
+import { CategoryManager } from "./components/CategoryManager";
 import { CompanyBoard } from "./components/CompanyBoard";
 import { GroupingTabs } from "./components/GroupingTabs";
 import { NewCompanyForm } from "./components/NewCompanyForm";
@@ -51,6 +52,7 @@ export default function App() {
   const workbench = useInterviewWorkbench();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showComposer, setShowComposer] = useState(false);
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [notice, setNotice] = useState<{ tone: NoticeTone; message: string } | null>(null);
   const copy =
     locale === "en"
@@ -136,10 +138,14 @@ export default function App() {
           archiveDescription:
             "主工作区只保留活跃流程，已结束与搁置的公司统一存下来，保留后续回看依据。"
         };
-  const groupedCompanies = workbench.groupedCompanies.map((group) => ({
-    ...group,
-    label: getGroupLabel(locale, workbench.grouping, group.key)
-  }));
+  const groupedCompanies = workbench.groupedCompanies.map((group) =>
+    workbench.grouping === "stage"
+      ? {
+          ...group,
+          label: getGroupLabel(locale, "stage", group.key)
+        }
+      : group
+  );
   const activeCompanyCount = new Set(
     groupedCompanies.flatMap((group) => group.companies.map((company) => company.id))
   ).size;
@@ -327,6 +333,8 @@ export default function App() {
       {showComposer ? (
         <section className="stack-section">
           <NewCompanyForm
+            companyCategories={workbench.companyCategories}
+            onManageCategories={() => setCategoryManagerOpen(true)}
             onSubmit={(draft) => {
               workbench.createCompanyWithProcess(draft);
               setShowComposer(false);
@@ -369,9 +377,14 @@ export default function App() {
                 {copy.boardDescription}
               </p>
             </div>
-            <GroupingTabs value={workbench.grouping} onChange={workbench.setGrouping} />
+            <GroupingTabs
+              value={workbench.grouping}
+              onChange={workbench.setGrouping}
+              onManageCategories={() => setCategoryManagerOpen(true)}
+            />
             <CompanyBoard
               groups={groupedCompanies}
+              companyCategories={workbench.companyCategories}
               onSaveSummary={workbench.updateCompanySummary}
               onAddRound={workbench.addRoundToProcess}
               negotiationSuggestionProcessIds={workbench.negotiationSuggestionProcessIds}
@@ -408,6 +421,16 @@ export default function App() {
           </section>
         </>
       )}
+      <CategoryManager
+        open={categoryManagerOpen}
+        companyCategories={workbench.companyCategories}
+        categoryUsage={workbench.categoryUsage}
+        onCreateCategory={workbench.createCompanyCategory}
+        onRenameCategory={workbench.renameCompanyCategory}
+        onMoveCategory={workbench.moveCompanyCategory}
+        onDeleteCategory={workbench.deleteCompanyCategory}
+        onClose={() => setCategoryManagerOpen(false)}
+      />
     </main>
   );
 }

@@ -4,6 +4,10 @@ import { CompanyBoard } from "./CompanyBoard";
 import { sampleCompanies } from "../lib/sampleData";
 
 const companyCardMock = vi.fn();
+const defaultCompanyCategories = [
+  { id: "startup", name: "创业公司", order: 0 },
+  { id: "big-tech", name: "大厂", order: 1 }
+];
 
 vi.mock("./CompanyCard", () => ({
   CompanyCard: (props: Record<string, unknown>) => {
@@ -27,6 +31,7 @@ describe("CompanyBoard", () => {
             companies: [sampleCompanies[1]]
           }
         ]}
+        companyCategories={defaultCompanyCategories}
         onSaveSummary={() => {}}
         onUpdateProcess={() => {}}
         onAddRound={() => {}}
@@ -44,6 +49,10 @@ describe("CompanyBoard", () => {
     expect(container).toHaveTextContent("份");
     expect(container).not.toHaveTextContent("份活跃判断");
     expect(screen.queryByText("判断档案")).not.toBeInTheDocument();
+    const passedProps = companyCardMock.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+    expect(passedProps).toMatchObject({
+      companyCategories: defaultCompanyCategories
+    });
   });
 
   it("passes the negotiation callbacks into CompanyCard", () => {
@@ -56,6 +65,7 @@ describe("CompanyBoard", () => {
             companies: [sampleCompanies[1]]
           }
         ]}
+        companyCategories={defaultCompanyCategories}
         onSaveSummary={() => {}}
         onUpdateProcess={() => {}}
         onAddRound={() => {}}

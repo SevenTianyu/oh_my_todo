@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { TextareaHTMLAttributes } from "react";
 import type {
+  CompanyCategory,
   CompanyRecord,
   InterviewProcess,
   NegotiationSnapshot,
@@ -8,7 +9,7 @@ import type {
   RoundRecord
 } from "../types/interview";
 import { getLatestNegotiationSnapshot } from "../lib/compensation";
-import { getCompanyTypeLabel, getRoundStatusLabel, resolveAppLocale, type AppLocale } from "../lib/locale";
+import { getRoundStatusLabel, resolveAppLocale, type AppLocale } from "../lib/locale";
 import { NegotiationSection } from "./NegotiationSection";
 
 type CompanySummaryPatch = Partial<
@@ -17,6 +18,7 @@ type CompanySummaryPatch = Partial<
 
 interface CompanyCardProps {
   company: CompanyRecord;
+  companyCategories: CompanyCategory[];
   onSaveSummary: (companyId: string, patch: CompanySummaryPatch) => void;
   onAddRound: (companyId: string, processId: string) => void;
   onArchiveProcess: (companyId: string, processId: string, archiveNote: string) => void;
@@ -474,6 +476,13 @@ function ActiveProcess({
 export function CompanyCard(props: CompanyCardProps) {
   const locale = resolveAppLocale();
   const copy = getCompanyCardCopy(locale);
+  const sortedCompanyCategories = useMemo(
+    () =>
+      [...props.companyCategories].sort(
+        (left, right) => left.order - right.order || left.name.localeCompare(right.name)
+      ),
+    [props.companyCategories]
+  );
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [interviewExpanded, setInterviewExpanded] = useState(false);
   const [summaryDraft, setSummaryDraft] = useState({
@@ -560,8 +569,11 @@ export function CompanyCard(props: CompanyCardProps) {
                     }))
                   }
                 >
-                  <option value="startup">{getCompanyTypeLabel(locale, "startup")}</option>
-                  <option value="big-tech">{getCompanyTypeLabel(locale, "big-tech")}</option>
+                  {sortedCompanyCategories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 

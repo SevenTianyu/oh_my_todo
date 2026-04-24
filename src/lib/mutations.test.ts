@@ -3,15 +3,24 @@ import { sampleCompanies } from "./sampleData";
 import {
   addRoundToProcess,
   archiveProcessById,
+  createCompanyCategory,
   createCompanyWithProcess,
+  deleteCompanyCategory,
   deleteNegotiationSnapshot,
   finishNegotiation,
+  moveCompanyCategory,
+  renameCompanyCategory,
   saveNegotiationSnapshot,
   startNegotiation,
   updateProcessRecord,
   updateCompanySummary,
   updateRoundRecord
 } from "./mutations";
+
+const defaultCategories = [
+  { id: "startup", name: "创业公司", order: 0 },
+  { id: "big-tech", name: "大厂", order: 1 }
+];
 
 describe("mutations", () => {
   it("updates company-level summary fields immutably", () => {
@@ -75,6 +84,81 @@ describe("mutations", () => {
     expect(next[0].id).toBeTruthy();
     expect(next[0].processes[0].id).toBeTruthy();
     expect(next[0].processes[0].rounds[0].id).toBeTruthy();
+  });
+
+  it("creates a trimmed company category with a generated id", () => {
+    const next = createCompanyCategory(defaultCategories, " 外企 ");
+
+    expect(next.ok).toBe(true);
+    expect(next.ok && next.categories).toHaveLength(3);
+    expect(next.ok && next.categories[2]).toMatchObject({
+      name: "外企",
+      order: 2
+    });
+    expect(next.ok && next.categories[2].id).toMatch(/^category-/);
+  });
+
+  it("rejects blank and duplicate category names", () => {
+    expect(createCompanyCategory(defaultCategories, " ")).toEqual({
+      ok: false,
+      error: "blank"
+    });
+    expect(createCompanyCategory(defaultCategories, " 创业公司 ")).toEqual({
+      ok: false,
+      error: "duplicate"
+    });
+  });
+
+  it("renames a category without touching company records", () => {
+    const result = renameCompanyCategory(defaultCategories, "startup", "早期团队");
+
+    expect(result).toEqual({
+      ok: true,
+      categories: [
+        { id: "startup", name: "早期团队", order: 0 },
+        { id: "big-tech", name: "大厂", order: 1 }
+      ]
+    });
+  });
+
+  it("moves categories by one slot and normalizes order", () => {
+    const result = moveCompanyCategory(
+      [
+        ...defaultCategories,
+        { id: "foreign", name: "外企", order: 2 }
+      ],
+      "foreign",
+      "up"
+    );
+
+    expect(result).toEqual([
+      { id: "startup", name: "创业公司", order: 0 },
+      { id: "foreign", name: "外企", order: 1 },
+      { id: "big-tech", name: "大厂", order: 2 }
+    ]);
+  });
+
+  it("deletes only empty categories and keeps at least one category", () => {
+    expect(deleteCompanyCategory(defaultCategories, sampleCompanies, "big-tech")).toEqual({
+      ok: false,
+      error: "in-use"
+    });
+
+    expect(deleteCompanyCategory([defaultCategories[0]], [], "startup")).toEqual({
+      ok: false,
+      error: "last-category"
+    });
+
+    expect(
+      deleteCompanyCategory(
+        [...defaultCategories, { id: "foreign", name: "外企", order: 2 }],
+        sampleCompanies,
+        "foreign"
+      )
+    ).toEqual({
+      ok: true,
+      categories: defaultCategories
+    });
   });
 
   it("archives only the targeted process and stores the archive note", () => {
