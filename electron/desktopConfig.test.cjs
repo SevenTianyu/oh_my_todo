@@ -18,9 +18,10 @@ test("uses a stable privileged app origin", () => {
 });
 
 test("resolves production assets inside the Vite dist directory", () => {
-  const distPath = path.join(path.sep, "tmp", "oh-my-todo-dist");
+  const distPath = path.resolve("tmp", "oh-my-todo-dist");
+  const appPath = path.resolve("repo");
 
-  assert.equal(getDistPath(path.join(path.sep, "repo")), path.join(path.sep, "repo", "dist"));
+  assert.equal(getDistPath(appPath), path.join(appPath, "dist"));
   assert.equal(
     resolveAppAssetPath("/assets/index.js", distPath),
     path.join(distPath, "assets", "index.js")
