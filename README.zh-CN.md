@@ -60,7 +60,37 @@ npm run dev
 
 ### 桌面 App
 
-桌面版用 Electron 包住同一套工作台，面向个人在 macOS 和 Windows 上本地使用。
+桌面版用 Electron 包住同一套工作台，面向个人在 macOS 和 Windows 上本地使用。最新版安装包在 [Releases](https://github.com/SevenTianyu/oh_my_todo/releases) 下载。
+
+#### 启动 Release 安装包
+
+macOS：
+
+1. 下载 `oh-my-todo-0.1.0-mac-arm64.zip`。
+2. 解压后，把 `面试工作台.app` 移到 `Applications`，或者放在你习惯的位置。
+3. 先从 Finder 双击打开一次。
+
+当前 macOS 包是未签名的个人使用版。如果 macOS 提示“已损坏，无法打开”，不是文件真的坏了，而是系统拦截了从浏览器下载的未签名 App。执行下面命令后再打开：
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/面试工作台.app"
+open "/Applications/面试工作台.app"
+```
+
+如果你把 App 留在 Downloads 里，把路径换成：
+
+```bash
+xattr -dr com.apple.quarantine "$HOME/Downloads/面试工作台.app"
+open "$HOME/Downloads/面试工作台.app"
+```
+
+Windows：
+
+1. 下载 `oh-my-todo-0.1.0-win-x64.exe`。
+2. 直接运行这个 `.exe`。
+3. 如果 Windows SmartScreen 弹出提示，点 **更多信息**，再点 **仍要运行**。
+
+#### 自己编译桌面版
 
 ```bash
 npm run desktop:dev

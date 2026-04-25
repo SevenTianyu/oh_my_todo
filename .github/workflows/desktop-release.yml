@@ -106,4 +106,11 @@ jobs:
             - macOS: download the `.zip`, unzip it, then open `面试工作台.app`.
             - Windows: download the portable `.exe` and run it directly.
             - Data migration still uses JSON export/import from the web or older local version.
+
+            The macOS app is unsigned. If macOS says the app is damaged, remove the browser download quarantine flag:
+
+            ```bash
+            xattr -dr com.apple.quarantine "/Applications/面试工作台.app"
+            open "/Applications/面试工作台.app"
+            ```
           files: release-artifacts/**/*

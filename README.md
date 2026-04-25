@@ -60,7 +60,37 @@ Then open [http://localhost:5173](http://localhost:5173).
 
 ### Desktop app
 
-The desktop build wraps the same workbench in Electron for personal macOS and Windows use.
+The desktop build wraps the same workbench in Electron for personal macOS and Windows use. Download the latest desktop packages from [Releases](https://github.com/SevenTianyu/oh_my_todo/releases).
+
+#### Run the release package
+
+macOS:
+
+1. Download `oh-my-todo-0.1.0-mac-arm64.zip`.
+2. Unzip it and move `面试工作台.app` to `Applications` or any folder you prefer.
+3. Open it once from Finder.
+
+The macOS package is unsigned. If macOS says the app is damaged, remove the download quarantine flag and open it again:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/面试工作台.app"
+open "/Applications/面试工作台.app"
+```
+
+If you kept the app in Downloads, replace the path:
+
+```bash
+xattr -dr com.apple.quarantine "$HOME/Downloads/面试工作台.app"
+open "$HOME/Downloads/面试工作台.app"
+```
+
+Windows:
+
+1. Download `oh-my-todo-0.1.0-win-x64.exe`.
+2. Run the `.exe` directly.
+3. If Windows SmartScreen appears, choose **More info** and then **Run anyway**.
+
+#### Build it yourself
 
 ```bash
 npm run desktop:dev
