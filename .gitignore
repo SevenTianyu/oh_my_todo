@@ -6,3 +6,10 @@ test-results
 .playwright-cli
 .DS_Store
 .superpowers/
+.gstack/
+
+# Local-only product design and planning docs from Superpowers or GStack.
+docs/superpowers/
+docs/gstack/
+doc/superpowers/
+doc/gstack/
