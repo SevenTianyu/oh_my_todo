@@ -2,6 +2,19 @@ name: Desktop Build
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - "codex/**"
+    paths:
+      - ".github/workflows/desktop-build.yml"
+      - "build/**"
+      - "electron/**"
+      - "package-lock.json"
+      - "package.json"
+      - "public/**"
+      - "src/**"
+      - "vite.config.ts"
+      - "tsconfig.json"
   pull_request:
     paths:
       - ".github/workflows/desktop-build.yml"
