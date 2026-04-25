@@ -1,0 +1,74 @@
+name: Desktop Build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/desktop-build.yml"
+      - "build/**"
+      - "electron/**"
+      - "package-lock.json"
+      - "package.json"
+      - "public/**"
+      - "src/**"
+      - "vite.config.ts"
+      - "tsconfig.json"
+
+jobs:
+  macos:
+    name: macOS zip
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm run test
+
+      - name: Package macOS app
+        run: npm run desktop:pack:mac
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: oh-my-todo-macos
+          path: release/*.zip
+          if-no-files-found: error
+
+  windows:
+    name: Windows portable exe
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm run test
+
+      - name: Package Windows portable app
+        run: npm run desktop:pack:win
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: oh-my-todo-windows
+          path: release/*.exe
+          if-no-files-found: error

@@ -58,6 +58,20 @@ npm run dev
 
 然后打开 [http://localhost:5173](http://localhost:5173)。
 
+### 桌面 App
+
+桌面版用 Electron 包住同一套工作台，面向个人在 macOS 和 Windows 上本地使用。
+
+```bash
+npm run desktop:dev
+npm run desktop:pack:mac
+npm run desktop:pack:win
+```
+
+- macOS 打包会在 `release/` 里生成未签名的 App zip。
+- Windows 打包会在 `release/` 里生成未签名的便携 `.exe`。
+- 桌面 App 使用自己稳定的本地存储。要从浏览器或旧本地启动器迁移数据，先在那里导出 JSON，再在桌面 App 里导入同一个文件。
+
 ## 如何使用
 
 1. 先创建一家公司和它的第一个流程。
@@ -80,6 +94,9 @@ npm run dev
 npm run dev
 npm run test
 npm run build
+npm run desktop:dev
+npm run desktop:pack:mac
+npm run desktop:pack:win
 ```
 
 如果要跑 Playwright 端到端测试：
@@ -94,5 +111,6 @@ npm run e2e
 - React 19
 - TypeScript
 - Vite
+- Electron
 - Vitest
 - Playwright

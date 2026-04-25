@@ -58,6 +58,20 @@ npm run dev
 
 Then open [http://localhost:5173](http://localhost:5173).
 
+### Desktop app
+
+The desktop build wraps the same workbench in Electron for personal macOS and Windows use.
+
+```bash
+npm run desktop:dev
+npm run desktop:pack:mac
+npm run desktop:pack:win
+```
+
+- macOS packaging writes an unsigned app zip to `release/`.
+- Windows packaging writes an unsigned portable `.exe` to `release/`.
+- The desktop app uses its own stable local storage. To move data from a browser or the older local launcher, export JSON there and import the same file in the desktop app.
+
 ## How to use it
 
 1. Create a company and its first process.
@@ -80,6 +94,9 @@ Then open [http://localhost:5173](http://localhost:5173).
 npm run dev
 npm run test
 npm run build
+npm run desktop:dev
+npm run desktop:pack:mac
+npm run desktop:pack:win
 ```
 
 For Playwright end-to-end tests:
@@ -94,5 +111,6 @@ npm run e2e
 - React 19
 - TypeScript
 - Vite
+- Electron
 - Vitest
 - Playwright
