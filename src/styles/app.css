@@ -567,11 +567,13 @@ body {
 .company-card__summary-lines {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
 .company-card__summary-item {
   display: grid;
   gap: 6px;
+  min-width: 0;
 }
 
 .company-card__summary-item span {
@@ -587,6 +589,8 @@ body {
   color: var(--text-secondary);
   line-height: 1.6;
   white-space: pre-line;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .company-card__details {
@@ -864,6 +868,8 @@ body {
   min-height: 92px;
   padding: 14px 16px;
   overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   resize: none;
 }
 

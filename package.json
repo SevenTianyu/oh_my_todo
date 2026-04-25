@@ -10,8 +10,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "test": "vitest run && npm run test:desktop",
+    "test": "vitest run && npm run test:desktop && npm run test:css",
     "test:desktop": "node --test electron/desktopConfig.test.cjs",
+    "test:css": "node --test src/styles/appCss.test.cjs",
     "test:watch": "vitest",
     "e2e": "playwright test",
     "desktop:dev": "concurrently -k \"npm run dev -- --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
