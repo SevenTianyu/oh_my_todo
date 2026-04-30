@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
@@ -19,6 +19,46 @@ function seedWorkbench() {
     version: 2,
     grouping: "companyType",
     companies: sampleCompanies
+  });
+}
+
+function seedBeijingScheduledInterview(scheduledAt: string) {
+  saveWorkbenchSnapshot({
+    version: 2,
+    grouping: "companyType",
+    companies: [
+      {
+        id: "beijing-ai",
+        name: "Beijing AI",
+        companyType: "startup",
+        overallImpression: "",
+        negotiation: {
+          status: "inactive",
+          sourceProcessId: null,
+          startedAt: null,
+          endedAt: null,
+          latestSnapshotId: null,
+          snapshots: []
+        },
+        processes: [
+          {
+            id: "beijing-ai-pm",
+            roleName: "PM",
+            nextStep: "一面",
+            status: "active",
+            rounds: [
+              {
+                id: "beijing-ai-round",
+                name: "北京时间面试",
+                scheduledAt,
+                status: "scheduled",
+                notes: ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
   });
 }
 
@@ -267,6 +307,39 @@ describe("App", () => {
 
     expect(within(timeline!).queryByText("ACME")).not.toBeInTheDocument();
     expect(within(timeline!).queryByText("字节跳动")).not.toBeInTheDocument();
+  });
+
+  it("auto-refreshes the upcoming timeline every hour using Beijing time", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-17T05:00:00.000Z"));
+    seedBeijingScheduledInterview("2026-04-17T13:30");
+
+    render(<App />);
+
+    const timeline = screen.getByText("未来 7 天安排").closest("section");
+    expect(within(timeline!).getByText("Beijing AI")).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(60 * 60 * 1000);
+    });
+
+    expect(within(timeline!).queryByText("Beijing AI")).not.toBeInTheDocument();
+  });
+
+  it("refreshes the upcoming timeline immediately from the agenda button", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-17T05:00:00.000Z"));
+    seedBeijingScheduledInterview("2026-04-17T13:30");
+
+    render(<App />);
+
+    const timeline = screen.getByText("未来 7 天安排").closest("section");
+    expect(within(timeline!).getByText("Beijing AI")).toBeInTheDocument();
+
+    vi.setSystemTime(new Date("2026-04-17T06:00:00.000Z"));
+    fireEvent.click(screen.getByRole("button", { name: "刷新未来 7 天安排" }));
+
+    expect(within(timeline!).queryByText("Beijing AI")).not.toBeInTheDocument();
   });
 
   it("renders the redesigned workbench landmarks for the hero, timeline, and archive areas", () => {

@@ -366,7 +366,10 @@ export default function App() {
         </section>
       ) : (
         <>
-          <UpcomingTimeline interviews={workbench.upcomingInterviews} />
+          <UpcomingTimeline
+            interviews={workbench.upcomingInterviews}
+            onRefresh={workbench.refreshSchedule}
+          />
 
           <section className="stack-section stack-section--board">
             <div className="section-heading">

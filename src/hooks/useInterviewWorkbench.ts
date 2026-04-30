@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   addRoundToProcess,
   archiveProcessById,
@@ -39,14 +39,26 @@ import type {
 } from "../types/interview";
 
 type CompanySummaryPatch = Partial<Pick<CompanyRecord, "name" | "companyType" | "overallImpression">>;
+const SCHEDULE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 
 export function useInterviewWorkbench() {
   const [snapshot, setSnapshot] = useState(() => loadWorkbenchSnapshot() ?? createEmptyWorkbenchSnapshot());
   const [comparisonScope, setComparisonScope] = useState<"active" | "all">("active");
+  const [scheduleNow, setScheduleNow] = useState(() => new Date());
+
+  const refreshSchedule = useCallback(() => {
+    setScheduleNow(new Date());
+  }, []);
 
   useEffect(() => {
     saveWorkbenchSnapshot(snapshot);
   }, [snapshot]);
+
+  useEffect(() => {
+    const refreshTimer = window.setInterval(refreshSchedule, SCHEDULE_REFRESH_INTERVAL_MS);
+
+    return () => window.clearInterval(refreshTimer);
+  }, [refreshSchedule]);
 
   const grouping = snapshot.grouping;
   const companies = snapshot.companies;
@@ -85,7 +97,8 @@ export function useInterviewWorkbench() {
       () => getOfferComparisonRows(companies, comparisonScope),
       [companies, comparisonScope]
     ),
-    upcomingInterviews: useMemo(() => getUpcomingInterviews(companies, new Date()), [companies]),
+    upcomingInterviews: useMemo(() => getUpcomingInterviews(companies, scheduleNow), [companies, scheduleNow]),
+    refreshSchedule,
     updateCompanySummary: (companyId: string, patch: CompanySummaryPatch) =>
       setSnapshot((current) => ({
         ...current,

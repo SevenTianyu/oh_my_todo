@@ -7,6 +7,7 @@ import type {
   RoundStatus,
   UpcomingInterview
 } from "../types/interview";
+import { getBeijingEndOfNextSevenDays, parseInterviewDateTime } from "./beijingTime";
 import { getLatestNegotiationSnapshot, getNegotiationMetrics, type NegotiationMetrics } from "./compensation";
 
 const STAGE_GROUP_LABELS: Record<string, string> = {
@@ -44,13 +45,6 @@ export interface OfferComparisonRow {
   latestVersion: number;
   latestSnapshot: NegotiationSnapshot;
   metrics: NegotiationMetrics;
-}
-
-function endOfWindow(now: Date) {
-  const end = new Date(now);
-  end.setDate(end.getDate() + 7);
-  end.setHours(23, 59, 59, 999);
-  return end;
 }
 
 function getProcessStage(process: CompanyRecord["processes"][number]): DerivedStage {
@@ -102,7 +96,7 @@ export function getArchivedCompanies(companies: CompanyRecord[]) {
 }
 
 export function getUpcomingInterviews(companies: CompanyRecord[], now: Date): UpcomingInterview[] {
-  const end = endOfWindow(now);
+  const end = getBeijingEndOfNextSevenDays(now);
 
   return companies
     .flatMap((company) =>
@@ -112,7 +106,7 @@ export function getUpcomingInterviews(companies: CompanyRecord[], now: Date): Up
             return [];
           }
 
-          const scheduledAt = new Date(round.scheduledAt);
+          const scheduledAt = parseInterviewDateTime(round.scheduledAt);
           if (scheduledAt < now || scheduledAt > end) {
             return [];
           }
@@ -132,8 +126,8 @@ export function getUpcomingInterviews(companies: CompanyRecord[], now: Date): Up
       )
     )
     .sort((left, right) => {
-      const leftTime = new Date(left.scheduledAt).getTime();
-      const rightTime = new Date(right.scheduledAt).getTime();
+      const leftTime = parseInterviewDateTime(left.scheduledAt).getTime();
+      const rightTime = parseInterviewDateTime(right.scheduledAt).getTime();
 
       return leftTime - rightTime || left.scheduledAt.localeCompare(right.scheduledAt);
     });

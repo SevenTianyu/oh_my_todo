@@ -1,17 +1,27 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import { parseInterviewDateTime } from "../lib/beijingTime";
 import { UpcomingTimeline } from "./UpcomingTimeline";
 
 function getExpectedAgendaParts(value: string) {
-  const date = new Date(value);
+  const date = parseInterviewDateTime(value);
 
   return {
-    dayLabel: new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric" }).format(date),
-    weekdayLabel: new Intl.DateTimeFormat("zh-CN", { weekday: "short" }).format(date),
+    dayLabel: new Intl.DateTimeFormat("zh-CN", {
+      month: "numeric",
+      day: "numeric",
+      timeZone: "Asia/Shanghai"
+    }).format(date),
+    weekdayLabel: new Intl.DateTimeFormat("zh-CN", {
+      weekday: "short",
+      timeZone: "Asia/Shanghai"
+    }).format(date),
     timeLabel: new Intl.DateTimeFormat("zh-CN", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false
+      hour12: false,
+      timeZone: "Asia/Shanghai"
     }).format(date)
   };
 }
@@ -47,7 +57,7 @@ describe("UpcomingTimeline", () => {
     expect(screen.getByText(timeLabel)).toBeInTheDocument();
   });
 
-  it("uses actual date parsing semantics for timestamps that include offsets", () => {
+  it("formats timestamps with offsets in Beijing time", () => {
     const scheduledAt = "2026-04-24T13:00:00+08:00";
     const { dayLabel, weekdayLabel, timeLabel } = getExpectedAgendaParts(scheduledAt);
 
@@ -95,5 +105,16 @@ describe("UpcomingTimeline", () => {
     expect(screen.getByText("--/--")).toBeInTheDocument();
     expect(screen.getByText("未知")).toBeInTheDocument();
     expect(screen.getByText("--:--")).toBeInTheDocument();
+  });
+
+  it("calls onRefresh from the agenda refresh button", async () => {
+    const onRefresh = vi.fn();
+    const user = userEvent.setup();
+
+    render(<UpcomingTimeline interviews={[]} onRefresh={onRefresh} />);
+
+    await user.click(screen.getByRole("button", { name: "刷新未来 7 天安排" }));
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 });

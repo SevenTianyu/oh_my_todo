@@ -1,4 +1,5 @@
 import type { UpcomingInterview } from "../types/interview";
+import { parseInterviewDateTime } from "../lib/beijingTime";
 import { resolveAppLocale } from "../lib/locale";
 
 function getFallbackAgendaParts(locale: "zh-CN" | "en") {
@@ -11,27 +12,37 @@ function getFallbackAgendaParts(locale: "zh-CN" | "en") {
 
 const FORMATTERS = {
   "zh-CN": {
-    day: new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric" }),
-    weekday: new Intl.DateTimeFormat("zh-CN", { weekday: "short" }),
+    day: new Intl.DateTimeFormat("zh-CN", {
+      month: "numeric",
+      day: "numeric",
+      timeZone: "Asia/Shanghai"
+    }),
+    weekday: new Intl.DateTimeFormat("zh-CN", { weekday: "short", timeZone: "Asia/Shanghai" }),
     time: new Intl.DateTimeFormat("zh-CN", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false
+      hour12: false,
+      timeZone: "Asia/Shanghai"
     })
   },
   en: {
-    day: new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }),
-    weekday: new Intl.DateTimeFormat("en", { weekday: "short" }),
+    day: new Intl.DateTimeFormat("en", {
+      month: "short",
+      day: "numeric",
+      timeZone: "Asia/Shanghai"
+    }),
+    weekday: new Intl.DateTimeFormat("en", { weekday: "short", timeZone: "Asia/Shanghai" }),
     time: new Intl.DateTimeFormat("en", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false
+      hour12: false,
+      timeZone: "Asia/Shanghai"
     })
   }
 } as const;
 
 function formatAgendaParts(value: string, locale: "zh-CN" | "en") {
-  const date = new Date(value);
+  const date = parseInterviewDateTime(value);
 
   if (Number.isNaN(date.getTime())) {
     return getFallbackAgendaParts(locale);
@@ -45,7 +56,13 @@ function formatAgendaParts(value: string, locale: "zh-CN" | "en") {
   };
 }
 
-export function UpcomingTimeline({ interviews }: { interviews: UpcomingInterview[] }) {
+export function UpcomingTimeline({
+  interviews,
+  onRefresh
+}: {
+  interviews: UpcomingInterview[];
+  onRefresh?: () => void;
+}) {
   const locale = resolveAppLocale();
   const copy =
     locale === "en"
@@ -53,12 +70,16 @@ export function UpcomingTimeline({ interviews }: { interviews: UpcomingInterview
           eyebrow: "Next 7 Days",
           description:
             "See the interviews that are already fixed on the calendar before deciding today's momentum.",
-          empty: "Nothing scheduled in the next 7 days yet."
+          empty: "Nothing scheduled in the next 7 days yet.",
+          refresh: "Refresh",
+          refreshAria: "Refresh next 7 days agenda"
         }
       : {
           eyebrow: "未来 7 天安排",
           description: "先看已经落定的时间，再决定今天的推进顺序。",
-          empty: "未来 7 天还没有已定安排。"
+          empty: "未来 7 天还没有已定安排。",
+          refresh: "刷新",
+          refreshAria: "刷新未来 7 天安排"
         };
 
   return (
@@ -69,7 +90,19 @@ export function UpcomingTimeline({ interviews }: { interviews: UpcomingInterview
             {copy.eyebrow}
           </p>
         </div>
-        <p className="panel__description">{copy.description}</p>
+        <div className="panel__agenda-actions">
+          <p className="panel__description">{copy.description}</p>
+          {onRefresh ? (
+            <button
+              aria-label={copy.refreshAria}
+              className="button button--ghost agenda-refresh-button"
+              type="button"
+              onClick={onRefresh}
+            >
+              {copy.refresh}
+            </button>
+          ) : null}
+        </div>
       </div>
       <div className="agenda-list">
         {interviews.length > 0 ? (

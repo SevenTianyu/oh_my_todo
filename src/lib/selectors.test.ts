@@ -95,6 +95,47 @@ describe("selectors", () => {
     ]);
   });
 
+  it("treats no-offset scheduled interview times as Beijing wall time", () => {
+    const upcoming = getUpcomingInterviews(
+      [
+        {
+          id: "beijing",
+          name: "Beijing AI",
+          companyType: "startup",
+          overallImpression: "",
+          negotiation: defaultNegotiation,
+          processes: [
+            {
+              id: "beijing-pm",
+              roleName: "PM",
+              nextStep: "一面",
+              status: "active",
+              rounds: [
+                {
+                  id: "past-beijing-round",
+                  name: "已过时间",
+                  scheduledAt: "2026-04-17T13:00",
+                  status: "scheduled",
+                  notes: ""
+                },
+                {
+                  id: "future-beijing-round",
+                  name: "还没到",
+                  scheduledAt: "2026-04-17T14:30",
+                  status: "scheduled",
+                  notes: ""
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      new Date("2026-04-17T06:00:00.000Z")
+    );
+
+    expect(upcoming.map((item) => item.roundName)).toEqual(["还没到"]);
+  });
+
   it("orders upcoming interviews by actual instant across mixed timestamp offsets", () => {
     const upcoming = getUpcomingInterviews(
       [

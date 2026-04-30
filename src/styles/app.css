@@ -256,6 +256,17 @@ body {
   color: var(--ink-strong);
 }
 
+.panel__agenda-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.agenda-refresh-button {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+}
+
 .stack-section--board > .section-heading .section-heading__eyebrow,
 .offer-panel > .section-heading .section-heading__eyebrow {
   font-family: "Newsreader", serif;
@@ -1404,6 +1415,11 @@ body {
   .group-tabs__shell,
   .composer-panel__header,
   .page__masthead-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .panel__agenda-actions {
     align-items: flex-start;
     flex-direction: column;
   }
